@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:todo_app/utils/data_utils.dart';
 
 void main() async {
@@ -15,12 +14,12 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
 
-  Map data = {};
+  Map dataList = {};
 
   @override
   void initState() {
     super.initState();
-    data = readJsonFile();
+    dataList = DataUtils().readJsonFile();
 
   }
   
@@ -46,23 +45,30 @@ class _MyAppState extends State<MyApp> {
                 padding: const EdgeInsets.all(10),
                 color: Colors.blue, 
                 child: ReorderableListView.builder(
+                  buildDefaultDragHandles: false,
                   onReorder: ((oldIndex, newIndex) {
                     setState(() {
                       if (oldIndex < newIndex) {
                         newIndex -= 1;
                       }
-                      final int item = data["list"].removeAt(oldIndex);
-                      data["list"].insert(newIndex, item);
+                      final String item = dataList["list"].removeAt(oldIndex);
+                      dataList["list"].insert(newIndex, item);
+
+                      DataUtils().writeJsonFile(dataList);
                     });
                   }),
-                  itemCount: 3,
+                  itemCount: dataList["list"].length,
                   itemBuilder: ((context, index) {
                     return Card(
-                      child: ListTile(
-                        // leading:
-                        title: const Text('test'),
-                        // trailing: ,
-                        onTap: () {},
+                      key: Key("$index"),
+                      child: ReorderableDragStartListener(
+                        index: index,
+                        child: ListTile(
+                          // leading:
+                          title: Text("${dataList["list"][index]}"),
+                          // trailing: ,
+                          onTap: () {},
+                        ),
                       ),
                     );
                   })
