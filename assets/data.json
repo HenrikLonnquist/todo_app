@@ -1,7 +1,22 @@
 {
-    "list": [
-        "Name 1",
-        "Name 3",
-        "Name 2"
+    "main_tasks": [
+        {
+            "Name 1": {
+                "sub_tasks": [],
+                "notes": ""
+            }
+        },
+        {
+            "Name 2": {
+                "sub_tasks": [],
+                "notes": ""
+            }
+        },
+        {
+            "Name 3": {
+                "sub_tasks": [],
+                "notes": ""
+            }
+        }
     ]
 }
