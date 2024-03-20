@@ -5,6 +5,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 // ignore: unnecessary_import
 import 'package:flutter/widgets.dart';
+import 'package:todo_app/components/card_field.dart';
 import 'package:todo_app/components/task_list.dart';
 import 'package:todo_app/utils/data_utils.dart';
 
@@ -66,37 +67,22 @@ class _HomePageState extends State<HomePage> {
                     flex: 1,
                     child: Padding(
                       padding: const EdgeInsets.all(2.0),
-                      child: Card(
-                        color: Colors.white,
-                        child: Align(
-                          alignment: Alignment.centerLeft,
-                          child: Padding(
-                            padding: const EdgeInsets.fromLTRB(10, 0, 0, 0),
-                            child: TextField(
-                              decoration: const InputDecoration(
-                                hintText: "Add new task",
-                                border: InputBorder.none,
-                              ),
-                              controller: _newTaskController,
-                              onSubmitted: (value) {
-                                
-                                // model
-                                Map template = {
-                                  "name": value,
-                                  // "id": int //time?
-                                  "sub_tasks": [],
-                                  "notes": ""
-                                };
-                                dataList["main_tasks"].add(template);
-                                
-                                setState(() {
-                                  _newTaskController.text = "";
-                                  DataUtils().writeJsonFile(dataList);
-                                });
-                              },
-                            )
-                          )
-                        )
+                      child: CardField(
+                        onSubmitted: (value) {
+                          // model
+                          Map template = {
+                            "name": value,
+                            // "id": int //time?
+                            "sub_tasks": [],
+                            "notes": ""
+                          };
+                          dataList["main_tasks"].add(template);
+                          
+                          setState(() {
+                            _newTaskController.text = "";
+                            DataUtils().writeJsonFile(dataList);
+                          });
+                        },
                       ),
                     ),
                   )
@@ -104,10 +90,21 @@ class _HomePageState extends State<HomePage> {
               ), 
             ),
           ),
-          // This or "dataList" should be the mainTask(type map) that was
-          // pressed or tapped on and trigger the sidepanel.
           // how do I know which one it is? What index..
-          SidePanel(mainTaskSubList: dataList["main_tasks"][0]["sub_tasks"]),
+          // change the 0 to a variable?
+          // setstate > 
+          SidePanel(
+            mainTaskSubList: dataList["main_tasks"][0]["sub_tasks"],
+            onChanged: (value) {
+              Map templateSub = {
+                "name": value
+              };
+              setState(() {
+                dataList["main_tasks"][0]["sub_tasks"].add(templateSub);
+                DataUtils().writeJsonFile(dataList);
+              });
+            },
+          ),
         ],
       ),
     );
@@ -117,10 +114,12 @@ class _HomePageState extends State<HomePage> {
 class SidePanel extends StatelessWidget {
   const SidePanel({
     super.key,
-    required this.mainTaskSubList,
+    required this.mainTaskSubList, 
+    this.onChanged,
   });
 
   final List mainTaskSubList;
+  final ValueChanged? onChanged;
 
   @override
   Widget build(BuildContext context) {
@@ -137,6 +136,16 @@ class SidePanel extends StatelessWidget {
               child: TaskList(
                 dataList: mainTaskSubList,
               ),
+            ),
+            // TODO: able to add a new sub task to the list
+            Align(
+              alignment: Alignment.bottomCenter,
+              child: CardField(
+                onSubmitted: (value) {
+                  // TODO: how do I clear the texteditingcontroller from here?
+                  onChanged!.call(value);
+                },
+              )
             ),
             const Divider(thickness: 2,),
             // due dates

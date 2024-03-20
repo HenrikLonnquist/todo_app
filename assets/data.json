@@ -3,9 +3,12 @@
         {
             "name": "Name 1",
             "sub_tasks": [
-              {
-                "name": "sub name 1"
-              }
+                {
+                    "name": "sub name 1"
+                },
+                {
+                    "name": "sub name 2"
+                }
             ],
             "notes": ""
         },
@@ -16,6 +19,11 @@
         },
         {
             "name": "Name 3",
+            "sub_tasks": [],
+            "notes": ""
+        },
+        {
+            "name": "Name 4",
             "sub_tasks": [],
             "notes": ""
         }
