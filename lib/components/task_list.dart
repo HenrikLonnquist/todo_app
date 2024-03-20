@@ -6,9 +6,12 @@ import 'package:flutter/material.dart';
 class TaskList extends StatefulWidget {
   const TaskList({
     super.key,
-    required this.dataList, 
+    required this.dataList,
+    required this.subTask, 
     this.onChanged, 
   });
+  
+  final bool subTask;
   
   final List dataList;
 
@@ -51,8 +54,25 @@ class _TaskListState extends State<TaskList> {
             child: ListTile(
               // leading:
               title: Text("${widget.dataList[index]["name"]}"),
-              // trailing: ,
-              onTap: () {
+              trailing: IconButton(
+                icon: const Icon(
+                  Icons.remove_circle,
+                  size: 20,
+                  color: Colors.black,
+                ),
+                onPressed: () {
+                  // how do I know what task list it is?
+                  // Is it a removal of main task or sub task?
+                  // probably need to send it back again.'
+
+                  // print("${widget.dataList[index].toString().contains("sub_tasks")}");
+                  widget.dataList.removeAt(index);
+                  widget.onChanged!.call(widget.dataList);
+                },
+              ),
+              onTap: widget.subTask ? null : () {
+                // show sidepanel to current context
+
                 
               },
             ),

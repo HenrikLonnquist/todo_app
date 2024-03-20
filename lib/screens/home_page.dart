@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 // ignore: unnecessary_import
 import 'package:flutter/widgets.dart';
 import 'package:todo_app/components/card_field.dart';
+import 'package:todo_app/components/side_panel_task.dart';
 import 'package:todo_app/components/task_list.dart';
 import 'package:todo_app/utils/data_utils.dart';
 
@@ -35,37 +36,52 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Row(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
+        // crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Expanded(
-            flex: 2,
-            child:Container(
-              color: Colors.purple, 
-              // child: const Text('test')
-            )
+          Container(
+            width: MediaQuery.of(context).size.width * 0.2,
+            color: Colors.purple, 
+            // child: const Text('test')
           ),
-          Expanded(
-            flex: 5,
-            child:Container(
-              padding: const EdgeInsets.all(10),
-              color: Colors.blue, 
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Expanded(
-                    flex: 9,
-                    child: TaskList(
-                      onChanged: (value) {
-                        setState(() {
-                          DataUtils().writeJsonFile(dataList);
-                        });
-                      },
-                      dataList: dataList["main_tasks"],
+          Stack(
+            children: [
+              // // how do I know which one it is? What index..
+              // // change the 0 to a variable?
+              // // setstate > 
+              SidePanelTask(
+                mainTaskSubList: dataList["main_tasks"][0]["sub_tasks"],
+                onChanged: (value) {
+              
+                  print(value.runtimeType);
+              
+                  // Map templateSub = {
+                  //   "name": value
+                  // };
+                  // setState(() {
+                  //   dataList["main_tasks"][0]["sub_tasks"].add(templateSub);
+                  //   DataUtils().writeJsonFile(dataList);
+                  // });
+                },
+              ),
+              Container(
+                width: MediaQuery.of(context).size.width * 0.8,
+                padding: const EdgeInsets.all(10),
+                color: Colors.blue, 
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Expanded(
+                      child: TaskList(
+                        dataList: dataList["main_tasks"],
+                        subTask: false,
+                        onChanged: (value) {
+                          setState(() {
+                            DataUtils().writeJsonFile(dataList);
+                          });
+                        },
+                      ),
                     ),
-                  ),
-                  Expanded(
-                    flex: 1,
-                    child: Padding(
+                    Padding(
                       padding: const EdgeInsets.all(2.0),
                       child: CardField(
                         onSubmitted: (value) {
@@ -84,76 +100,15 @@ class _HomePageState extends State<HomePage> {
                           });
                         },
                       ),
-                    ),
-                  )
-                ],
-              ), 
-            ),
+                    )
+                  ],
+                ), 
+              ),
+            ],
           ),
-          // how do I know which one it is? What index..
-          // change the 0 to a variable?
-          // setstate > 
-          SidePanel(
-            mainTaskSubList: dataList["main_tasks"][0]["sub_tasks"],
-            onChanged: (value) {
-              Map templateSub = {
-                "name": value
-              };
-              setState(() {
-                dataList["main_tasks"][0]["sub_tasks"].add(templateSub);
-                DataUtils().writeJsonFile(dataList);
-              });
-            },
-          ),
+          
         ],
       ),
-    );
-  }
-}
-
-class SidePanel extends StatelessWidget {
-  const SidePanel({
-    super.key,
-    required this.mainTaskSubList, 
-    this.onChanged,
-  });
-
-  final List mainTaskSubList;
-  final ValueChanged? onChanged;
-
-  @override
-  Widget build(BuildContext context) {
-    return Expanded(
-      flex: 3,
-      child: Container(
-        color: Colors.blueAccent,
-        padding: const EdgeInsets.all(10),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.start,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Expanded(
-              child: TaskList(
-                dataList: mainTaskSubList,
-              ),
-            ),
-            // TODO: able to add a new sub task to the list
-            Align(
-              alignment: Alignment.bottomCenter,
-              child: CardField(
-                onSubmitted: (value) {
-                  onChanged!.call(value);
-                },
-              )
-            ),
-            const Divider(thickness: 2,),
-            // due dates
-            // reminder
-            // repeat
-            // Textfield
-          ],
-        ),
-      ) 
     );
   }
 }
