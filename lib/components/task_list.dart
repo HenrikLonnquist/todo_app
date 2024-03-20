@@ -1,7 +1,7 @@
 // ignore_for_file: avoid_print
 
 import 'package:flutter/material.dart';
-import 'package:todo_app/utils/data_utils.dart';
+// import 'package:todo_app/utils/data_utils.dart';
 
 class TaskList extends StatefulWidget {
   const TaskList({
@@ -10,7 +10,7 @@ class TaskList extends StatefulWidget {
     this.onChanged, 
   });
   
-  final Map dataList;
+  final List dataList;
 
   final ValueChanged<List>? onChanged;
 
@@ -28,8 +28,8 @@ class _TaskListState extends State<TaskList> {
           if (oldIndex < newIndex) {
             newIndex -= 1;
           }
-          final Map item = widget.dataList["main_tasks"].removeAt(oldIndex);
-          widget.dataList["main_tasks"].insert(newIndex, item);
+          final Map item = widget.dataList.removeAt(oldIndex);
+          widget.dataList.insert(newIndex, item);
 
           // TODO: Need a better to send data between components and files.
           // otherwise I need to send the whole "dataList" to every file that needs
@@ -38,11 +38,11 @@ class _TaskListState extends State<TaskList> {
           // something similar to it.
           // maybe do a onchanged and send back the results of the list. Then i would not
           // write to json here but in home page.
-          DataUtils().writeJsonFile(widget.dataList);
-          widget.onChanged!.call(widget.dataList["main_tasks"]);
+          // DataUtils().writeJsonFile(widget.dataList);
+          widget.onChanged!.call(widget.dataList);
         });
       }),
-      itemCount: widget.dataList["main_tasks"].length,
+      itemCount: widget.dataList.length,
       itemBuilder: ((context, index) {
         return Card(
           key: Key("$index"),
@@ -50,7 +50,7 @@ class _TaskListState extends State<TaskList> {
             index: index,
             child: ListTile(
               // leading:
-              title: Text("${widget.dataList["main_tasks"][index].keys}"),
+              title: Text("${widget.dataList[index]["name"]}"),
               // trailing: ,
               onTap: () {
                 

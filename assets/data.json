@@ -1,28 +1,23 @@
 {
     "main_tasks": [
         {
-            "Name 1": {
-                "sub_tasks": [],
-                "notes": ""
-            }
+            "name": "Name 1",
+            "sub_tasks": [
+              {
+                "name": "sub name 1"
+              }
+            ],
+            "notes": ""
         },
         {
-            "Name 2": {
-                "sub_tasks": [],
-                "notes": ""
-            }
+            "name": "Name 2",
+            "sub_tasks": [],
+            "notes": ""
         },
         {
-            "Name 3": {
-                "sub_tasks": [],
-                "notes": ""
-            }
-        },
-        {
-            "Name 4": {
-                "sub_tasks": [],
-                "notes": ""
-            }
+            "name": "Name 3",
+            "sub_tasks": [],
+            "notes": ""
         }
     ]
 }

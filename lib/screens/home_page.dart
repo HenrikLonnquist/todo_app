@@ -82,10 +82,10 @@ class _HomePageState extends State<HomePage> {
                                 
                                 // model
                                 Map template = {
-                                  value: {
-                                    "sub_tasks": [],
-                                    "notes": ""
-                                  }
+                                  "name": value,
+                                  // "id": int //time?
+                                  "sub_tasks": [],
+                                  "notes": ""
                                 };
                                 dataList["main_tasks"].add(template);
                                 
@@ -107,7 +107,7 @@ class _HomePageState extends State<HomePage> {
           // This or "dataList" should be the mainTask(type map) that was
           // pressed or tapped on and trigger the sidepanel.
           // how do I know which one it is? What index..
-          // SidePanel(mainTaskSubList: dataList["main_tasks"][index?]),
+          SidePanel(mainTaskSubList: dataList["main_tasks"][0]["sub_tasks"]),
         ],
       ),
     );
@@ -120,7 +120,7 @@ class SidePanel extends StatelessWidget {
     required this.mainTaskSubList,
   });
 
-  final Map mainTaskSubList;
+  final List mainTaskSubList;
 
   @override
   Widget build(BuildContext context) {
