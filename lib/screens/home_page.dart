@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 // ignore: unnecessary_import
 import 'package:flutter/widgets.dart';
 import 'package:todo_app/components/card_field.dart';
-import 'package:todo_app/components/side_panel_task.dart';
+import 'package:todo_app/components/subtask_panel.dart';
 import 'package:todo_app/components/task_list.dart';
 import 'package:todo_app/utils/data_utils.dart';
 
@@ -48,7 +48,7 @@ class _HomePageState extends State<HomePage> {
               // // how do I know which one it is? What index..
               // // change the 0 to a variable?
               // // setstate > 
-              SidePanelTask(
+              SubTaskPanel(
                 mainTaskSubList: dataList["main_tasks"][0]["sub_tasks"],
                 onChanged: (value) {
               

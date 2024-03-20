@@ -4,8 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:todo_app/components/card_field.dart';
 import 'package:todo_app/components/task_list.dart';
 
-class SidePanelTask extends StatelessWidget {
-  const SidePanelTask({
+class SubTaskPanel extends StatelessWidget {
+  const SubTaskPanel({
     super.key,
     required this.mainTaskSubList, 
     this.onChanged,
