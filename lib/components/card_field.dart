@@ -8,13 +8,14 @@ class CardField extends StatefulWidget {
     this.onSubmitted,
   });
 
-  final Function(String)? onSubmitted;
+  final Function? onSubmitted;
 
   @override
   State<CardField> createState() => _CardFieldState();
 }
 
 class _CardFieldState extends State<CardField> {
+  
   final TextEditingController _newTaskController = TextEditingController();
 
   @override
@@ -35,7 +36,10 @@ class _CardFieldState extends State<CardField> {
             border: InputBorder.none,
           ),
           controller: _newTaskController,
-          onSubmitted: widget.onSubmitted,
+          onSubmitted: (value) {
+            widget.onSubmitted!.call(value);
+            _newTaskController.text = "";
+          },
         )
       )
     );

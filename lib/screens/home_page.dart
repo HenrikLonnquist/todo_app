@@ -142,7 +142,6 @@ class SidePanel extends StatelessWidget {
               alignment: Alignment.bottomCenter,
               child: CardField(
                 onSubmitted: (value) {
-                  // TODO: how do I clear the texteditingcontroller from here?
                   onChanged!.call(value);
                 },
               )
