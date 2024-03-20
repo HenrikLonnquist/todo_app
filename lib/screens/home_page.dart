@@ -53,7 +53,14 @@ class _HomePageState extends State<HomePage> {
                 children: [
                   Expanded(
                     flex: 9,
-                    child: TaskList(dataList: dataList),
+                    child: TaskList(
+                      onChanged: (value) {
+                        setState(() {
+                          DataUtils().writeJsonFile(dataList);
+                        });
+                      },
+                      dataList: dataList["main_tasks"],
+                    ),
                   ),
                   Expanded(
                     flex: 1,
@@ -99,7 +106,8 @@ class _HomePageState extends State<HomePage> {
           ),
           // This or "dataList" should be the mainTask(type map) that was
           // pressed or tapped on and trigger the sidepanel.
-          SidePanel(mainTaskSubList: dataList),
+          // how do I know which one it is? What index..
+          // SidePanel(mainTaskSubList: dataList["main_tasks"][index?]),
         ],
       ),
     );

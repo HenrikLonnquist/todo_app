@@ -7,9 +7,12 @@ class TaskList extends StatefulWidget {
   const TaskList({
     super.key,
     required this.dataList, 
+    this.onChanged, 
   });
   
   final Map dataList;
+
+  final ValueChanged<List>? onChanged;
 
   @override
   State<TaskList> createState() => _TaskListState();
@@ -33,10 +36,13 @@ class _TaskListState extends State<TaskList> {
           // to write to the file(data.json).
           // Look up skeleton flutter  create. I think it had what I wanted or at least
           // something similar to it.
+          // maybe do a onchanged and send back the results of the list. Then i would not
+          // write to json here but in home page.
           DataUtils().writeJsonFile(widget.dataList);
+          widget.onChanged!.call(widget.dataList["main_tasks"]);
         });
       }),
-      itemCount: widget.dataList.length,
+      itemCount: widget.dataList["main_tasks"].length,
       itemBuilder: ((context, index) {
         return Card(
           key: Key("$index"),
