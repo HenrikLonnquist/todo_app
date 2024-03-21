@@ -22,6 +22,7 @@ class SubTaskPanel extends StatelessWidget {
       padding: const EdgeInsets.all(10),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Expanded(
@@ -34,7 +35,7 @@ class SubTaskPanel extends StatelessWidget {
                 // this is will always be a sub task list
                 // and I have to send it back to main task 
     
-                // onChanged!.call(listValue);
+                onChanged!.call(listValue);
               },
             ),
           ),
@@ -42,7 +43,6 @@ class SubTaskPanel extends StatelessWidget {
             alignment: Alignment.bottomCenter,
             child: CardField(
               onSubmitted: (stringValue) {
-                // Textfield
                 onChanged!.call(stringValue);
               },
             )

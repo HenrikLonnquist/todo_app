@@ -1,7 +1,6 @@
 // ignore_for_file: avoid_print
 
 import 'package:flutter/material.dart';
-// import 'package:todo_app/utils/data_utils.dart';
 
 class TaskList extends StatefulWidget {
   const TaskList({
@@ -9,9 +8,12 @@ class TaskList extends StatefulWidget {
     required this.dataList,
     required this.subTask, 
     this.onChanged, 
+    this.onTap,
   });
   
   final bool subTask;
+
+  final Function(int)? onTap;
   
   final List dataList;
 
@@ -34,7 +36,7 @@ class _TaskListState extends State<TaskList> {
           final Map item = widget.dataList.removeAt(oldIndex);
           widget.dataList.insert(newIndex, item);
 
-          // TODO: Need a better to send data between components and files.
+          // TODO: Need a better way to send data between components and files.
           // otherwise I need to send the whole "dataList" to every file that needs
           // to write to the file(data.json).
           // Look up skeleton flutter  create. I think it had what I wanted or at least
@@ -54,26 +56,20 @@ class _TaskListState extends State<TaskList> {
             child: ListTile(
               // leading:
               title: Text("${widget.dataList[index]["name"]}"),
-              trailing: IconButton(
+              trailing: widget.subTask ? IconButton(
                 icon: const Icon(
-                  Icons.remove_circle,
+                  Icons.more_vert_rounded,
                   size: 20,
                   color: Colors.black,
                 ),
                 onPressed: () {
-                  // how do I know what task list it is?
-                  // Is it a removal of main task or sub task?
-                  // probably need to send it back again.'
-
-                  // print("${widget.dataList[index].toString().contains("sub_tasks")}");
+                  // sub task list
                   widget.dataList.removeAt(index);
                   widget.onChanged!.call(widget.dataList);
                 },
-              ),
+              ) : null,
               onTap: widget.subTask ? null : () {
-                // show sidepanel to current context
-
-                
+                widget.onTap!.call(index);
               },
             ),
           ),

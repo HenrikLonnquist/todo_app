@@ -17,11 +17,16 @@ class HomePage extends StatefulWidget {
   State<HomePage> createState() => _HomePageState();
 }
 
-class _HomePageState extends State<HomePage> {
+class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin {
 
   Map dataList = {};
   
   final TextEditingController _newTaskController = TextEditingController();
+  
+  bool isSubPanelOpen = false;
+
+  late int mainTaskIndex;
+
 
   @override
   void initState() {
@@ -36,35 +41,19 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Row(
-        // crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Container(
             width: MediaQuery.of(context).size.width * 0.2,
             color: Colors.purple, 
-            // child: const Text('test')
           ),
-          Stack(
+          Row(
             children: [
-              // // how do I know which one it is? What index..
-              // // change the 0 to a variable?
-              // // setstate > 
-              SubTaskPanel(
-                mainTaskSubList: dataList["main_tasks"][0]["sub_tasks"],
-                onChanged: (value) {
-              
-                  print(value.runtimeType);
-              
-                  // Map templateSub = {
-                  //   "name": value
-                  // };
-                  // setState(() {
-                  //   dataList["main_tasks"][0]["sub_tasks"].add(templateSub);
-                  //   DataUtils().writeJsonFile(dataList);
-                  // });
-                },
-              ),
               Container(
-                width: MediaQuery.of(context).size.width * 0.8,
+                // duration: const Duration(seconds: 10),
+                // curve: Curves.fastEaseInToSlowEaseOut,
+                width: isSubPanelOpen ? 
+                MediaQuery.of(context).size.width * 0.5 :
+                MediaQuery.of(context).size.width * 0.8,
                 padding: const EdgeInsets.all(10),
                 color: Colors.blue, 
                 child: Column(
@@ -77,6 +66,16 @@ class _HomePageState extends State<HomePage> {
                         onChanged: (value) {
                           setState(() {
                             DataUtils().writeJsonFile(dataList);
+                          });
+                        },
+                        onTap: (indexTask) {
+                          setState(() {
+                            if (isSubPanelOpen && mainTaskIndex != indexTask) {
+                              mainTaskIndex = indexTask;
+                              return;
+                            } 
+                            isSubPanelOpen = !isSubPanelOpen;
+                            mainTaskIndex = indexTask;
                           });
                         },
                       ),
@@ -104,6 +103,23 @@ class _HomePageState extends State<HomePage> {
                   ],
                 ), 
               ),
+              // how do I know which one it is? What index..
+              // change the 0 to a variable?
+              // setstate > 
+              if (isSubPanelOpen) SubTaskPanel(
+                mainTaskSubList: dataList["main_tasks"][mainTaskIndex]["sub_tasks"],
+                onChanged: (value) {
+                  if (value.runtimeType == String) {
+                    Map templateSub = {
+                      "name": value
+                    };
+                    dataList["main_tasks"][mainTaskIndex]["sub_tasks"].add(templateSub);
+                  }
+                  setState(() {
+                    DataUtils().writeJsonFile(dataList);
+                  });
+                },
+              ),              
             ],
           ),
           
