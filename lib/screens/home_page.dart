@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 // ignore: unnecessary_import
 import 'package:flutter/widgets.dart';
 import 'package:todo_app/components/card_field.dart';
+import 'package:todo_app/components/navigation_panel.dart';
 import 'package:todo_app/components/subtask_panel.dart';
 import 'package:todo_app/components/task_list.dart';
 import 'package:todo_app/utils/data_utils.dart';
@@ -44,7 +45,8 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
         children: [
           Container(
             width: MediaQuery.of(context).size.width * 0.2,
-            color: Colors.purple, 
+            color: Colors.purple,
+            child: const NavigationPanel(),
           ),
           Row(
             children: [
