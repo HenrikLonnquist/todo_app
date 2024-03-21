@@ -5,14 +5,14 @@ import 'package:flutter/material.dart';
 class RightSidePanel extends StatelessWidget {
   const RightSidePanel({
     super.key,
-    this.mainTaskSubList, 
-    this.onChanged, 
+    // this.mainTaskSubList, 
+    // this.onChanged, 
     this.child,
   });
 
-  final List? mainTaskSubList;
+  // final List? mainTaskSubList;
   final Widget? child;
-  final ValueChanged? onChanged;
+  // final ValueChanged? onChanged;
 
   @override
   Widget build(BuildContext context) {
