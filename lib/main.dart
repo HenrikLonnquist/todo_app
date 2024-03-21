@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:todo_app/screens/home_page.dart';
+import 'package:todo_app/components/navigation_panel.dart';
 
 void main() async {
   runApp(const MyApp());
@@ -17,7 +17,7 @@ class MyApp extends StatelessWidget {
           seedColor: Colors.deepPurple
         )
       ),
-      home: const HomePage(),
+      home: const NavigationPanel(),
     );
   }
 }

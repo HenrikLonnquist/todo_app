@@ -1,6 +1,7 @@
 // ignore_for_file: avoid_print
 
 import 'package:flutter/material.dart';
+import 'package:todo_app/screens/main_content.dart';
 import 'package:todo_app/utils/data_utils.dart';
 
 class NavigationPanel extends StatefulWidget {
@@ -11,28 +12,87 @@ class NavigationPanel extends StatefulWidget {
 }
 
 class _NavigationPanelState extends State<NavigationPanel> {
+  Map dataList = {};
   int _navigationRailIndex = 0;
+
+  late List<Widget> pages = <Widget>[
+    MainContent(
+      title: "Main Tasks",
+      dataList: dataList
+    ),
+    MainContent(
+      title: "Schedule",
+      dataList: dataList, 
+    ),
+    TodayTasks(dataList: dataList)
+  ];
+
+  @override
+  void initState() {
+    super.initState();
+    dataList = DataUtils().readJsonFile();
+  }
 
   @override
   Widget build(BuildContext context) {
-    return NavigationRail(
-      // backgroundColor: ,
-      selectedIndex: _navigationRailIndex,
-      onDestinationSelected: (index) {
-        setState(() {
-          _navigationRailIndex = index;
-        });
-      },
-      destinations: const [
-        NavigationRailDestination(
-          icon: Icon(Icons.home), 
-          label: Text("Home"),
-        ),
-        NavigationRailDestination(
-          icon: Icon(Icons.schedule_rounded), 
-          label: Text("Schedule"),
-        )
-      ],
+    return Scaffold(
+      body: Row(
+        children: [
+          SizedBox(
+            width: MediaQuery.of(context).size.width * 0.2,
+            height: MediaQuery.of(context).size.height,
+            child: NavigationRail(
+              // backgroundColor: ,
+              selectedIndex: _navigationRailIndex,
+              onDestinationSelected: (index) {
+                setState(() {
+                  _navigationRailIndex = index;
+                });
+              },
+              labelType: NavigationRailLabelType.all,
+              destinations: const [
+                NavigationRailDestination(
+                  icon: Icon(Icons.home), 
+                  label: Text("Main Tasks"),
+                ),
+                NavigationRailDestination(
+                  icon: Icon(Icons.schedule_rounded), 
+                  label: Text("Schedule"),
+                ),
+                
+              ],
+              trailing: const Column(
+                children: [
+                  Divider(thickness: 2,),
+                  SizedBox(height: 10),
+                  // PageLists that the user has created.
+                  Text('User Lists')
+                ],
+              ),
+            ),
+          ),
+          Expanded(
+            child: pages.elementAt(_navigationRailIndex),
+          )
+        ],
+      ),
+    );
+  }
+}
+
+class TodayTasks extends StatelessWidget {
+  const TodayTasks({
+    super.key,
+    required this.dataList,
+  });
+
+  final Map dataList;
+
+  @override
+  Widget build(BuildContext context) {
+    return MainContent(
+      title: "Today",
+      dataList: dataList
     );
   }
 }
