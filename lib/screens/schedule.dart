@@ -2,6 +2,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:todo_app/components/right_sidepanel.dart';
+import "package:easy_date_timeline/easy_date_timeline.dart";
 
 class SchedulePage extends StatefulWidget {
   const SchedulePage({
@@ -58,7 +59,20 @@ class _SchedulePageState extends State<SchedulePage> {
               ),
               Expanded(
                 child: Container(
-                  color: Colors.purple,
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Column(
+                    children: [
+                      EasyDateTimeLine(
+                        initialDate: DateTime.now(),
+                        onDateChange: (selectedDate) {
+                          print("date");
+                        },
+                      ),
+                    ],
+                  )
                 ),
               )
             ],
