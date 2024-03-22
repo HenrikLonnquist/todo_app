@@ -3,8 +3,8 @@
 import 'package:flutter/material.dart';
 import 'package:todo_app/components/right_sidepanel.dart';
 
-class ScheduleContent extends StatefulWidget {
-  const ScheduleContent({
+class SchedulePage extends StatefulWidget {
+  const SchedulePage({
     super.key,
     // required this.title,
     required this.dataList,
@@ -15,11 +15,11 @@ class ScheduleContent extends StatefulWidget {
   final Map dataList;
 
   @override
-  State<ScheduleContent> createState() => _ScheduleContentState();
+  State<SchedulePage> createState() => _SchedulePageState();
 }
 
-class _ScheduleContentState extends State<ScheduleContent> {
-
+class _SchedulePageState extends State<SchedulePage> {
+  
   bool isSubPanelOpen = false;
 
   late int mainTaskIndex;
@@ -56,6 +56,11 @@ class _ScheduleContentState extends State<ScheduleContent> {
               const SizedBox(
                 height: 10,
               ),
+              Expanded(
+                child: Container(
+                  color: Colors.purple,
+                ),
+              )
             ],
           ), 
         ),
