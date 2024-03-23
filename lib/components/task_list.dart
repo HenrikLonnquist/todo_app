@@ -142,18 +142,20 @@ class SubTaskLIst extends StatelessWidget {
           onPressed: () async {
 
             DateTime dataDate =  DateTime.parse(mainTask["due_date"]);
-            
+            // TODO: might switch to calendar date picker 2 package later on.
             DateTime? selectedDate = await showDatePicker(
               context: context,
               initialDate: dataDate,
               firstDate: DateTime.now(), 
               lastDate: DateTime.now().add(const Duration(days: 30)),
+               
               
             ); 
 
             if (selectedDate != null && selectedDate != dataDate) {
-              mainTask["due_date"] = selectedDate.toString().split(" ")[0];
-              onChanged!.call(mainTask);
+              print(selectedDate);
+              // mainTask["due_date"] = selectedDate.toString().split(" ")[0];
+              // onChanged!.call(mainTask);
             }
 
           }, 
