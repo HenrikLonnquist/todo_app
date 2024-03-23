@@ -25,8 +25,22 @@ class _SchedulePageState extends State<SchedulePage> {
 
   late int mainTaskIndex;
 
+  List tasksWithDueDate = [];
+
+  String matchTaskWithSelectedDate = DateTime.now().toString().split(" ")[0];
+
+
+
   @override
   Widget build(BuildContext context) {
+    tasksWithDueDate.clear();
+    print(matchTaskWithSelectedDate);
+    for (var i in widget.dataList["main_tasks"]) {
+      var conditionCheck = i.toString();
+      if (conditionCheck.contains("due_date") && conditionCheck.contains(matchTaskWithSelectedDate)) {
+        tasksWithDueDate.add(i);
+      }
+    }
     return Row(
       children: [
         Container(
@@ -68,11 +82,38 @@ class _SchedulePageState extends State<SchedulePage> {
                       EasyDateTimeLine(
                         initialDate: DateTime.now(),
                         onDateChange: (selectedDate) {
-                          print("date selected");
-                          print(DateTime.now());
+                          print(selectedDate);
+                          setState(() {
+                            matchTaskWithSelectedDate = selectedDate.toString().split(" ")[0];
+                          });
+                          // print(DateTime.now());
                         },
                       ),
                       // tasks corresponding to selected date
+                      
+                      // switch to a gridview.builder?
+                      const Divider(
+                        thickness: 1,
+                      ),
+                      // const SizedBox(
+                      //   height: 10,
+                      // ),
+                      Row(
+                        children: [
+                          for (var i = 0; i < tasksWithDueDate.length; i++) 
+                          Card(
+                            child: Column(
+                              children: [
+                                // TODO: maybe able to open an side panel for this.
+                                
+                                // for (var i = in)
+                                Text('${widget.dataList["main_tasks"][i]["name"]}'),
+                                Text('${widget.dataList["main_tasks"][i]["due_date"]}'),
+                              ],
+                            ),
+                          ),
+                        ],
+                      )
 
                     ],
                   )

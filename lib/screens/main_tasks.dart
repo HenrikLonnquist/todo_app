@@ -93,7 +93,7 @@ class _MainTasksPageState extends State<MainTasksPage> {
                     Map template = {
                       "name": value,
                       // "id": int //time?
-                      "date": DateTime.now().toString(), // Change later to an empty string if no date has been set
+                      "due_date": DateTime.now().toString(), // Change later to an empty string if no date has been set
                       "sub_tasks": [],
                       "notes": ""
                     };

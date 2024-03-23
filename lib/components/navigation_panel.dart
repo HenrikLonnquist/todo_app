@@ -14,7 +14,7 @@ class NavigationPanel extends StatefulWidget {
 
 class _NavigationPanelState extends State<NavigationPanel> {
   Map dataList = {};
-  int _navigationRailIndex = 0;
+  int _navigationRailIndex = 1;
 
   late List<Widget> pages = <Widget>[
     MainTasksPage(
