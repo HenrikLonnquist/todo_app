@@ -2,7 +2,6 @@
 
 import 'package:flutter/material.dart';
 // import 'package:intl/intl.dart';
-import 'package:todo_app/model/data_model.dart';
 import 'package:todo_app/components/card_field.dart';
 import 'package:todo_app/components/right_sidepanel.dart';
 import 'package:todo_app/components/task_list.dart';
@@ -93,7 +92,7 @@ class _MainTasksPageState extends State<MainTasksPage> {
                 child: CardField(
                   onSubmitted: (value) {
                     
-                    var template = dataTemplate(
+                    var template = DataUtils().dataTemplate(
                       name: value,
                     );
                     widget.dataList["main_tasks"].add(template);

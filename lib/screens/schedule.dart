@@ -5,7 +5,6 @@ import 'package:todo_app/components/card_field.dart';
 import 'package:todo_app/components/right_sidepanel.dart';
 import "package:easy_date_timeline/easy_date_timeline.dart";
 import 'package:todo_app/components/task_list.dart';
-import 'package:todo_app/model/data_model.dart';
 import 'package:todo_app/utils/data_utils.dart';
 
 class SchedulePage extends StatefulWidget {
@@ -130,7 +129,7 @@ class _SchedulePageState extends State<SchedulePage> {
                       const Spacer(flex: 2),
                       CardField(
                         onSubmitted: (value) {
-                          var template = dataTemplate(
+                          var template = DataUtils().dataTemplate(
                             name: value,
                             dueDate: matchTaskWithSelectedDate
                           );
