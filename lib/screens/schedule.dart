@@ -149,7 +149,7 @@ class _SchedulePageState extends State<SchedulePage> {
         if (isRightPanelOpen) RightSidePanel(
           child: SubTaskLIst(
             title: widget.dataList["main_tasks"][pressedTask]["name"],
-            mainTaskSubList: widget.dataList["main_tasks"][pressedTask]["sub_tasks"], 
+            mainTask: widget.dataList["main_tasks"][pressedTask], 
             onChanged: (value) {
               if (value.runtimeType == String) {
                 Map templateSub = {

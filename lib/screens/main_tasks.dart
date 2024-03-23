@@ -110,7 +110,7 @@ class _MainTasksPageState extends State<MainTasksPage> {
         if (isRightPanelOpen && widget.dataList["main_tasks"].isNotEmpty) RightSidePanel(
           child: SubTaskLIst(
             title: widget.dataList["main_tasks"][mainTaskIndex]["name"],
-            mainTaskSubList: widget.dataList["main_tasks"][mainTaskIndex]["sub_tasks"],
+            mainTask: widget.dataList["main_tasks"][mainTaskIndex],
             onChanged: (value) {
               if (value.runtimeType == String) {
                 Map templateSub = {

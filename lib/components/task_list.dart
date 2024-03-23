@@ -85,11 +85,11 @@ class SubTaskLIst extends StatelessWidget {
   const SubTaskLIst({
     super.key,
     required this.title,
-    required this.mainTaskSubList,
+    required this.mainTask,
     required this.onChanged,
   });
 
-  final List mainTaskSubList;
+  final Map mainTask;
   final ValueChanged? onChanged;
   final String title;
 
@@ -116,7 +116,7 @@ class SubTaskLIst extends StatelessWidget {
         ),
         Expanded(
           child: TaskList(
-            dataList: mainTaskSubList,
+            dataList: mainTask["sub_tasks"],
             subTask: true,
             onChanged: (listValue) {
               // List
@@ -137,21 +137,42 @@ class SubTaskLIst extends StatelessWidget {
           )
         ),
         const Divider(thickness: 2,),
-        // due dates: date
-        Card(
-          color: Colors.white,
-          child: CalendarDatePicker(
-            initialDate: DateTime.now(),
-            firstDate: DateTime.now(), 
-            lastDate: DateTime.now().add(const Duration(days: 30)),
-            onDateChanged: (selectedDate) {
-              print("testing");
+        //* due dates: date
+        ElevatedButton(
+          onPressed: () async {
+
+            DateTime dataDate =  DateTime.parse(mainTask["due_date"]);
+            
+            DateTime? selectedDate = await showDatePicker(
+              context: context,
+              initialDate: dataDate,
+              firstDate: DateTime.now(), 
+              lastDate: DateTime.now().add(const Duration(days: 30)),
+              
+            ); 
+
+            if (selectedDate != null && selectedDate != dataDate) {
+              mainTask["due_date"] = selectedDate.toString().split(" ")[0];
+              onChanged!.call(mainTask);
             }
-          ),
+
+          }, 
+          child: const Text("Due Date"),
         )
-        // reminder: time + date
-        // repeat: dates(days)
-        // notes: Textfield
+        // Card(
+        //   color: Colors.white,
+        //   child: CalendarDatePicker(
+        //     initialDate: DateTime.now(),
+        //     firstDate: DateTime.now(), 
+        //     lastDate: DateTime.now().add(const Duration(days: 30)),
+        //     onDateChanged: (selectedDate) {
+        //       print("testing");
+        //     }
+        //   ),
+        // )
+        //* TODO: reminder: time + date
+        //* TODO: repeat: dates(days)
+        //* TODO: notes: Textfield
       ],
     );
   }
