@@ -84,9 +84,9 @@ class _TaskListState extends State<TaskList> {
 class SubTaskLIst extends StatelessWidget {
   const SubTaskLIst({
     super.key,
+    required this.title,
     required this.mainTaskSubList,
     required this.onChanged,
-    required this.title,
   });
 
   final List mainTaskSubList;
