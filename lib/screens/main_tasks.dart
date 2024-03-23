@@ -1,6 +1,7 @@
 // ignore_for_file: avoid_print
 
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:todo_app/components/card_field.dart';
 import 'package:todo_app/components/right_sidepanel.dart';
 import 'package:todo_app/components/task_list.dart';
@@ -68,7 +69,7 @@ class _MainTasksPageState extends State<MainTasksPage> {
                   onChanged: (value) {
                     setState(() {
                       if (widget.dataList["main_tasks"].isEmpty) {
-                        isSubPanelOpen = !isSubPanelOpen;
+                        isSubPanelOpen = false;
                       }
                       DataUtils().writeJsonFile(widget.dataList);
                     });
@@ -93,7 +94,7 @@ class _MainTasksPageState extends State<MainTasksPage> {
                     Map template = {
                       "name": value,
                       // "id": int //time?
-                      "due_date": DateTime.now().toString(), // Change later to an empty string if no date has been set
+                      "due_date": DateFormat("y-M-d").format(DateTime.now()), // Change later to an empty string if no date has been set
                       "sub_tasks": [],
                       "notes": ""
                     };
