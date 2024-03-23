@@ -1,6 +1,7 @@
 // ignore_for_file: avoid_print
 
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:todo_app/components/card_field.dart';
 import 'package:todo_app/components/right_sidepanel.dart';
 import "package:easy_date_timeline/easy_date_timeline.dart";
@@ -39,11 +40,12 @@ class _SchedulePageState extends State<SchedulePage> {
   @override
   Widget build(BuildContext context) {
     tasksWithDueDate.clear();
-    for (var i = 0; i < widget.dataList["main_tasks"].length; i++) {
-      var data = widget.dataList["main_tasks"][i];
-      var conditionCheck = data.toString();
-      if (conditionCheck.contains("due_date") && conditionCheck.contains(matchTaskWithSelectedDate)) {
-        tasksWithDueDate[i] = data;
+    var dataTask = widget.dataList["main_tasks"];
+    for (var i = 0; i < dataTask.length; i++) {
+      // var taskCheck = dataTask[i].toString();
+      //  && taskCheck.contains(matchTaskWithSelectedDate)
+      if (dataTask[i]["due_date"] != "") {
+        tasksWithDueDate[i] = dataTask[i];
       }
     }
     return Row(
@@ -88,12 +90,73 @@ class _SchedulePageState extends State<SchedulePage> {
                       EasyDateTimeLine(
                         initialDate: DateTime.now(),
                         onDateChange: (selectedDate) {
-                          print(selectedDate);
+                          // print(selectedDate);
                           setState(() {
                             matchTaskWithSelectedDate = selectedDate.toString().split(" ")[0];
                             isRightPanelOpen = false;
                           });
-                          // print(DateTime.now());
+                        },
+                        itemBuilder: (context, dayNumber, dayName, monthName, fullDate, isSelected) {
+                          String today = DateFormat("y-MM-d").format(DateTime.now());
+                          bool imToday = fullDate.toString().contains(today);
+                          bool dateHasTasks = false;
+
+                          for (var i in tasksWithDueDate.values) {
+                            if (fullDate.toString().contains(i["due_date"])) {
+                              dateHasTasks = true;
+                            }
+                          }
+
+                          return Container(
+                            width: 56.0,
+                            padding: const EdgeInsets.all(8.0),
+                            decoration: BoxDecoration(
+                              border: Border.all(
+                                color: imToday && !isSelected ? Colors.black : Colors.black.withOpacity(0.1),
+                                width: 1,
+                              ),
+                              color: isSelected ? Colors.purple : null,
+                              borderRadius: BorderRadius.circular(16.0),
+                            ),
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Text(
+                                  monthName,
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    color: isSelected ? Colors.white : const Color(0xff6D5D6E),
+                                  ),
+                                ),
+                                const SizedBox(
+                                  width: 8.0,
+                                ),
+                                Text(
+                                  dayNumber,
+                                  style: TextStyle(
+                                    fontSize: 20,
+                                    fontWeight: FontWeight.bold,
+                                    color: isSelected ? Colors.white : const Color(0xff393646),
+                                  ),
+                                ),
+                                const SizedBox(
+                                  width: 8.0,
+                                ),
+                                Text(
+                                  dayName,
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    color: isSelected ? Colors.white : const Color(0xff6D5D6E),
+                                  ),
+                                ),
+                                if (dateHasTasks) const Icon(
+                                  Icons.circle,
+                                  size: 10,
+                                  color: Colors.green,
+                                ),
+                              ],
+                            ),
+                          );
                         },
                       ),
                       // TODO: switch to a gridview.builder?
@@ -103,7 +166,7 @@ class _SchedulePageState extends State<SchedulePage> {
                       Row(
                         children: [
                           for (var task in tasksWithDueDate.keys) 
-                          InkWell(
+                          if (tasksWithDueDate[task]["due_date"].contains(matchTaskWithSelectedDate)) InkWell(
                             onTap: () {
                               setState(() {
                                 if (isRightPanelOpen && pressedTask != task ) {
