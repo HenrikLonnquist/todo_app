@@ -57,7 +57,8 @@ class _TaskListState extends State<TaskList> {
             child: ListTile(
               // leading:
               title: Text("${widget.dataList[index]["name"]}"),
-              trailing: widget.subTask ? IconButton(
+              // TODO: below change back to: widget.subTask ? ... : null
+              trailing: IconButton(
                 icon: const Icon(
                   Icons.more_vert_rounded,
                   size: 20,
@@ -68,7 +69,7 @@ class _TaskListState extends State<TaskList> {
                   widget.dataList.removeAt(index);
                   widget.onChanged!.call(widget.dataList);
                 },
-              ) : null,
+              ),
               onTap: widget.subTask ? null : () {
                 widget.onTap!.call(index);
               },
@@ -85,10 +86,12 @@ class SubTaskLIst extends StatelessWidget {
     super.key,
     required this.mainTaskSubList,
     required this.onChanged,
+    required this.title,
   });
 
   final List mainTaskSubList;
   final ValueChanged? onChanged;
+  final String title;
 
   @override
   Widget build(BuildContext context) {
@@ -97,6 +100,20 @@ class SubTaskLIst extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
+        Padding(
+          padding: const EdgeInsets.only(left: 8.0),
+          child: Title(
+            color: Colors.black, 
+            child: Text(
+              title,
+              style: const TextStyle(
+                fontSize: 26,
+                fontWeight: FontWeight.bold,
+                // fontFamily: ,
+              ),
+            ),
+          ),
+        ),
         Expanded(
           child: TaskList(
             dataList: mainTaskSubList,
@@ -121,6 +138,17 @@ class SubTaskLIst extends StatelessWidget {
         ),
         const Divider(thickness: 2,),
         // due dates: date
+        Card(
+          color: Colors.white,
+          child: CalendarDatePicker(
+            initialDate: DateTime.now(),
+            firstDate: DateTime.now(), 
+            lastDate: DateTime.now().add(const Duration(days: 30)),
+            onDateChanged: (selectedDate) {
+              print("testing");
+            }
+          ),
+        )
         // reminder: time + date
         // repeat: dates(days)
         // notes: Textfield

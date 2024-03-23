@@ -2,18 +2,20 @@
     "main_tasks": [
         {
             "name": "Name 1",
+            "date": "2024-03-23 02:09:48.562094",
             "sub_tasks": [
                 {
                     "name": "sub name 1"
                 },
                 {
-                    "name": "sub name 3"
+                    "name": "sub name 2"
                 }
             ],
             "notes": ""
         },
         {
             "name": "Name 2",
+            "date": "2024-03-23 02:09:52.489438",
             "sub_tasks": [],
             "notes": ""
         }

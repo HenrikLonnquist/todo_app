@@ -68,9 +68,12 @@ class _SchedulePageState extends State<SchedulePage> {
                       EasyDateTimeLine(
                         initialDate: DateTime.now(),
                         onDateChange: (selectedDate) {
-                          print("date");
+                          print("date selected");
+                          print(DateTime.now());
                         },
                       ),
+                      // tasks corresponding to selected date
+
                     ],
                   )
                 ),

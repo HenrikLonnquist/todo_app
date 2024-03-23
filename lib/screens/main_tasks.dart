@@ -6,8 +6,8 @@ import 'package:todo_app/components/right_sidepanel.dart';
 import 'package:todo_app/components/task_list.dart';
 import 'package:todo_app/utils/data_utils.dart';
 
-class MainContent extends StatefulWidget {
-  const MainContent({
+class MainTasksPage extends StatefulWidget {
+  const MainTasksPage({
     super.key,
     required this.title,
     required this.dataList,
@@ -18,10 +18,10 @@ class MainContent extends StatefulWidget {
   final Map dataList;
 
   @override
-  State<MainContent> createState() => _MainContentState();
+  State<MainTasksPage> createState() => _MainTasksPageState();
 }
 
-class _MainContentState extends State<MainContent> {
+class _MainTasksPageState extends State<MainTasksPage> {
 
   final TextEditingController _newTaskController = TextEditingController();
   
@@ -67,6 +67,9 @@ class _MainContentState extends State<MainContent> {
                   subTask: false,
                   onChanged: (value) {
                     setState(() {
+                      if (widget.dataList["main_tasks"].isEmpty) {
+                        isSubPanelOpen = !isSubPanelOpen;
+                      }
                       DataUtils().writeJsonFile(widget.dataList);
                     });
                   },
@@ -90,6 +93,7 @@ class _MainContentState extends State<MainContent> {
                     Map template = {
                       "name": value,
                       // "id": int //time?
+                      "date": DateTime.now().toString(), // Change later to an empty string if no date has been set
                       "sub_tasks": [],
                       "notes": ""
                     };
@@ -108,8 +112,9 @@ class _MainContentState extends State<MainContent> {
         // how do I know which one it is? What index..
         // change the 0 to a variable?
         // setstate > 
-        if (isSubPanelOpen) RightSidePanel(
+        if (isSubPanelOpen && widget.dataList["main_tasks"].isNotEmpty) RightSidePanel(
           child: SubTaskLIst(
+            title: widget.dataList["main_tasks"][mainTaskIndex]["name"],
             mainTaskSubList: widget.dataList["main_tasks"][mainTaskIndex]["sub_tasks"],
             onChanged: (value) {
               if (value.runtimeType == String) {
@@ -118,9 +123,9 @@ class _MainContentState extends State<MainContent> {
                 };
                 widget.dataList["main_tasks"][mainTaskIndex]["sub_tasks"].add(templateSub);
               }
-              // setState(() {
-              //   DataUtils().writeJsonFile(dataList);
-              // });
+              setState(() {
+                DataUtils().writeJsonFile(widget.dataList);
+              });
             }, 
           ),
         ),              
