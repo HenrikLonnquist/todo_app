@@ -57,7 +57,8 @@ class _TaskListState extends State<TaskList> {
             child: ListTile(
               // leading:
               title: Text("${widget.dataList[index]["name"]}"),
-              trailing: widget.subTask ? IconButton(
+              // TODO: below change back to: widget.subTask ? ... : null
+              trailing: IconButton(
                 icon: const Icon(
                   Icons.more_vert_rounded,
                   size: 20,
@@ -68,7 +69,7 @@ class _TaskListState extends State<TaskList> {
                   widget.dataList.removeAt(index);
                   widget.onChanged!.call(widget.dataList);
                 },
-              ) : null,
+              ),
               onTap: widget.subTask ? null : () {
                 widget.onTap!.call(index);
               },
@@ -83,12 +84,14 @@ class _TaskListState extends State<TaskList> {
 class SubTaskLIst extends StatelessWidget {
   const SubTaskLIst({
     super.key,
-    required this.mainTaskSubList,
+    required this.title,
+    required this.mainTask,
     required this.onChanged,
   });
 
-  final List mainTaskSubList;
+  final Map mainTask;
   final ValueChanged? onChanged;
+  final String title;
 
   @override
   Widget build(BuildContext context) {
@@ -97,9 +100,23 @@ class SubTaskLIst extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
+        Padding(
+          padding: const EdgeInsets.only(left: 8.0),
+          child: Title(
+            color: Colors.black, 
+            child: Text(
+              title,
+              style: const TextStyle(
+                fontSize: 26,
+                fontWeight: FontWeight.bold,
+                // fontFamily: ,
+              ),
+            ),
+          ),
+        ),
         Expanded(
           child: TaskList(
-            dataList: mainTaskSubList,
+            dataList: mainTask["sub_tasks"],
             subTask: true,
             onChanged: (listValue) {
               // List
@@ -120,10 +137,44 @@ class SubTaskLIst extends StatelessWidget {
           )
         ),
         const Divider(thickness: 2,),
-        // due dates: date
-        // reminder: time + date
-        // repeat: dates(days)
-        // notes: Textfield
+        //* due dates: date
+        ElevatedButton(
+          onPressed: () async {
+
+            DateTime dataDate =  DateTime.parse(mainTask["due_date"]);
+            // TODO: might switch to calendar date picker 2 package later on.
+            DateTime? selectedDate = await showDatePicker(
+              context: context,
+              initialDate: dataDate,
+              firstDate: DateTime.now(), 
+              lastDate: DateTime.now().add(const Duration(days: 30)),
+               
+              
+            ); 
+
+            if (selectedDate != null && selectedDate != dataDate) {
+              print(selectedDate);
+              // mainTask["due_date"] = selectedDate.toString().split(" ")[0];
+              // onChanged!.call(mainTask);
+            }
+
+          }, 
+          child: const Text("Due Date"),
+        )
+        // Card(
+        //   color: Colors.white,
+        //   child: CalendarDatePicker(
+        //     initialDate: DateTime.now(),
+        //     firstDate: DateTime.now(), 
+        //     lastDate: DateTime.now().add(const Duration(days: 30)),
+        //     onDateChanged: (selectedDate) {
+        //       print("testing");
+        //     }
+        //   ),
+        // )
+        //* TODO: reminder: time + date
+        //* TODO: repeat: dates(days)
+        //* TODO: notes: Textfield
       ],
     );
   }

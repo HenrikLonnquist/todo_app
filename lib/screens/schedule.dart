@@ -1,10 +1,14 @@
 // ignore_for_file: avoid_print
 
 import 'package:flutter/material.dart';
+import 'package:todo_app/components/card_field.dart';
 import 'package:todo_app/components/right_sidepanel.dart';
+import "package:easy_date_timeline/easy_date_timeline.dart";
+import 'package:todo_app/components/task_list.dart';
+import 'package:todo_app/utils/data_utils.dart';
 
-class ScheduleContent extends StatefulWidget {
-  const ScheduleContent({
+class SchedulePage extends StatefulWidget {
+  const SchedulePage({
     super.key,
     // required this.title,
     required this.dataList,
@@ -15,24 +19,40 @@ class ScheduleContent extends StatefulWidget {
   final Map dataList;
 
   @override
-  State<ScheduleContent> createState() => _ScheduleContentState();
+  State<SchedulePage> createState() => _SchedulePageState();
 }
 
-class _ScheduleContentState extends State<ScheduleContent> {
-
-  bool isSubPanelOpen = false;
+class _SchedulePageState extends State<SchedulePage> {
+  
+  bool isRightPanelOpen = false;
 
   late int mainTaskIndex;
 
+  Map tasksWithDueDate = {};
+
+  String matchTaskWithSelectedDate = DateTime.now().toString().split(" ")[0];
+  
+  late int pressedTask;
+
+
+
   @override
   Widget build(BuildContext context) {
+    tasksWithDueDate.clear();
+    for (var i = 0; i < widget.dataList["main_tasks"].length; i++) {
+      var data = widget.dataList["main_tasks"][i];
+      var conditionCheck = data.toString();
+      if (conditionCheck.contains("due_date") && conditionCheck.contains(matchTaskWithSelectedDate)) {
+        tasksWithDueDate[i] = data;
+      }
+    }
     return Row(
       children: [
         Container(
           // duration: const Duration(seconds: 10),
           // curve: Curves.fastEaseInToSlowEaseOut,
-          width: isSubPanelOpen ? 
-          MediaQuery.of(context).size.width * 0.5 :
+          width: isRightPanelOpen ? 
+          MediaQuery.of(context).size.width * 0.55 :
           MediaQuery.of(context).size.width * 0.8,
           padding: const EdgeInsets.all(10),
           color: Colors.blue, 
@@ -56,13 +76,92 @@ class _ScheduleContentState extends State<ScheduleContent> {
               const SizedBox(
                 height: 10,
               ),
+              Expanded(
+                child: Container(
+                  padding: const EdgeInsets.all(8.0),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Column(
+                    children: [
+                      EasyDateTimeLine(
+                        initialDate: DateTime.now(),
+                        onDateChange: (selectedDate) {
+                          print(selectedDate);
+                          setState(() {
+                            matchTaskWithSelectedDate = selectedDate.toString().split(" ")[0];
+                            isRightPanelOpen = false;
+                          });
+                          // print(DateTime.now());
+                        },
+                      ),
+                      // TODO: switch to a gridview.builder?
+                      const Divider(
+                        thickness: 1,
+                      ),
+                      Row(
+                        children: [
+                          for (var task in tasksWithDueDate.keys) 
+                          InkWell(
+                            onTap: () {
+                              setState(() {
+                                if (isRightPanelOpen && pressedTask != task ) {
+                                  pressedTask = task;
+                                  return;
+                                }
+                                pressedTask = task;
+                                // TODO: for now have toggle, maybe change to a button later
+                                isRightPanelOpen = !isRightPanelOpen;
+                              });
+                            },
+                            child: Card(
+                              child: Column(
+                                children: [
+                                  Text('${tasksWithDueDate[task]["name"]}'),
+                                  Text('${tasksWithDueDate[task]["due_date"]}'),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const Spacer(flex: 2),
+                      CardField(
+                        onSubmitted: (value) {
+                          var template = DataUtils().dataTemplate(
+                            name: value,
+                            dueDate: matchTaskWithSelectedDate
+                          );
+                          widget.dataList["main_tasks"].add(template);
+                          setState(() {
+                            DataUtils().writeJsonFile(widget.dataList);
+                          });
+                        },
+                      ),
+                    ],
+                  )
+                ),
+              )
             ],
           ), 
         ),
-        // how do I know which one it is? What index..
-        // change the 0 to a variable?
-        // setstate > 
-        if (isSubPanelOpen) const RightSidePanel(
+        if (isRightPanelOpen) RightSidePanel(
+          child: SubTaskLIst(
+            title: widget.dataList["main_tasks"][pressedTask]["name"],
+            mainTask: widget.dataList["main_tasks"][pressedTask], 
+            onChanged: (value) {
+              if (value.runtimeType == String) {
+                Map templateSub = {
+                  "name": value
+                };
+                widget.dataList["main_tasks"][mainTaskIndex]["sub_tasks"].add(templateSub);
+              }
+              setState(() {
+                DataUtils().writeJsonFile(widget.dataList);
+              });
+            }, 
+          ),
         ),              
       ],
     );

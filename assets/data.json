@@ -2,18 +2,29 @@
     "main_tasks": [
         {
             "name": "Name 1",
+            "due_date": "2024-03-23",
             "sub_tasks": [
                 {
                     "name": "sub name 1"
-                },
-                {
-                    "name": "sub name 3"
                 }
             ],
             "notes": ""
         },
         {
             "name": "Name 2",
+            "due_date": "2024-03-23",
+            "sub_tasks": [],
+            "notes": ""
+        },
+        {
+            "name": "Name 3",
+            "due_date": "",
+            "sub_tasks": [],
+            "notes": ""
+        },
+        {
+            "name": "Name 4",
+            "due_date": "2024-03-30",
             "sub_tasks": [],
             "notes": ""
         }

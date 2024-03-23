@@ -7,6 +7,22 @@ class DataUtils {
 
   final String _dataPath = "assets/data.json";
 
+  Map dataTemplate( 
+  {
+    required String name,
+    String dueDate = "", 
+    List subList = const [], 
+    String notes = "", 
+  }) {
+    return {
+      "name": name,
+      // "id": int //time?
+      "due_date": dueDate,
+      "sub_tasks": subList,
+      "notes": notes,
+    };
+  }
+
   // open Json file
   Map readJsonFile() {
     try {

@@ -1,7 +1,8 @@
 // ignore_for_file: avoid_print
 
 import 'package:flutter/material.dart';
-import 'package:todo_app/screens/main_content.dart';
+import 'package:todo_app/screens/main_tasks.dart';
+import 'package:todo_app/screens/schedule.dart';
 import 'package:todo_app/utils/data_utils.dart';
 
 class NavigationPanel extends StatefulWidget {
@@ -13,16 +14,15 @@ class NavigationPanel extends StatefulWidget {
 
 class _NavigationPanelState extends State<NavigationPanel> {
   Map dataList = {};
-  int _navigationRailIndex = 0;
+  int _navigationRailIndex = 1;
 
   late List<Widget> pages = <Widget>[
-    MainContent(
+    MainTasksPage(
       title: "Main Tasks",
       dataList: dataList
     ),
-    MainContent(
-      title: "Schedule",
-      dataList: dataList, 
+    SchedulePage(
+      dataList: dataList
     ),
     TodayTasks(dataList: dataList)
   ];
@@ -90,7 +90,7 @@ class TodayTasks extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MainContent(
+    return MainTasksPage(
       title: "Today",
       dataList: dataList
     );

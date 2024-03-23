@@ -1,13 +1,14 @@
 // ignore_for_file: avoid_print
 
 import 'package:flutter/material.dart';
+// import 'package:intl/intl.dart';
 import 'package:todo_app/components/card_field.dart';
 import 'package:todo_app/components/right_sidepanel.dart';
 import 'package:todo_app/components/task_list.dart';
 import 'package:todo_app/utils/data_utils.dart';
 
-class MainContent extends StatefulWidget {
-  const MainContent({
+class MainTasksPage extends StatefulWidget {
+  const MainTasksPage({
     super.key,
     required this.title,
     required this.dataList,
@@ -18,16 +19,17 @@ class MainContent extends StatefulWidget {
   final Map dataList;
 
   @override
-  State<MainContent> createState() => _MainContentState();
+  State<MainTasksPage> createState() => _MainTasksPageState();
 }
 
-class _MainContentState extends State<MainContent> {
+class _MainTasksPageState extends State<MainTasksPage> {
 
   final TextEditingController _newTaskController = TextEditingController();
   
-  bool isSubPanelOpen = false;
+  bool isRightPanelOpen = false;
 
   late int mainTaskIndex;
+
 
   @override
   Widget build(BuildContext context) {
@@ -36,7 +38,7 @@ class _MainContentState extends State<MainContent> {
         Container(
           // duration: const Duration(seconds: 10),
           // curve: Curves.fastEaseInToSlowEaseOut,
-          width: isSubPanelOpen ? 
+          width: isRightPanelOpen ? 
           MediaQuery.of(context).size.width * 0.5 :
           MediaQuery.of(context).size.width * 0.8,
           padding: const EdgeInsets.all(10),
@@ -67,16 +69,19 @@ class _MainContentState extends State<MainContent> {
                   subTask: false,
                   onChanged: (value) {
                     setState(() {
+                      if (widget.dataList["main_tasks"].isEmpty) {
+                        isRightPanelOpen = false;
+                      }
                       DataUtils().writeJsonFile(widget.dataList);
                     });
                   },
                   onTap: (indexTask) {
                     setState(() {
-                      if (isSubPanelOpen && mainTaskIndex != indexTask) {
+                      if (isRightPanelOpen && mainTaskIndex != indexTask) {
                         mainTaskIndex = indexTask;
                         return;
                       } 
-                      isSubPanelOpen = !isSubPanelOpen;
+                      isRightPanelOpen = !isRightPanelOpen;
                       mainTaskIndex = indexTask;
                     });
                   },
@@ -86,13 +91,10 @@ class _MainContentState extends State<MainContent> {
                 padding: const EdgeInsets.all(2.0),
                 child: CardField(
                   onSubmitted: (value) {
-                    // model
-                    Map template = {
-                      "name": value,
-                      // "id": int //time?
-                      "sub_tasks": [],
-                      "notes": ""
-                    };
+                    
+                    var template = DataUtils().dataTemplate(
+                      name: value,
+                    );
                     widget.dataList["main_tasks"].add(template);
                     
                     setState(() {
@@ -105,12 +107,10 @@ class _MainContentState extends State<MainContent> {
             ],
           ), 
         ),
-        // how do I know which one it is? What index..
-        // change the 0 to a variable?
-        // setstate > 
-        if (isSubPanelOpen) RightSidePanel(
+        if (isRightPanelOpen && widget.dataList["main_tasks"].isNotEmpty) RightSidePanel(
           child: SubTaskLIst(
-            mainTaskSubList: widget.dataList["main_tasks"][mainTaskIndex]["sub_tasks"],
+            title: widget.dataList["main_tasks"][mainTaskIndex]["name"],
+            mainTask: widget.dataList["main_tasks"][mainTaskIndex],
             onChanged: (value) {
               if (value.runtimeType == String) {
                 Map templateSub = {
@@ -118,9 +118,9 @@ class _MainContentState extends State<MainContent> {
                 };
                 widget.dataList["main_tasks"][mainTaskIndex]["sub_tasks"].add(templateSub);
               }
-              // setState(() {
-              //   DataUtils().writeJsonFile(dataList);
-              // });
+              setState(() {
+                DataUtils().writeJsonFile(widget.dataList);
+              });
             }, 
           ),
         ),              

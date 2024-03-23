@@ -10,10 +10,12 @@ environment:
   sdk: '>=3.3.0 <4.0.0'
 
 dependencies:
+  easy_date_timeline: ^1.0.3
   flutter:
     sdk: flutter
   flutter_localizations:
     sdk: flutter
+  intl: ^0.18.1
 
 dev_dependencies:
   flutter_test:
