@@ -89,9 +89,12 @@ class _SchedulePageState extends State<SchedulePage> {
                   ),
                   child: Column(
                     children: [
-                      // EasyInfiniteDateTimeLine(
-                      //   onDateChange: ,
-                      // ),
+                      EasyDateTimeLine(
+                        initialDate: DateTime.now(),
+                        onDateChange: (value) {
+                          print(value);
+                        },
+                      ),
                       Calendar(
                         firstDate: DateTime.now().subtract(Duration(days: DateTime.now().weekday - 1)),
                         lastDate: DateTime.now().add(Duration(days: DateTime.now().weekday - 6)),
@@ -181,7 +184,7 @@ class Calendar extends StatefulWidget {
   });
 
   final DateTime firstDate, lastDate, focusDate;
-  final Function(String) onDateChange;
+  final Function(DateTime) onDateChange;
 
   @override
   State<Calendar> createState() => _CalendarState();
@@ -189,17 +192,13 @@ class Calendar extends StatefulWidget {
 
 class _CalendarState extends State<Calendar> {  
   DateTime dateNow = DateTime.now();
+  late ValueNotifier<DateTime?> _focusedDateListener;
   
   late String shortDay;
-
   late String dayName;
-
   late String dateNumber;
-
   late String monthName;
-
-  String fullDate = "";
-
+  // late DateTime fullDate;
   bool isSelected = false;
 
   Map tasksWithDueDate = {};
@@ -209,13 +208,29 @@ class _CalendarState extends State<Calendar> {
     dayName = CalendarDateFormatter.dayName(currentIndexDay);
     dateNumber = currentIndexDay.day.toString();
     monthName = CalendarDateFormatter.monthName(currentIndexDay);
-    fullDate = CalendarDateFormatter.fullDate(currentIndexDay);
+    // fullDate = CalendarDateFormatter.fullDate(currentIndexDay);
   }
 
   int daysBetween(DateTime from, DateTime to) {
      from = DateTime(from.year, from.month, from.day);
      to = DateTime(to.year, to.month, to.day);
    return (to.difference(from).inHours / 24).round();
+  }
+
+  void _onFocusedDateChange(DateTime date) {
+    // print("focused");
+    _focusedDateListener.value = date;
+    widget.onDateChange.call(date);
+  }
+
+  // InkWell _dayItemBuilder(BuildContext context, DateTime date, bool isSelected) {
+  //   return ;
+  // }
+
+  @override
+  void initState() {
+    super.initState();
+    _focusedDateListener = ValueNotifier(widget.focusDate);
   }
 
   @override
@@ -228,36 +243,35 @@ class _CalendarState extends State<Calendar> {
         itemCount: daysBetween(widget.firstDate, widget.lastDate),
         itemBuilder: (context, index) {
           DateTime currentIndexDay = widget.firstDate.add(Duration(days: index));
-          bool imToday = widget.focusDate.day.compareTo(currentIndexDay.day) == 0 ;
+          bool imToday = widget.focusDate.day.compareTo(currentIndexDay.day) == 0;
           bool dateHasTasks = false;
           isSelected = false;
       
           for (var i in tasksWithDueDate.values) {
-            if (fullDate.toString().contains(i["due_date"])) {
+            if (currentIndexDay.toString().contains(i["due_date"])) {
               dateHasTasks = true;
             }
           }
           
           changeDate(currentIndexDay);
-
-          // print("widget: ${widget.focusDate} currentIndexDay: $currentIndexDay ${widget.focusDate.day.compareTo(currentIndexDay.day)}");
-          // print("currentIndexDay: $currentIndexDay");
+      
+          print("${widget.focusDate} $currentIndexDay $imToday");
           if (imToday && !isSelected) {
+            // print(widget.focusDate.day.compareTo(currentIndexDay.day) == 0);
+            // print(imToday);
             isSelected = true;
           }
-
-          // print("widget: ${widget.firstDate}");
-          // print("dateNow: $dateNow");
-
-          // print(DateFormat("E").format(widget.firstDate));
-          // print(dayName);
-
+      
           // TODO: create an function or class for this.
           // check out the "timeline_widget.dart" file for how its done.
           return InkWell(
             onTap: () {
-              print(fullDate);
-              widget.onDateChange.call(fullDate);
+              // _onFocusedDateChange(currentIndexDay);
+              setState(() {
+                isSelected = true;
+                print("$currentIndexDay $isSelected");
+              });
+              // widget.onDateChange.call(currentIndexDay);
             },
             child: Container(
               width: 68.0,
@@ -270,7 +284,7 @@ class _CalendarState extends State<Calendar> {
                   color: imToday && !isSelected ? Colors.black : Colors.black.withOpacity(0.1),
                   width: 1,
                 ),
-                color: isSelected ? Colors.purple : null,
+                color: isSelected ? Colors.deepPurple : null,
                 borderRadius: BorderRadius.circular(16.0),
               ),
               child: Column(
