@@ -135,13 +135,13 @@ class _SchedulePageState extends State<SchedulePage> {
                       const Spacer(flex: 2),
                       CardField(
                         onSubmitted: (value) {
-                          var template = DataUtils().dataTemplate(
+                          var template = DataUtils.dataTemplate(
                             name: value,
                             dueDate: matchTaskWithSelectedDate
                           );
                           widget.dataList["main_tasks"].add(template);
                           setState(() {
-                            DataUtils().writeJsonFile(widget.dataList);
+                            DataUtils.writeJsonFile(widget.dataList);
                           });
                         },
                       ),
@@ -164,7 +164,7 @@ class _SchedulePageState extends State<SchedulePage> {
                 widget.dataList["main_tasks"][mainTaskIndex]["sub_tasks"].add(templateSub);
               }
               setState(() {
-                DataUtils().writeJsonFile(widget.dataList);
+                DataUtils.writeJsonFile(widget.dataList);
               });
             }, 
           ),
@@ -200,6 +200,7 @@ class _CalendarState extends State<Calendar> {
   late String monthName;
   // late DateTime fullDate;
   bool isSelected = false;
+  bool dateHasTasks = false;
 
   Map tasksWithDueDate = {};
 
@@ -218,14 +219,19 @@ class _CalendarState extends State<Calendar> {
   }
 
   void _onFocusedDateChange(DateTime date) {
-    // print("focused");
     _focusedDateListener.value = date;
     widget.onDateChange.call(date);
   }
 
-  // InkWell _dayItemBuilder(BuildContext context, DateTime date, bool isSelected) {
-  //   return ;
-  // }
+  @override
+  void dispose() {
+    _focusedDateListener.dispose();
+    super.dispose();
+  }
+  
+  void _onDayChanged(bool isSelected, DateTime currentDate){
+    widget.onDateChange.call(currentDate);
+  }
 
   @override
   void initState() {
@@ -236,98 +242,139 @@ class _CalendarState extends State<Calendar> {
   @override
   Widget build(BuildContext context) {
     return Expanded(
-      child: ListView.builder(
-        shrinkWrap: false,
-        scrollDirection: Axis.horizontal,
-        // addSemanticIndexes: ,
-        itemCount: daysBetween(widget.firstDate, widget.lastDate),
-        itemBuilder: (context, index) {
-          DateTime currentIndexDay = widget.firstDate.add(Duration(days: index));
-          bool imToday = widget.focusDate.day.compareTo(currentIndexDay.day) == 0;
-          bool dateHasTasks = false;
-          isSelected = false;
-      
-          for (var i in tasksWithDueDate.values) {
-            if (currentIndexDay.toString().contains(i["due_date"])) {
-              dateHasTasks = true;
-            }
-          }
+      child: ValueListenableBuilder(
+        valueListenable: _focusedDateListener,
+        builder: (context, focusedDate, child) {
+          return ListView.builder(
+            shrinkWrap: false,
+            scrollDirection: Axis.horizontal,
+            itemCount: daysBetween(widget.firstDate, widget.lastDate),
+            itemBuilder: (context, index) {
+              DateTime currentIndexDay = widget.firstDate.add(Duration(days: index));
+              bool imToday = widget.focusDate.day.compareTo(currentIndexDay.day) == 0;
+
+              for (var i in tasksWithDueDate.values) {
+                if (currentIndexDay.toString().contains(i["due_date"])) {
+                  dateHasTasks = true;
+                }
+              }
+              
+              changeDate(currentIndexDay);
+              print(isSelected);
           
-          changeDate(currentIndexDay);
-      
-          print("${widget.focusDate} $currentIndexDay $imToday");
-          if (imToday && !isSelected) {
-            // print(widget.focusDate.day.compareTo(currentIndexDay.day) == 0);
-            // print(imToday);
-            isSelected = true;
-          }
-      
-          // TODO: create an function or class for this.
-          // check out the "timeline_widget.dart" file for how its done.
-          return InkWell(
-            onTap: () {
-              // _onFocusedDateChange(currentIndexDay);
-              setState(() {
+              if (imToday && !isSelected) {
                 isSelected = true;
-                print("$currentIndexDay $isSelected");
-              });
-              // widget.onDateChange.call(currentIndexDay);
+              }
+          
+              // TODO: create an function or class for this.
+              // check out the "timeline_widget.dart" file for how its done.
+              return DayWidget(
+                shortDay: shortDay,
+                dateNumber: dateNumber,
+                monthName: monthName,
+                // TODO: above put it inside of daywidget class later
+                date: currentIndexDay,
+                isSelected: isSelected,
+                onDayPressed: () {
+                  setState(() {
+                    // isSelected = !isSelected;
+                    // // isSelected = !isSelected;
+                    // _onDayChanged(isSelected, currentIndexDay);
+                  });
+                  // print("$isSelected $currentIndexDay");
+                  // print(focusedDate);
+                  // _onFocusedDateChange(currentIndexDay);
+                  // widget.onDateChange.call(currentIndexDay);
+                },
+              );
             },
-            child: Container(
-              width: 68.0,
-              margin: const EdgeInsets.all(8.0),
-              padding: dateHasTasks ? 
-              const EdgeInsets.fromLTRB(8, 8, 8, 0) : 
-              const  EdgeInsets.fromLTRB(8, 8, 8, 9),
-              decoration: BoxDecoration(
-                border: Border.all(
-                  color: imToday && !isSelected ? Colors.black : Colors.black.withOpacity(0.1),
-                  width: 1,
-                ),
-                color: isSelected ? Colors.deepPurple : null,
-                borderRadius: BorderRadius.circular(16.0),
-              ),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    monthName,
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: isSelected ? Colors.white : const Color(0xff6D5D6E),
-                    ),
-                  ),
-                  const SizedBox(
-                    width: 8.0,
-                  ),
-                  Text(
-                    dateNumber,
-                    style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                      color: isSelected ? Colors.white : const Color(0xff393646),
-                    ),
-                  ),
-                  const SizedBox(
-                    width: 8.0,
-                  ),
-                  Text(
-                    shortDay,
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: isSelected ? Colors.white : const Color(0xff6D5D6E),
-                    ),
-                  ),
-                  if (dateHasTasks) const Icon(
-                    Icons.circle,
-                    size: 10,
-                    color: Colors.green,
-                  ),
-                ],
+          );
+        }
+      ),
+    );
+  }
+}
+
+
+class DayWidget extends StatelessWidget {
+  const DayWidget({
+    super.key, 
+    required this.date, 
+    required this.isSelected, 
+    required this.onDayPressed,
+    // required this.child,
+    this.dateHasTasks = false, 
+    required this.shortDay, 
+    required this.dateNumber, 
+    required this.monthName,
+  });
+
+  final DateTime date;
+  final String shortDay;
+  final String dateNumber;
+  final String monthName;
+  final bool isSelected;
+  final VoidCallback onDayPressed;
+  final bool dateHasTasks;
+  
+  // final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: onDayPressed,
+      child: Container(
+        width: 68.0,
+        margin: const EdgeInsets.all(8.0),
+        padding: dateHasTasks ? 
+        const EdgeInsets.fromLTRB(8, 8, 8, 0) : 
+        const  EdgeInsets.fromLTRB(8, 8, 8, 9),
+        decoration: BoxDecoration(
+          border: Border.all(
+            color: isSelected ? Colors.black : Colors.black.withOpacity(0.1),
+            width: 1,
+          ),
+          color: isSelected ? Colors.deepPurple : null,
+          borderRadius: BorderRadius.circular(16.0),
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(
+              monthName,
+              style: TextStyle(
+                fontSize: 12,
+                color: isSelected ? Colors.white : const Color(0xff6D5D6E),
               ),
             ),
-          );
-        },
+            const SizedBox(
+              width: 8.0,
+            ),
+            Text(
+              dateNumber,
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+                color: isSelected ? Colors.white : const Color(0xff393646),
+              ),
+            ),
+            const SizedBox(
+              width: 8.0,
+            ),
+            Text(
+              shortDay,
+              style: TextStyle(
+                fontSize: 12,
+                color: isSelected ? Colors.white : const Color(0xff6D5D6E),
+              ),
+            ),
+            if (dateHasTasks) const Icon(
+              Icons.circle,
+              size: 10,
+              color: Colors.green,
+            ),
+          ],
+        ),
       ),
     );
   }

@@ -30,7 +30,7 @@ class _NavigationPanelState extends State<NavigationPanel> {
   @override
   void initState() {
     super.initState();
-    dataList = DataUtils().readJsonFile();
+    dataList = DataUtils.readJsonFile();
   }
 
   @override

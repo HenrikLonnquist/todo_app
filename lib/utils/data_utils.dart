@@ -2,12 +2,14 @@
 import "dart:convert";
 import 'dart:io';
 
+const String _dataPath = "assets/data.json";
 
 class DataUtils {
 
-  final String _dataPath = "assets/data.json";
+  const DataUtils._();
 
-  Map dataTemplate( 
+
+  static Map dataTemplate( 
   {
     required String name,
     String dueDate = "", 
@@ -24,7 +26,7 @@ class DataUtils {
   }
 
   // open Json file
-  Map readJsonFile() {
+  static Map readJsonFile() {
     try {
       final fileContent = File(_dataPath).readAsStringSync();
       final jsonData = json.decode(fileContent);
@@ -36,7 +38,7 @@ class DataUtils {
   }
 
   // save to Json file
-  void writeJsonFile(Map dataList) {
+  static void writeJsonFile(Map dataList) {
     
     var spaces = " " * 4;
     var jsonString = JsonEncoder.withIndent(spaces).convert(dataList);

@@ -72,7 +72,7 @@ class _MainTasksPageState extends State<MainTasksPage> {
                       if (widget.dataList["main_tasks"].isEmpty) {
                         isRightPanelOpen = false;
                       }
-                      DataUtils().writeJsonFile(widget.dataList);
+                      DataUtils.writeJsonFile(widget.dataList);
                     });
                   },
                   onTap: (indexTask) {
@@ -92,14 +92,14 @@ class _MainTasksPageState extends State<MainTasksPage> {
                 child: CardField(
                   onSubmitted: (value) {
                     
-                    var template = DataUtils().dataTemplate(
+                    var template = DataUtils.dataTemplate(
                       name: value,
                     );
                     widget.dataList["main_tasks"].add(template);
                     
                     setState(() {
                       _newTaskController.text = "";
-                      DataUtils().writeJsonFile(widget.dataList);
+                      DataUtils.writeJsonFile(widget.dataList);
                     });
                   },
                 ),
@@ -119,7 +119,7 @@ class _MainTasksPageState extends State<MainTasksPage> {
                 widget.dataList["main_tasks"][mainTaskIndex]["sub_tasks"].add(templateSub);
               }
               setState(() {
-                DataUtils().writeJsonFile(widget.dataList);
+                DataUtils.writeJsonFile(widget.dataList);
               });
             }, 
           ),
