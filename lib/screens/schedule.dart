@@ -1,12 +1,13 @@
 // ignore_for_file: avoid_print
 
+import 'package:easy_date_timeline/easy_date_timeline.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:todo_app/components/card_field.dart';
 import 'package:todo_app/components/right_sidepanel.dart';
-import "package:easy_date_timeline/easy_date_timeline.dart";
 import 'package:todo_app/components/task_list.dart';
 import 'package:todo_app/utils/data_utils.dart';
+import 'package:todo_app/utils/date_formatter.dart';
 
 class SchedulePage extends StatefulWidget {
   const SchedulePage({
@@ -48,6 +49,7 @@ class _SchedulePageState extends State<SchedulePage> {
         tasksWithDueDate[i] = dataTask[i];
       }
     }
+
     return Row(
       children: [
         Container(
@@ -87,76 +89,14 @@ class _SchedulePageState extends State<SchedulePage> {
                   ),
                   child: Column(
                     children: [
-                      EasyDateTimeLine(
-                        initialDate: DateTime.now(),
-                        onDateChange: (selectedDate) {
-                          // print(selectedDate);
-                          setState(() {
-                            matchTaskWithSelectedDate = selectedDate.toString().split(" ")[0];
-                            isRightPanelOpen = false;
-                          });
-                        },
-                        itemBuilder: (context, dayNumber, dayName, monthName, fullDate, isSelected) {
-                          String today = DateFormat("y-MM-d").format(DateTime.now());
-                          bool imToday = fullDate.toString().contains(today);
-                          bool dateHasTasks = false;
-
-                          for (var i in tasksWithDueDate.values) {
-                            if (fullDate.toString().contains(i["due_date"])) {
-                              dateHasTasks = true;
-                            }
-                          }
-
-                          return Container(
-                            width: 56.0,
-                            padding: const EdgeInsets.all(8.0),
-                            decoration: BoxDecoration(
-                              border: Border.all(
-                                color: imToday && !isSelected ? Colors.black : Colors.black.withOpacity(0.1),
-                                width: 1,
-                              ),
-                              color: isSelected ? Colors.purple : null,
-                              borderRadius: BorderRadius.circular(16.0),
-                            ),
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Text(
-                                  monthName,
-                                  style: TextStyle(
-                                    fontSize: 12,
-                                    color: isSelected ? Colors.white : const Color(0xff6D5D6E),
-                                  ),
-                                ),
-                                const SizedBox(
-                                  width: 8.0,
-                                ),
-                                Text(
-                                  dayNumber,
-                                  style: TextStyle(
-                                    fontSize: 20,
-                                    fontWeight: FontWeight.bold,
-                                    color: isSelected ? Colors.white : const Color(0xff393646),
-                                  ),
-                                ),
-                                const SizedBox(
-                                  width: 8.0,
-                                ),
-                                Text(
-                                  dayName,
-                                  style: TextStyle(
-                                    fontSize: 12,
-                                    color: isSelected ? Colors.white : const Color(0xff6D5D6E),
-                                  ),
-                                ),
-                                if (dateHasTasks) const Icon(
-                                  Icons.circle,
-                                  size: 10,
-                                  color: Colors.green,
-                                ),
-                              ],
-                            ),
-                          );
+                      // EasyInfiniteDateTimeLine(
+                      //   onDateChange: ,
+                      // ),
+                      Calendar(
+                        firstDate: DateTime.now().subtract(Duration(days: DateTime.now().weekday - 1)),
+                        lastDate: DateTime.now().add(Duration(days: DateTime.now().weekday - 6)),
+                        focusDate: DateTime.now(),
+                        onDateChange: (value) {
                         },
                       ),
                       // TODO: switch to a gridview.builder?
@@ -227,6 +167,154 @@ class _SchedulePageState extends State<SchedulePage> {
           ),
         ),              
       ],
+    );
+  }
+}
+
+class Calendar extends StatefulWidget {
+  const Calendar({
+    super.key,
+    required this.firstDate,
+    required this.lastDate, 
+    required this.focusDate,
+    required this.onDateChange
+  });
+
+  final DateTime firstDate, lastDate, focusDate;
+  final Function(String) onDateChange;
+
+  @override
+  State<Calendar> createState() => _CalendarState();
+}
+
+class _CalendarState extends State<Calendar> {  
+  DateTime dateNow = DateTime.now();
+  
+  late String shortDay;
+
+  late String dayName;
+
+  late String dateNumber;
+
+  late String monthName;
+
+  String fullDate = "";
+
+  bool isSelected = false;
+
+  Map tasksWithDueDate = {};
+
+  void changeDate(DateTime currentIndexDay) {
+    shortDay = CalendarDateFormatter.shortDay(currentIndexDay);
+    dayName = CalendarDateFormatter.dayName(currentIndexDay);
+    dateNumber = currentIndexDay.day.toString();
+    monthName = CalendarDateFormatter.monthName(currentIndexDay);
+    fullDate = CalendarDateFormatter.fullDate(currentIndexDay);
+  }
+
+  int daysBetween(DateTime from, DateTime to) {
+     from = DateTime(from.year, from.month, from.day);
+     to = DateTime(to.year, to.month, to.day);
+   return (to.difference(from).inHours / 24).round();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Expanded(
+      child: ListView.builder(
+        shrinkWrap: false,
+        scrollDirection: Axis.horizontal,
+        // addSemanticIndexes: ,
+        itemCount: daysBetween(widget.firstDate, widget.lastDate),
+        itemBuilder: (context, index) {
+          DateTime currentIndexDay = widget.firstDate.add(Duration(days: index));
+          bool imToday = widget.focusDate.day.compareTo(currentIndexDay.day) == 0 ;
+          bool dateHasTasks = false;
+          isSelected = false;
+      
+          for (var i in tasksWithDueDate.values) {
+            if (fullDate.toString().contains(i["due_date"])) {
+              dateHasTasks = true;
+            }
+          }
+          
+          changeDate(currentIndexDay);
+
+          // print("widget: ${widget.focusDate} currentIndexDay: $currentIndexDay ${widget.focusDate.day.compareTo(currentIndexDay.day)}");
+          // print("currentIndexDay: $currentIndexDay");
+          if (imToday && !isSelected) {
+            isSelected = true;
+          }
+
+          // print("widget: ${widget.firstDate}");
+          // print("dateNow: $dateNow");
+
+          // print(DateFormat("E").format(widget.firstDate));
+          // print(dayName);
+
+          // TODO: create an function or class for this.
+          // check out the "timeline_widget.dart" file for how its done.
+          return InkWell(
+            onTap: () {
+              print(fullDate);
+              widget.onDateChange.call(fullDate);
+            },
+            child: Container(
+              width: 68.0,
+              margin: const EdgeInsets.all(8.0),
+              padding: dateHasTasks ? 
+              const EdgeInsets.fromLTRB(8, 8, 8, 0) : 
+              const  EdgeInsets.fromLTRB(8, 8, 8, 9),
+              decoration: BoxDecoration(
+                border: Border.all(
+                  color: imToday && !isSelected ? Colors.black : Colors.black.withOpacity(0.1),
+                  width: 1,
+                ),
+                color: isSelected ? Colors.purple : null,
+                borderRadius: BorderRadius.circular(16.0),
+              ),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    monthName,
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: isSelected ? Colors.white : const Color(0xff6D5D6E),
+                    ),
+                  ),
+                  const SizedBox(
+                    width: 8.0,
+                  ),
+                  Text(
+                    dateNumber,
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                      color: isSelected ? Colors.white : const Color(0xff393646),
+                    ),
+                  ),
+                  const SizedBox(
+                    width: 8.0,
+                  ),
+                  Text(
+                    shortDay,
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: isSelected ? Colors.white : const Color(0xff6D5D6E),
+                    ),
+                  ),
+                  if (dateHasTasks) const Icon(
+                    Icons.circle,
+                    size: 10,
+                    color: Colors.green,
+                  ),
+                ],
+              ),
+            ),
+          );
+        },
+      ),
     );
   }
 }
