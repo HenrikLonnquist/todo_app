@@ -115,12 +115,16 @@ class _SchedulePageState extends State<SchedulePage> {
                         focusDate: DateTime.now(),
                         datesWithTasks: tasksWithDueDate,
                         onDateChange: (value) {
+                          setState(() {
+                            matchTaskWithSelectedDate = value.toString().split(" ")[0];
+                            print(value);
+                          });
                         },
                       ),
                       // TODO: switch to a gridview.builder?
-                      // const Divider(
-                      //   thickness: 1,
-                      // ),
+                      const Divider(
+                        thickness: 1,
+                      ),
                       Expanded(
                         flex: 4,
                         child: Row(
@@ -150,7 +154,6 @@ class _SchedulePageState extends State<SchedulePage> {
                           ],
                         ),
                       ),
-                      // const Spacer(flex: 2),
                       CardField(
                         onSubmitted: (value) {
                           var template = DataUtils.dataTemplate(
@@ -278,6 +281,8 @@ class _CalendarState extends State<Calendar> {
                   lastDate = DateTime(widget.lastDate.year, widget.lastDate.month, widget.lastDate.day);
                   focusedDate = DateTime(widget.focusDate.year, widget.focusDate.month, widget.focusDate.day);
 
+                  // widget.onDateChange.call(focusedDate);                 
+
                 });
               },
               child: const Text(
@@ -303,6 +308,7 @@ class _CalendarState extends State<Calendar> {
                   lastDate = DateTime(lastDate.year, month + 1, lastDate.day);
                   focusedDate = DateTime(focusedDate.year, month, focusedDate.day);
 
+                  // widget.onDateChange.call(focusedDate);
 
                 });
               },
@@ -336,6 +342,7 @@ class _CalendarState extends State<Calendar> {
                 onTap: () {
                   setState(() {
                     focusedDate = currentIndexDay;
+                    widget.onDateChange.call(focusedDate);
                   });
                 },
                 child: Container(
