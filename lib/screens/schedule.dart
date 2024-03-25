@@ -128,6 +128,7 @@ class _SchedulePageState extends State<SchedulePage> {
                       Expanded(
                         flex: 4,
                         child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             for (var task in tasksWithDueDate.keys) 
                             if (tasksWithDueDate[task]["due_date"].contains(matchTaskWithSelectedDate)) InkWell(
@@ -144,6 +145,7 @@ class _SchedulePageState extends State<SchedulePage> {
                               },
                               child: Card(
                                 child: Column(
+                                  mainAxisSize: MainAxisSize.min,
                                   children: [
                                     Text("${tasksWithDueDate[task]["name"]}"),
                                     Text("${tasksWithDueDate[task]["due_date"]}"),
