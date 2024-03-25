@@ -216,7 +216,6 @@ class _CalendarState extends State<Calendar> {
   late DateTime lastDate = widget.lastDate;
 
   late String shortDay;
-  late String dayName;
   late String dateNumber;
   late String monthName;
 
@@ -226,10 +225,8 @@ class _CalendarState extends State<Calendar> {
 
   void changeDate(DateTime currentIndexDay) {
     shortDay = CalendarDateFormatter.shortDay(currentIndexDay);
-    dayName = CalendarDateFormatter.dayName(currentIndexDay);
     dateNumber = currentIndexDay.day.toString();
     monthName = CalendarDateFormatter.monthName(currentIndexDay);
-    // fullDate = CalendarDateFormatter.fullDate(currentIndexDay);
   }
 
   int daysBetween(DateTime from, DateTime to) {
@@ -266,7 +263,7 @@ class _CalendarState extends State<Calendar> {
             Padding(
               padding: const EdgeInsets.only(left: 12.0),
               child: Text(
-                "Day",
+                CalendarDateFormatter.dayName(focusedDate),
                 style: const TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
@@ -277,15 +274,13 @@ class _CalendarState extends State<Calendar> {
             ElevatedButton(
               onPressed: () {
                 setState(() {
-                  print("hello");
                   firstDate = DateTime(widget.firstDate.year, widget.firstDate.month, widget.firstDate.day);
                   lastDate = DateTime(widget.lastDate.year, widget.lastDate.month, widget.lastDate.day);
                   focusedDate = DateTime(widget.focusDate.year, widget.focusDate.month, widget.focusDate.day);
 
-                  print("$firstDate $lastDate $focusedDate");
                 });
               },
-              child: Text(
+              child: const Text(
                 "Today",
               )
             ),
@@ -304,7 +299,6 @@ class _CalendarState extends State<Calendar> {
 
                   int month = monthMap[value]!;
                   
-                  print("$firstDate $lastDate $focusedDate");
                   firstDate = DateTime(firstDate.year, month, firstDate.day);
                   lastDate = DateTime(lastDate.year, month + 1, lastDate.day);
                   focusedDate = DateTime(focusedDate.year, month, focusedDate.day);
