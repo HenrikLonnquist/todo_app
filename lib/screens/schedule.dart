@@ -1,15 +1,17 @@
 // ignore_for_file: avoid_print
 
-import 'package:easy_date_timeline/easy_date_timeline.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
-import 'package:intl/intl.dart';
-import 'package:todo_app/components/card_field.dart';
-import 'package:todo_app/components/navigation_panel.dart';
-import 'package:todo_app/components/right_sidepanel.dart';
-import 'package:todo_app/components/task_list.dart';
-import 'package:todo_app/utils/data_utils.dart';
-import 'package:todo_app/utils/date_formatter.dart';
+import "package:dropdown_button2/dropdown_button2.dart";
+import "package:easy_date_timeline/easy_date_timeline.dart";
+import "package:flutter/cupertino.dart";
+import "package:flutter/material.dart";
+import "package:flutter/widgets.dart";
+import "package:intl/intl.dart";
+import "package:todo_app/components/card_field.dart";
+import "package:todo_app/components/navigation_panel.dart";
+import "package:todo_app/components/right_sidepanel.dart";
+import "package:todo_app/components/task_list.dart";
+import "package:todo_app/utils/data_utils.dart";
+import "package:todo_app/utils/date_formatter.dart";
 
 class SchedulePage extends StatefulWidget {
   const SchedulePage({
@@ -92,7 +94,8 @@ class _SchedulePageState extends State<SchedulePage> {
                   ),
                   child: Column(
                     children: [
-                      // Expanded(
+                      // TODO: check how it scrolls to current date widget.
+                      // maybe through size and when does it do it.
                       // EasyDateTimeLine(
                       //   initialDate: DateTime.now(),
                       //   onDateChange: (value) {
@@ -115,36 +118,39 @@ class _SchedulePageState extends State<SchedulePage> {
                         },
                       ),
                       // TODO: switch to a gridview.builder?
-                      const Divider(
-                        thickness: 1,
-                      ),
-                      Row(
-                        children: [
-                          for (var task in tasksWithDueDate.keys) 
-                          if (tasksWithDueDate[task]["due_date"].contains(matchTaskWithSelectedDate)) InkWell(
-                            onTap: () {
-                              setState(() {
-                                if (isRightPanelOpen && pressedTask != task ) {
+                      // const Divider(
+                      //   thickness: 1,
+                      // ),
+                      Expanded(
+                        flex: 4,
+                        child: Row(
+                          children: [
+                            for (var task in tasksWithDueDate.keys) 
+                            if (tasksWithDueDate[task]["due_date"].contains(matchTaskWithSelectedDate)) InkWell(
+                              onTap: () {
+                                setState(() {
+                                  if (isRightPanelOpen && pressedTask != task ) {
+                                    pressedTask = task;
+                                    return;
+                                  }
                                   pressedTask = task;
-                                  return;
-                                }
-                                pressedTask = task;
-                                // TODO: for now have toggle, maybe change to a button later
-                                isRightPanelOpen = !isRightPanelOpen;
-                              });
-                            },
-                            child: Card(
-                              child: Column(
-                                children: [
-                                  Text('${tasksWithDueDate[task]["name"]}'),
-                                  Text('${tasksWithDueDate[task]["due_date"]}'),
-                                ],
+                                  // TODO: for now have toggle, maybe change to a button later
+                                  isRightPanelOpen = !isRightPanelOpen;
+                                });
+                              },
+                              child: Card(
+                                child: Column(
+                                  children: [
+                                    Text("${tasksWithDueDate[task]["name"]}"),
+                                    Text("${tasksWithDueDate[task]["due_date"]}"),
+                                  ],
+                                ),
                               ),
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
-                      const Spacer(flex: 2),
+                      // const Spacer(flex: 2),
                       CardField(
                         onSubmitted: (value) {
                           var template = DataUtils.dataTemplate(
@@ -206,6 +212,9 @@ class Calendar extends StatefulWidget {
 
 class _CalendarState extends State<Calendar> {  
   late DateTime focusedDate = widget.focusDate;
+  late DateTime firstDate = widget.firstDate;
+  late DateTime lastDate = widget.lastDate;
+
   late String shortDay;
   late String dayName;
   late String dateNumber;
@@ -229,96 +238,173 @@ class _CalendarState extends State<Calendar> {
     return (to.difference(from).inHours / 24).round();
   }
  
-  
+  Map<String, int> monthMap = {
+    "Jan": 1,
+    "Feb": 2,
+    "Mar": 3,
+    "Apr": 4,
+    "May": 5,
+    "Jun": 6,
+    "Jul": 7,
+    "Aug": 8,
+    "Sep": 9,
+    "Oct": 10,
+    "Nov": 11,
+    "Dec": 12,
+  };
+
+
+  late String? selectedValue = monthMap.keys.toList()[widget.focusDate.month - 1];
+
 
   @override
   Widget build(BuildContext context) {
-    return Expanded(
-      child: ListView.builder(
-        shrinkWrap: false,
-        scrollDirection: Axis.horizontal,
-        itemCount: daysBetween(widget.firstDate, widget.lastDate),
-        itemBuilder: (context, index) {
-          DateTime currentIndexDay = widget.firstDate.add(Duration(days: index));
-          
-          isSelected = focusedDate.day.compareTo(currentIndexDay.day) == 0;
-          dateHasTasks = false;
-      
-          for (var i in widget.datesWithTasks.values) {
-            if (currentIndexDay.toString().contains(i["due_date"])) {
-              dateHasTasks = true;
-            }
-          }
-
-          changeDate(currentIndexDay);
-
-          // TODO: create an function or class for this.
-          // check out the "timeline_widget.dart" file for how its done.
-          return InkWell(
-            onTap: () {
-              setState(() {
-                focusedDate = currentIndexDay;
-              });
-            },
-            child: Container(
-              width: 68.0,
-              margin: const EdgeInsets.all(8.0),
-              padding: dateHasTasks ? 
-              const EdgeInsets.fromLTRB(8, 8, 8, 0) : 
-              const  EdgeInsets.fromLTRB(8, 8, 8, 9),
-              decoration: BoxDecoration(
-                border: Border.all(
-                  color: widget.focusDate.day.compareTo(currentIndexDay.day) == 0 
-                  && !isSelected 
-                  ? Colors.black 
-                  : Colors.black.withOpacity(0.1),
-                  width: 1,
+    return Column(
+      children: [
+        Row(
+          children: [
+            Padding(
+              padding: const EdgeInsets.only(left: 12.0),
+              child: Text(
+                "Day",
+                style: const TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
                 ),
-                color: isSelected ? Colors.deepPurple : null,
-                borderRadius: BorderRadius.circular(16.0),
-              ),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    monthName,
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: isSelected ? Colors.white : const Color(0xff6D5D6E),
-                    ),
-                  ),
-                  const SizedBox(
-                    width: 8.0,
-                  ),
-                  Text(
-                    dateNumber,
-                    style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                      color: isSelected ? Colors.white : const Color(0xff393646),
-                    ),
-                  ),
-                  const SizedBox(
-                    width: 8.0,
-                  ),
-                  Text(
-                    shortDay,
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: isSelected ? Colors.white : const Color(0xff6D5D6E),
-                    ),
-                  ),
-                  if (dateHasTasks) const Icon(
-                    Icons.circle,
-                    size: 10,
-                    color: Colors.green,
-                  ),
-                ],
               ),
             ),
-          );
-        },
-      ),
+            const Spacer(flex: 2,),
+            ElevatedButton(
+              onPressed: () {
+                setState(() {
+                  print("hello");
+                  firstDate = DateTime(widget.firstDate.year, widget.firstDate.month, widget.firstDate.day);
+                  lastDate = DateTime(widget.lastDate.year, widget.lastDate.month, widget.lastDate.day);
+                  focusedDate = DateTime(widget.focusDate.year, widget.focusDate.month, widget.focusDate.day);
+
+                  print("$firstDate $lastDate $focusedDate");
+                });
+              },
+              child: Text(
+                "Today",
+              )
+            ),
+            const SizedBox(width: 10),
+            DropdownButton2(
+              value: selectedValue,
+              items: monthMap.keys.map((value) {
+                return DropdownMenuItem(
+                  value: value,
+                  child: Text(value),
+                );
+              }).toList(),
+              onChanged: (value) {
+                setState(() {
+                  selectedValue = value;
+
+                  int month = monthMap[value]!;
+                  
+                  print("$firstDate $lastDate $focusedDate");
+                  firstDate = DateTime(firstDate.year, month, firstDate.day);
+                  lastDate = DateTime(lastDate.year, month + 1, lastDate.day);
+                  focusedDate = DateTime(focusedDate.year, month, focusedDate.day);
+
+
+                });
+              },
+              
+            ),
+            
+          ],
+        ),
+        SizedBox(
+          height: 140,
+          child: ListView.builder(
+            scrollDirection: Axis.horizontal,
+            itemCount: daysBetween(firstDate, lastDate),
+            itemBuilder: (context, index) {
+              DateTime currentIndexDay = firstDate.add(Duration(days: index));
+              
+              isSelected = focusedDate.day.compareTo(currentIndexDay.day) == 0;
+              dateHasTasks = false;
+          
+              for (var i in widget.datesWithTasks.values) {
+                if (currentIndexDay.toString().contains(i["due_date"])) {
+                  dateHasTasks = true;
+                }
+              }
+              
+              changeDate(currentIndexDay);
+              
+              // TODO: create an function or class for this.
+              // check out the "timeline_widget.dart" file for how its done.
+              return InkWell(
+                onTap: () {
+                  setState(() {
+                    focusedDate = currentIndexDay;
+                  });
+                },
+                child: Container(
+                  width: 68.0,
+                  margin: const EdgeInsets.all(8.0),
+                  padding: dateHasTasks ? 
+                  const EdgeInsets.fromLTRB(8, 8, 8, 0) : 
+                  const  EdgeInsets.fromLTRB(8, 8, 8, 9),
+                  decoration: BoxDecoration(
+                    border: Border.all(
+                      color: widget.focusDate.day.compareTo(currentIndexDay.day) == 0 
+                      && !isSelected 
+                      ? Colors.black 
+                      : Colors.black.withOpacity(0.1),
+                      width: 1,
+                    ),
+                    color: isSelected ? Colors.deepPurple : null,
+                    borderRadius: BorderRadius.circular(16.0),
+                  ),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        monthName,
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: isSelected ? Colors.white : const Color(0xff6D5D6E),
+                        ),
+                      ),
+                      const SizedBox(
+                        width: 8.0,
+                      ),
+                      Text(
+                        dateNumber,
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                          color: isSelected ? Colors.white : const Color(0xff393646),
+                        ),
+                      ),
+                      const SizedBox(
+                        width: 8.0,
+                      ),
+                      Text(
+                        shortDay,
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: isSelected ? Colors.white : const Color(0xff6D5D6E),
+                        ),
+                      ),
+                      if (dateHasTasks) const Icon(
+                        Icons.circle,
+                        size: 10,
+                        color: Colors.green,
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+      ],
     );
   }
 }
