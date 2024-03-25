@@ -10,6 +10,7 @@ environment:
   sdk: '>=3.3.0 <4.0.0'
 
 dependencies:
+  dropdown_button2: ^2.3.9
   easy_date_timeline: ^1.0.3
   flutter:
     sdk: flutter
