@@ -2,8 +2,10 @@
 
 import 'package:easy_date_timeline/easy_date_timeline.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:intl/intl.dart';
 import 'package:todo_app/components/card_field.dart';
+import 'package:todo_app/components/navigation_panel.dart';
 import 'package:todo_app/components/right_sidepanel.dart';
 import 'package:todo_app/components/task_list.dart';
 import 'package:todo_app/utils/data_utils.dart';
@@ -36,6 +38,7 @@ class _SchedulePageState extends State<SchedulePage> {
   
   late int pressedTask;
 
+  DateTime now = DateTime.now();
 
 
   @override
@@ -89,16 +92,25 @@ class _SchedulePageState extends State<SchedulePage> {
                   ),
                   child: Column(
                     children: [
-                      EasyDateTimeLine(
-                        initialDate: DateTime.now(),
-                        onDateChange: (value) {
-                          print(value);
-                        },
-                      ),
+                      // Expanded(
+                      // EasyDateTimeLine(
+                      //   initialDate: DateTime.now(),
+                      //   onDateChange: (value) {
+                      //     print(value);
+                      //   },
+                      // ),
                       Calendar(
-                        firstDate: DateTime.now().subtract(Duration(days: DateTime.now().weekday - 1)),
-                        lastDate: DateTime.now().add(Duration(days: DateTime.now().weekday - 6)),
+                        //* 5 days(workdays) showing
+                        // firstDate: now.subtract(Duration(days: now.weekday - 1)),
+                        // lastDate: now.add(Duration(days: 5 - now.weekday + 1)),
+                        //* 7 days(weekdays) showing
+                        // firstDate: now.subtract(Duration(days: now.weekday - 1)),
+                        // lastDate: now.add(Duration(days: 7 - now.weekday)),
+                        //* 30 days showing
+                        firstDate: now.subtract(Duration(days: now.day - 1)),
+                        lastDate: now.add(Duration(days: DateTime(now.year, now.month + 1, 0).day - now.day + 1)),
                         focusDate: DateTime.now(),
+                        datesWithTasks: tasksWithDueDate,
                         onDateChange: (value) {
                         },
                       ),
@@ -180,10 +192,12 @@ class Calendar extends StatefulWidget {
     required this.firstDate,
     required this.lastDate, 
     required this.focusDate,
-    required this.onDateChange
+    required this.onDateChange, 
+    this.datesWithTasks = const {},
   });
 
   final DateTime firstDate, lastDate, focusDate;
+  final Map datesWithTasks;
   final Function(DateTime) onDateChange;
 
   @override
@@ -191,18 +205,15 @@ class Calendar extends StatefulWidget {
 }
 
 class _CalendarState extends State<Calendar> {  
-  DateTime dateNow = DateTime.now();
-  late ValueNotifier<DateTime?> _focusedDateListener;
-  
+  late DateTime focusedDate = widget.focusDate;
   late String shortDay;
   late String dayName;
   late String dateNumber;
   late String monthName;
-  // late DateTime fullDate;
+
   bool isSelected = false;
   bool dateHasTasks = false;
 
-  Map tasksWithDueDate = {};
 
   void changeDate(DateTime currentIndexDay) {
     shortDay = CalendarDateFormatter.shortDay(currentIndexDay);
@@ -213,168 +224,100 @@ class _CalendarState extends State<Calendar> {
   }
 
   int daysBetween(DateTime from, DateTime to) {
-     from = DateTime(from.year, from.month, from.day);
-     to = DateTime(to.year, to.month, to.day);
-   return (to.difference(from).inHours / 24).round();
+    from = DateTime(from.year, from.month, from.day);
+    to = DateTime(to.year, to.month, to.day);
+    return (to.difference(from).inHours / 24).round();
   }
-
-  void _onFocusedDateChange(DateTime date) {
-    _focusedDateListener.value = date;
-    widget.onDateChange.call(date);
-  }
-
-  @override
-  void dispose() {
-    _focusedDateListener.dispose();
-    super.dispose();
-  }
+ 
   
-  void _onDayChanged(bool isSelected, DateTime currentDate){
-    widget.onDateChange.call(currentDate);
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    _focusedDateListener = ValueNotifier(widget.focusDate);
-  }
 
   @override
   Widget build(BuildContext context) {
     return Expanded(
-      child: ValueListenableBuilder(
-        valueListenable: _focusedDateListener,
-        builder: (context, focusedDate, child) {
-          return ListView.builder(
-            shrinkWrap: false,
-            scrollDirection: Axis.horizontal,
-            itemCount: daysBetween(widget.firstDate, widget.lastDate),
-            itemBuilder: (context, index) {
-              DateTime currentIndexDay = widget.firstDate.add(Duration(days: index));
-              bool imToday = widget.focusDate.day.compareTo(currentIndexDay.day) == 0;
+      child: ListView.builder(
+        shrinkWrap: false,
+        scrollDirection: Axis.horizontal,
+        itemCount: daysBetween(widget.firstDate, widget.lastDate),
+        itemBuilder: (context, index) {
+          DateTime currentIndexDay = widget.firstDate.add(Duration(days: index));
+          
+          isSelected = focusedDate.day.compareTo(currentIndexDay.day) == 0;
+          dateHasTasks = false;
+      
+          for (var i in widget.datesWithTasks.values) {
+            if (currentIndexDay.toString().contains(i["due_date"])) {
+              dateHasTasks = true;
+            }
+          }
 
-              for (var i in tasksWithDueDate.values) {
-                if (currentIndexDay.toString().contains(i["due_date"])) {
-                  dateHasTasks = true;
-                }
-              }
-              
-              changeDate(currentIndexDay);
-              print(isSelected);
-          
-              if (imToday && !isSelected) {
-                isSelected = true;
-              }
-          
-              // TODO: create an function or class for this.
-              // check out the "timeline_widget.dart" file for how its done.
-              return DayWidget(
-                shortDay: shortDay,
-                dateNumber: dateNumber,
-                monthName: monthName,
-                // TODO: above put it inside of daywidget class later
-                date: currentIndexDay,
-                isSelected: isSelected,
-                onDayPressed: () {
-                  setState(() {
-                    // isSelected = !isSelected;
-                    // // isSelected = !isSelected;
-                    // _onDayChanged(isSelected, currentIndexDay);
-                  });
-                  // print("$isSelected $currentIndexDay");
-                  // print(focusedDate);
-                  // _onFocusedDateChange(currentIndexDay);
-                  // widget.onDateChange.call(currentIndexDay);
-                },
-              );
+          changeDate(currentIndexDay);
+
+          // TODO: create an function or class for this.
+          // check out the "timeline_widget.dart" file for how its done.
+          return InkWell(
+            onTap: () {
+              setState(() {
+                focusedDate = currentIndexDay;
+              });
             },
+            child: Container(
+              width: 68.0,
+              margin: const EdgeInsets.all(8.0),
+              padding: dateHasTasks ? 
+              const EdgeInsets.fromLTRB(8, 8, 8, 0) : 
+              const  EdgeInsets.fromLTRB(8, 8, 8, 9),
+              decoration: BoxDecoration(
+                border: Border.all(
+                  color: widget.focusDate.day.compareTo(currentIndexDay.day) == 0 
+                  && !isSelected 
+                  ? Colors.black 
+                  : Colors.black.withOpacity(0.1),
+                  width: 1,
+                ),
+                color: isSelected ? Colors.deepPurple : null,
+                borderRadius: BorderRadius.circular(16.0),
+              ),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    monthName,
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: isSelected ? Colors.white : const Color(0xff6D5D6E),
+                    ),
+                  ),
+                  const SizedBox(
+                    width: 8.0,
+                  ),
+                  Text(
+                    dateNumber,
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                      color: isSelected ? Colors.white : const Color(0xff393646),
+                    ),
+                  ),
+                  const SizedBox(
+                    width: 8.0,
+                  ),
+                  Text(
+                    shortDay,
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: isSelected ? Colors.white : const Color(0xff6D5D6E),
+                    ),
+                  ),
+                  if (dateHasTasks) const Icon(
+                    Icons.circle,
+                    size: 10,
+                    color: Colors.green,
+                  ),
+                ],
+              ),
+            ),
           );
-        }
-      ),
-    );
-  }
-}
-
-
-class DayWidget extends StatelessWidget {
-  const DayWidget({
-    super.key, 
-    required this.date, 
-    required this.isSelected, 
-    required this.onDayPressed,
-    // required this.child,
-    this.dateHasTasks = false, 
-    required this.shortDay, 
-    required this.dateNumber, 
-    required this.monthName,
-  });
-
-  final DateTime date;
-  final String shortDay;
-  final String dateNumber;
-  final String monthName;
-  final bool isSelected;
-  final VoidCallback onDayPressed;
-  final bool dateHasTasks;
-  
-  // final Widget child;
-
-  @override
-  Widget build(BuildContext context) {
-    return InkWell(
-      onTap: onDayPressed,
-      child: Container(
-        width: 68.0,
-        margin: const EdgeInsets.all(8.0),
-        padding: dateHasTasks ? 
-        const EdgeInsets.fromLTRB(8, 8, 8, 0) : 
-        const  EdgeInsets.fromLTRB(8, 8, 8, 9),
-        decoration: BoxDecoration(
-          border: Border.all(
-            color: isSelected ? Colors.black : Colors.black.withOpacity(0.1),
-            width: 1,
-          ),
-          color: isSelected ? Colors.deepPurple : null,
-          borderRadius: BorderRadius.circular(16.0),
-        ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text(
-              monthName,
-              style: TextStyle(
-                fontSize: 12,
-                color: isSelected ? Colors.white : const Color(0xff6D5D6E),
-              ),
-            ),
-            const SizedBox(
-              width: 8.0,
-            ),
-            Text(
-              dateNumber,
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-                color: isSelected ? Colors.white : const Color(0xff393646),
-              ),
-            ),
-            const SizedBox(
-              width: 8.0,
-            ),
-            Text(
-              shortDay,
-              style: TextStyle(
-                fontSize: 12,
-                color: isSelected ? Colors.white : const Color(0xff6D5D6E),
-              ),
-            ),
-            if (dateHasTasks) const Icon(
-              Icons.circle,
-              size: 10,
-              color: Colors.green,
-            ),
-          ],
-        ),
+        },
       ),
     );
   }
