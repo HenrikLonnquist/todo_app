@@ -8,7 +8,7 @@ class CalendarDateFormatter {
     return DateFormat("E").format(date);
   }
 
-  static String dayName(date) {
+  static String dayName(DateTime date) {
     return DateFormat("EEEE").format(date);
   }
 
@@ -18,6 +18,14 @@ class CalendarDateFormatter {
 
   static String fullDate(DateTime date) {
     return DateFormat("y-MM-d").format(date);
+  }
+
+  static Map<String, String> parseAll(DateTime date){
+    return {
+      "shortDay": shortDay(date),
+      "dayName": dayName(date),
+      "monthName": monthName(date),
+    };
   }
   
 }

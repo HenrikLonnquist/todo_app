@@ -2,7 +2,7 @@
     "main_tasks": [
         {
             "name": "Name 1",
-            "due_date": "2024-03-23",
+            "due_date": "2024-03-23 00:00:00.000",
             "sub_tasks": [
                 {
                     "name": "sub name 1"
@@ -12,7 +12,7 @@
         },
         {
             "name": "Name 2",
-            "due_date": "2024-03-23",
+            "due_date": "2024-03-23 00:00:00.000",
             "sub_tasks": [],
             "notes": ""
         },
@@ -24,13 +24,13 @@
         },
         {
             "name": "Name 4",
-            "due_date": "2024-03-30",
+            "due_date": "2024-03-30 00:00:00.000",
             "sub_tasks": [],
             "notes": ""
         },
         {
             "name": "testa",
-            "due_date": "2024-03-25",
+            "due_date": "2024-03-25 00:00:00.000",
             "sub_tasks": [],
             "notes": ""
         }

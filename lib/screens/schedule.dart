@@ -36,11 +36,12 @@ class _SchedulePageState extends State<SchedulePage> {
 
   Map tasksWithDueDate = {};
 
-  String matchTaskWithSelectedDate = DateTime.now().toString().split(" ")[0];
+  DateTime now = DateTime.now();
+
+  late DateTime matchTaskWithSelectedDate = DateTime(now.year, now.month, now.day);
   
   late int pressedTask;
 
-  DateTime now = DateTime.now();
 
 
   @override
@@ -51,7 +52,8 @@ class _SchedulePageState extends State<SchedulePage> {
       // var taskCheck = dataTask[i].toString();
       //  && taskCheck.contains(matchTaskWithSelectedDate)
       if (dataTask[i]["due_date"] != "") {
-        tasksWithDueDate[i] = dataTask[i];
+        var parsedDate = DateTime.parse(dataTask[i]["due_date"]);
+        tasksWithDueDate[parsedDate] = dataTask[i];
       }
     }
 
@@ -106,18 +108,15 @@ class _SchedulePageState extends State<SchedulePage> {
                         //* 5 days(workdays) showing
                         // firstDate: now.subtract(Duration(days: now.weekday - 1)),
                         // lastDate: now.add(Duration(days: 5 - now.weekday + 1)),
-                        //* 7 days(weekdays) showing
-                        // firstDate: now.subtract(Duration(days: now.weekday - 1)),
-                        // lastDate: now.add(Duration(days: 7 - now.weekday)),
-                        //* 30 days showing
-                        firstDate: now.subtract(Duration(days: now.day - 1)),
-                        lastDate: now.add(Duration(days: DateTime(now.year, now.month + 1, 0).day - now.day + 1)),
-                        focusDate: DateTime.now(),
+                        
+
+                        focusDate: matchTaskWithSelectedDate,
+                        // viewState: workdays, weekdays, monthly,
                         datesWithTasks: tasksWithDueDate,
                         onDateChange: (value) {
                           setState(() {
-                            matchTaskWithSelectedDate = value.toString().split(" ")[0];
                             print(value);
+                            matchTaskWithSelectedDate = value;
                           });
                         },
                       ),
@@ -131,7 +130,7 @@ class _SchedulePageState extends State<SchedulePage> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             for (var task in tasksWithDueDate.keys) 
-                            if (tasksWithDueDate[task]["due_date"].contains(matchTaskWithSelectedDate)) InkWell(
+                            if (task.compareTo(matchTaskWithSelectedDate) == 0) InkWell(
                               onTap: () {
                                 setState(() {
                                   if (isRightPanelOpen && pressedTask != task ) {
@@ -148,7 +147,7 @@ class _SchedulePageState extends State<SchedulePage> {
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
                                     Text("${tasksWithDueDate[task]["name"]}"),
-                                    Text("${tasksWithDueDate[task]["due_date"]}"),
+                                    // Text("${tasksWithDueDate[task]["due_date"]}"),
                                   ],
                                 ),
                               ),
@@ -160,7 +159,7 @@ class _SchedulePageState extends State<SchedulePage> {
                         onSubmitted: (value) {
                           var template = DataUtils.dataTemplate(
                             name: value,
-                            dueDate: matchTaskWithSelectedDate
+                            dueDate: matchTaskWithSelectedDate.toString()
                           );
                           widget.dataList["main_tasks"].add(template);
                           setState(() {
@@ -200,14 +199,12 @@ class _SchedulePageState extends State<SchedulePage> {
 class Calendar extends StatefulWidget {
   const Calendar({
     super.key,
-    required this.firstDate,
-    required this.lastDate, 
     required this.focusDate,
     required this.onDateChange, 
     this.datesWithTasks = const {},
   });
 
-  final DateTime firstDate, lastDate, focusDate;
+  final DateTime focusDate;
   final Map datesWithTasks;
   final Function(DateTime) onDateChange;
 
@@ -217,8 +214,6 @@ class Calendar extends StatefulWidget {
 
 class _CalendarState extends State<Calendar> {  
   late DateTime focusedDate = widget.focusDate;
-  late DateTime firstDate = widget.firstDate;
-  late DateTime lastDate = widget.lastDate;
 
   late String shortDay;
   late String dateNumber;
@@ -255,12 +250,26 @@ class _CalendarState extends State<Calendar> {
     "Dec": 12,
   };
 
-
   late String? selectedValue = monthMap.keys.toList()[widget.focusDate.month - 1];
+
+  late Map<String, Widget> viewState = {
+    "Month": const Placeholder(),//*Current listview. builder
+    // "Month": MonthView()//*Current listview. builder
+    "7-day": const Placeholder(),
+    // "7-day": WeekDaysView(),
+    "Workdays": const Placeholder(),
+    // "Workdays": WorkDaysView(),
+  };
+
+  late String selectedViewState = viewState.keys.toList()[0];
+
+
+  
 
 
   @override
   Widget build(BuildContext context) {
+
     return Column(
       children: [
         Row(
@@ -275,139 +284,211 @@ class _CalendarState extends State<Calendar> {
                 ),
               ),
             ),
-            const Spacer(flex: 2,),
-            ElevatedButton(
-              onPressed: () {
-                setState(() {
-                  firstDate = DateTime(widget.firstDate.year, widget.firstDate.month, widget.firstDate.day);
-                  lastDate = DateTime(widget.lastDate.year, widget.lastDate.month, widget.lastDate.day);
-                  focusedDate = DateTime(widget.focusDate.year, widget.focusDate.month, widget.focusDate.day);
-
-                  // widget.onDateChange.call(focusedDate);                 
-
-                });
-              },
-              child: const Text(
-                "Today",
-              )
-            ),
-            const SizedBox(width: 10),
+            const Spacer(flex: 2),
             DropdownButton2(
-              value: selectedValue,
-              items: monthMap.keys.map((value) {
+                // change to 5,7 or 30 day calendar
+              value: selectedViewState,
+              items: viewState.keys.map((value) {
                 return DropdownMenuItem(
                   value: value,
-                  child: Text(value),
-                );
+                  child: Text(value)
+                  );
               }).toList(),
               onChanged: (value) {
+
                 setState(() {
-                  selectedValue = value;
-
-                  int month = monthMap[value]!;
-                  
-                  firstDate = DateTime(firstDate.year, month, firstDate.day);
-                  lastDate = DateTime(lastDate.year, month + 1, lastDate.day);
-                  focusedDate = DateTime(focusedDate.year, month, focusedDate.day);
-
-                  // widget.onDateChange.call(focusedDate);
-
+                  selectedViewState = value!;
                 });
+
               },
-              
             ),
+            const Spacer(flex: 2,),
+            // ElevatedButton(
+            //   onPressed: () {
+            //     setState(() {
+            //       firstDate = DateTime(widget.firstDate.year, widget.firstDate.month, widget.firstDate.day);
+            //       lastDate = DateTime(widget.lastDate.year, widget.lastDate.month, widget.lastDate.day);
+            //       focusedDate = DateTime(widget.focusDate.year, widget.focusDate.month, widget.focusDate.day);
+
+            //       // widget.onDateChange.call(focusedDate);                 
+
+            //     });
+            //   },
+            //   child: const Text(
+            //     "Today",
+            //   )
+            // ),
+            // const SizedBox(width: 10),
+            // DropdownButton2(
+            //   value: selectedValue,
+            //   items: monthMap.keys.map((value) {
+            //     return DropdownMenuItem(
+            //       value: value,
+            //       child: Text(value),
+            //     );
+            //   }).toList(),
+            //   onChanged: (value) {
+            //     setState(() {
+            //       selectedValue = value;
+
+            //       int month = monthMap[value]!;
+                  
+            //       firstDate = DateTime(firstDate.year, month, firstDate.day);
+            //       lastDate = DateTime(lastDate.year, month + 1, lastDate.day);
+            //       focusedDate = DateTime(focusedDate.year, month, focusedDate.day);
+
+            //       // widget.onDateChange.call(focusedDate);
+
+            //     });
+            //   },
+              
+            // ),
             
           ],
         ),
-        SizedBox(
-          height: 140,
-          child: ListView.builder(
-            scrollDirection: Axis.horizontal,
-            itemCount: daysBetween(firstDate, lastDate),
-            itemBuilder: (context, index) {
-              DateTime currentIndexDay = firstDate.add(Duration(days: index));
-              
-              isSelected = focusedDate.day.compareTo(currentIndexDay.day) == 0;
-              dateHasTasks = false;
-          
-              for (var i in widget.datesWithTasks.values) {
-                if (currentIndexDay.toString().contains(i["due_date"])) {
-                  dateHasTasks = true;
-                }
-              }
-              
-              changeDate(currentIndexDay);
-              
-              // TODO: create an function or class for this.
-              // check out the "timeline_widget.dart" file for how its done.
-              return InkWell(
-                onTap: () {
-                  setState(() {
-                    focusedDate = currentIndexDay;
-                    widget.onDateChange.call(focusedDate);
-                  });
-                },
-                child: Container(
-                  width: 68.0,
-                  margin: const EdgeInsets.all(8.0),
-                  padding: dateHasTasks ? 
-                  const EdgeInsets.fromLTRB(8, 8, 8, 0) : 
-                  const  EdgeInsets.fromLTRB(8, 8, 8, 9),
-                  decoration: BoxDecoration(
-                    border: Border.all(
-                      color: widget.focusDate.day.compareTo(currentIndexDay.day) == 0 
-                      && !isSelected 
-                      ? Colors.black 
-                      : Colors.black.withOpacity(0.1),
-                      width: 1,
-                    ),
-                    color: isSelected ? Colors.deepPurple : null,
-                    borderRadius: BorderRadius.circular(16.0),
-                  ),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(
-                        monthName,
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: isSelected ? Colors.white : const Color(0xff6D5D6E),
-                        ),
-                      ),
-                      const SizedBox(
-                        width: 8.0,
-                      ),
-                      Text(
-                        dateNumber,
-                        style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                          color: isSelected ? Colors.white : const Color(0xff393646),
-                        ),
-                      ),
-                      const SizedBox(
-                        width: 8.0,
-                      ),
-                      Text(
-                        shortDay,
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: isSelected ? Colors.white : const Color(0xff6D5D6E),
-                        ),
-                      ),
-                      if (dateHasTasks) const Icon(
-                        Icons.circle,
-                        size: 10,
-                        color: Colors.green,
-                      ),
-                    ],
-                  ),
-                ),
-              );
-            },
-          ),
+        MonthView(
+          dateNow: focusedDate,
+          days: DateTime(focusedDate.year, focusedDate.month + 1, 0).day,
+          // days: daysBetween(firstDate, lastDate),
+          changeDate: changeDate,
+          datesWithTasks: widget.datesWithTasks,
+          onDateChange: (value) {
+            widget.onDateChange.call(value);
+          },
         ),
       ],
     );
+  }
+}
+
+class MonthView extends StatefulWidget{
+  const MonthView({
+    super.key,
+    required this.days,
+    required this.dateNow,
+    required this.changeDate,
+    required this.onDateChange,
+    required this.datesWithTasks,
+  });
+
+
+  final Function(DateTime) onDateChange;
+  final Map datesWithTasks;
+  final int days;
+  final DateTime dateNow;
+  final Function changeDate;
+
+  @override
+  State<MonthView> createState() => _MonthViewState();
+}
+
+class _MonthViewState extends State<MonthView> {
+  //* 30 days showing
+  late DateTime now = widget.dateNow;
+  late DateTime firstDate =  now.subtract(Duration(days: now.day - 1));
+  late Map<String, String> formattedDates;
+
+  late bool dateHasTasks;
+  bool isSelected = false;
+  
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      height: 140,
+      child: ListView.builder(
+        scrollDirection: Axis.horizontal,
+        itemCount: widget.days,
+        itemBuilder: (context, index) {
+          DateTime currentIndexDay = firstDate.add(Duration(days: index));
+          
+          isSelected = now.day.compareTo(currentIndexDay.day) == 0;
+          dateHasTasks = widget.datesWithTasks.containsKey(currentIndexDay);
+
+          formattedDates = CalendarDateFormatter.parseAll(currentIndexDay);
+          
+          // TODO: create an function or class for this.
+          // check out the "timeline_widget.dart" file for how its done.
+          return InkWell(
+            onTap: () {
+              setState(() {
+                now = currentIndexDay;
+                widget.onDateChange.call(now);
+              });
+            },
+            child: Container(
+              width: 68.0,
+              margin: const EdgeInsets.all(8.0),
+              padding: dateHasTasks ? 
+              const EdgeInsets.fromLTRB(8, 8, 8, 0) : 
+              const  EdgeInsets.fromLTRB(8, 8, 8, 9),
+              decoration: BoxDecoration(
+                border: Border.all(
+                  color: widget.dateNow.day.compareTo(currentIndexDay.day) == 0 
+                  && !isSelected 
+                  ? Colors.black 
+                  : Colors.black.withOpacity(0.1),
+                  width: 1,
+                ),
+                color: isSelected ? Colors.deepPurple : null,
+                borderRadius: BorderRadius.circular(16.0),
+              ),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    formattedDates["monthName"]!,
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: isSelected ? Colors.white : const Color(0xff6D5D6E),
+                    ),
+                  ),
+                  const SizedBox(
+                    width: 8.0,
+                  ),
+                  Text(
+                    "${currentIndexDay.day}",
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                      color: isSelected ? Colors.white : const Color(0xff393646),
+                    ),
+                  ),
+                  const SizedBox(
+                    width: 8.0,
+                  ),
+                  Text(
+                    formattedDates["shortDay"]!,
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: isSelected ? Colors.white : const Color(0xff6D5D6E),
+                    ),
+                  ),
+                  if (dateHasTasks) const Icon(
+                    Icons.circle,
+                    size: 10,
+                    color: Colors.green,
+                  ),
+                ],
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
+}
+
+class WeekDaysView extends StatelessWidget {
+  const WeekDaysView({
+    super.key,
+  });
+
+  //* 7 days(weekdays) showing
+  // firstDate: now.subtract(Duration(days: now.weekday - 1)),
+  // lastDate: firstDate.add(Duration(days: 6)),
+
+  @override
+  Widget build(BuildContext context) {
+    return const Placeholder();
   }
 }
