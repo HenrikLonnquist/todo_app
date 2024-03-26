@@ -1,13 +1,8 @@
 // ignore_for_file: avoid_print
 
 import "package:dropdown_button2/dropdown_button2.dart";
-import "package:easy_date_timeline/easy_date_timeline.dart";
-import "package:flutter/cupertino.dart";
 import "package:flutter/material.dart";
-import "package:flutter/widgets.dart";
-import "package:intl/intl.dart";
 import "package:todo_app/components/card_field.dart";
-import "package:todo_app/components/navigation_panel.dart";
 import "package:todo_app/components/right_sidepanel.dart";
 import "package:todo_app/components/task_list.dart";
 import "package:todo_app/utils/data_utils.dart";
@@ -114,7 +109,6 @@ class _SchedulePageState extends State<SchedulePage> {
                         datesWithTasks: tasksWithDueDate,
                         onDateChange: (value) {
                           setState(() {
-                            print("calendar call: $value");
                             matchTaskWithSelectedDate = value;
                           });
                         },
@@ -268,7 +262,6 @@ class _CalendarState extends State<Calendar> {
 
   @override
   Widget build(BuildContext context) {
-
     return Column(
       children: [
         Row(
@@ -305,13 +298,7 @@ class _CalendarState extends State<Calendar> {
             ElevatedButton(
               onPressed: () {
                 setState(() {
-                  print("Today button: $focusedDate ${widget.focusDate}");
-                  
                   focusedDate = DateTime(widget.focusDate.year, widget.focusDate.month, widget.focusDate.day);
-                  
-
-                  // widget.onDateChange.call(focusedDate);
-
                 });
               },
               child: const Text(
@@ -319,30 +306,28 @@ class _CalendarState extends State<Calendar> {
               )
             ),
             const SizedBox(width: 10),
-            // DropdownButton2(
-            //   value: selectedValue,
-            //   items: monthMap.keys.map((value) {
-            //     return DropdownMenuItem(
-            //       value: value,
-            //       child: Text(value),
-            //     );
-            //   }).toList(),
-            //   onChanged: (value) {
-            //     setState(() {
-            //       selectedValue = value;
+            DropdownButton2(
+              value: selectedValue,
+              items: monthMap.keys.map((value) {
+                return DropdownMenuItem(
+                  value: value,
+                  child: Text(value),
+                );
+              }).toList(),
+              onChanged: (value) {
+                setState(() {
+                  selectedValue = value;
 
-            //       int month = monthMap[value]!;
+                  int month = monthMap[value]!;
                   
-            //       firstDate = DateTime(firstDate.year, month, firstDate.day);
-            //       lastDate = DateTime(lastDate.year, month + 1, lastDate.day);
-            //       focusedDate = DateTime(focusedDate.year, month, focusedDate.day);
+                  focusedDate = DateTime(focusedDate.year, month, focusedDate.day);
 
-            //       // widget.onDateChange.call(focusedDate);
+                  // widget.onDateChange.call(focusedDate);
 
-            //     });
-            //   },
+                });
+              },
               
-            // ),
+            ),
             
           ],
         ),
@@ -387,7 +372,7 @@ class MonthView extends StatefulWidget{
 class _MonthViewState extends State<MonthView> {
   //* 30 days showing
   late DateTime now;
-  late DateTime firstDate =  now.subtract(Duration(days: now.day - 1));
+  late DateTime firstDate;
   late Map<String, String> formattedDates;
 
   late bool dateHasTasks;
@@ -396,7 +381,8 @@ class _MonthViewState extends State<MonthView> {
   @override
   Widget build(BuildContext context) {
     now = widget.dateNow;
-    // print("Listview $now ${widget.dateNow}");
+    firstDate = now.subtract(Duration(days: now.day - 1));
+    // print("listview: $now ${widget.dateNow}");
     return SizedBox(
       height: 140,
       child: ListView.builder(
@@ -407,8 +393,6 @@ class _MonthViewState extends State<MonthView> {
           
           isSelected = now.day.compareTo(currentIndexDay.day) == 0;
           dateHasTasks = widget.datesWithTasks.containsKey(currentIndexDay);
-
-          // if (currentIndexDay)
 
           formattedDates = CalendarDateFormatter.parseAll(currentIndexDay);
           
