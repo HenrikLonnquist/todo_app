@@ -108,14 +108,13 @@ class _SchedulePageState extends State<SchedulePage> {
                         //* 5 days(workdays) showing
                         // firstDate: now.subtract(Duration(days: now.weekday - 1)),
                         // lastDate: now.add(Duration(days: 5 - now.weekday + 1)),
-                        
-
-                        focusDate: matchTaskWithSelectedDate,
+                        //! TODO: rename property - initial date?
+                        focusDate: DateTime(now.year, now.month, now.day),
                         // viewState: workdays, weekdays, monthly,
                         datesWithTasks: tasksWithDueDate,
                         onDateChange: (value) {
                           setState(() {
-                            print(value);
+                            print("calendar call: $value");
                             matchTaskWithSelectedDate = value;
                           });
                         },
@@ -138,7 +137,7 @@ class _SchedulePageState extends State<SchedulePage> {
                                     return;
                                   }
                                   pressedTask = task;
-                                  // TODO: for now have toggle, maybe change to a button later
+                                
                                   isRightPanelOpen = !isRightPanelOpen;
                                 });
                               },
@@ -303,22 +302,23 @@ class _CalendarState extends State<Calendar> {
               },
             ),
             const Spacer(flex: 2,),
-            // ElevatedButton(
-            //   onPressed: () {
-            //     setState(() {
-            //       firstDate = DateTime(widget.firstDate.year, widget.firstDate.month, widget.firstDate.day);
-            //       lastDate = DateTime(widget.lastDate.year, widget.lastDate.month, widget.lastDate.day);
-            //       focusedDate = DateTime(widget.focusDate.year, widget.focusDate.month, widget.focusDate.day);
+            ElevatedButton(
+              onPressed: () {
+                setState(() {
+                  print("Today button: $focusedDate ${widget.focusDate}");
+                  
+                  focusedDate = DateTime(widget.focusDate.year, widget.focusDate.month, widget.focusDate.day);
+                  
 
-            //       // widget.onDateChange.call(focusedDate);                 
+                  // widget.onDateChange.call(focusedDate);
 
-            //     });
-            //   },
-            //   child: const Text(
-            //     "Today",
-            //   )
-            // ),
-            // const SizedBox(width: 10),
+                });
+              },
+              child: const Text(
+                "Today",
+              )
+            ),
+            const SizedBox(width: 10),
             // DropdownButton2(
             //   value: selectedValue,
             //   items: monthMap.keys.map((value) {
@@ -349,11 +349,13 @@ class _CalendarState extends State<Calendar> {
         MonthView(
           dateNow: focusedDate,
           days: DateTime(focusedDate.year, focusedDate.month + 1, 0).day,
-          // days: daysBetween(firstDate, lastDate),
           changeDate: changeDate,
           datesWithTasks: widget.datesWithTasks,
           onDateChange: (value) {
-            widget.onDateChange.call(value);
+            setState(() {
+              focusedDate = value;
+              widget.onDateChange.call(value);
+            });
           },
         ),
       ],
@@ -384,15 +386,17 @@ class MonthView extends StatefulWidget{
 
 class _MonthViewState extends State<MonthView> {
   //* 30 days showing
-  late DateTime now = widget.dateNow;
+  late DateTime now;
   late DateTime firstDate =  now.subtract(Duration(days: now.day - 1));
   late Map<String, String> formattedDates;
 
   late bool dateHasTasks;
-  bool isSelected = false;
+  late bool isSelected;
   
   @override
   Widget build(BuildContext context) {
+    now = widget.dateNow;
+    // print("Listview $now ${widget.dateNow}");
     return SizedBox(
       height: 140,
       child: ListView.builder(
@@ -404,6 +408,8 @@ class _MonthViewState extends State<MonthView> {
           isSelected = now.day.compareTo(currentIndexDay.day) == 0;
           dateHasTasks = widget.datesWithTasks.containsKey(currentIndexDay);
 
+          // if (currentIndexDay)
+
           formattedDates = CalendarDateFormatter.parseAll(currentIndexDay);
           
           // TODO: create an function or class for this.
@@ -411,8 +417,7 @@ class _MonthViewState extends State<MonthView> {
           return InkWell(
             onTap: () {
               setState(() {
-                now = currentIndexDay;
-                widget.onDateChange.call(now);
+                widget.onDateChange.call(currentIndexDay);
               });
             },
             child: Container(
@@ -423,7 +428,7 @@ class _MonthViewState extends State<MonthView> {
               const  EdgeInsets.fromLTRB(8, 8, 8, 9),
               decoration: BoxDecoration(
                 border: Border.all(
-                  color: widget.dateNow.day.compareTo(currentIndexDay.day) == 0 
+                  color: DateTime.now().day.compareTo(currentIndexDay.day) == 0 
                   && !isSelected 
                   ? Colors.black 
                   : Colors.black.withOpacity(0.1),
