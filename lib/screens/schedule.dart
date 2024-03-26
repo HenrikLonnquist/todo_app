@@ -320,7 +320,7 @@ class _CalendarState extends State<Calendar> {
 
                   int month = monthMap[value]!;
                   
-                  focusedDate = DateTime(focusedDate.year, month, focusedDate.day);
+                  focusedDate = DateTime(focusedDate.year, month, 15);
 
                   // widget.onDateChange.call(focusedDate);
 
@@ -373,6 +373,7 @@ class _MonthViewState extends State<MonthView> {
   //* 30 days showing
   late DateTime now;
   late DateTime firstDate;
+  late DateTime imToday = widget.dateNow;
   late Map<String, String> formattedDates;
 
   late bool dateHasTasks;
@@ -412,7 +413,7 @@ class _MonthViewState extends State<MonthView> {
               const  EdgeInsets.fromLTRB(8, 8, 8, 9),
               decoration: BoxDecoration(
                 border: Border.all(
-                  color: DateTime.now().day.compareTo(currentIndexDay.day) == 0 
+                  color: imToday.compareTo(currentIndexDay) == 0 
                   && !isSelected 
                   ? Colors.black 
                   : Colors.black.withOpacity(0.1),
