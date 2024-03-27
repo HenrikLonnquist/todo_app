@@ -27,11 +27,11 @@ class _SchedulePageState extends State<SchedulePage> {
   
   bool isRightPanelOpen = false;
 
-  late int mainTaskIndex;
-
   Map tasksWithDueDate = {};
 
   DateTime now = DateTime.now();
+
+  late var mainTasks = widget.dataList["main_tasks"];
 
   late DateTime matchTaskWithSelectedDate = DateTime(now.year, now.month, now.day);
   
@@ -48,7 +48,7 @@ class _SchedulePageState extends State<SchedulePage> {
       //  && taskCheck.contains(matchTaskWithSelectedDate)
       if (dataTask[i]["due_date"] != "") {
         var parsedDate = DateTime.parse(dataTask[i]["due_date"]);
-        tasksWithDueDate[parsedDate] = dataTask[i];
+        tasksWithDueDate[i] = parsedDate;
       }
     }
 
@@ -96,7 +96,6 @@ class _SchedulePageState extends State<SchedulePage> {
                       // EasyDateTimeLine(
                       //   initialDate: DateTime.now(),
                       //   onDateChange: (value) {
-                      //     print(value);
                       //   },
                       // ),
                       Calendar(
@@ -123,15 +122,15 @@ class _SchedulePageState extends State<SchedulePage> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             for (var task in tasksWithDueDate.keys) 
-                            if (task.compareTo(matchTaskWithSelectedDate) == 0) InkWell(
+                            if (tasksWithDueDate[task].compareTo(matchTaskWithSelectedDate) == 0) InkWell(
                               onTap: () {
                                 setState(() {
-                                  if (isRightPanelOpen && pressedTask != task ) {
+                                  if (isRightPanelOpen && pressedTask != task) {
                                     pressedTask = task;
                                     return;
                                   }
-                                  pressedTask = task;
                                 
+                                  pressedTask = task;
                                   isRightPanelOpen = !isRightPanelOpen;
                                 });
                               },
@@ -139,8 +138,7 @@ class _SchedulePageState extends State<SchedulePage> {
                                 child: Column(
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
-                                    Text("${tasksWithDueDate[task]["name"]}"),
-                                    // Text("${tasksWithDueDate[task]["due_date"]}"),
+                                    Text("${mainTasks[task]["name"]}"),
                                   ],
                                 ),
                               ),
@@ -169,14 +167,14 @@ class _SchedulePageState extends State<SchedulePage> {
         ),
         if (isRightPanelOpen) RightSidePanel(
           child: SubTaskLIst(
-            title: widget.dataList["main_tasks"][pressedTask]["name"],
-            mainTask: widget.dataList["main_tasks"][pressedTask], 
+            title: mainTasks[pressedTask]["name"],
+            mainTask: mainTasks[pressedTask], 
             onChanged: (value) {
               if (value.runtimeType == String) {
                 Map templateSub = {
                   "name": value
                 };
-                widget.dataList["main_tasks"][mainTaskIndex]["sub_tasks"].add(templateSub);
+                mainTasks[pressedTask]["sub_tasks"].add(templateSub);
               }
               setState(() {
                 DataUtils.writeJsonFile(widget.dataList);
@@ -207,20 +205,6 @@ class Calendar extends StatefulWidget {
 
 class _CalendarState extends State<Calendar> {  
   late DateTime focusedDate = widget.focusDate;
-
-  late String shortDay;
-  late String dateNumber;
-  late String monthName;
-
-  bool isSelected = false;
-  bool dateHasTasks = false;
-
-
-  void changeDate(DateTime currentIndexDay) {
-    shortDay = CalendarDateFormatter.shortDay(currentIndexDay);
-    dateNumber = currentIndexDay.day.toString();
-    monthName = CalendarDateFormatter.monthName(currentIndexDay);
-  }
 
   int daysBetween(DateTime from, DateTime to) {
     from = DateTime(from.year, from.month, from.day);
@@ -334,7 +318,6 @@ class _CalendarState extends State<Calendar> {
         MonthView(
           dateNow: focusedDate,
           days: DateTime(focusedDate.year, focusedDate.month + 1, 0).day,
-          changeDate: changeDate,
           datesWithTasks: widget.datesWithTasks,
           onDateChange: (value) {
             setState(() {
@@ -353,7 +336,6 @@ class MonthView extends StatefulWidget{
     super.key,
     required this.days,
     required this.dateNow,
-    required this.changeDate,
     required this.onDateChange,
     required this.datesWithTasks,
   });
@@ -363,7 +345,6 @@ class MonthView extends StatefulWidget{
   final Map datesWithTasks;
   final int days;
   final DateTime dateNow;
-  final Function changeDate;
 
   @override
   State<MonthView> createState() => _MonthViewState();
@@ -383,7 +364,6 @@ class _MonthViewState extends State<MonthView> {
   Widget build(BuildContext context) {
     now = widget.dateNow;
     firstDate = now.subtract(Duration(days: now.day - 1));
-    // print("listview: $now ${widget.dateNow}");
     return SizedBox(
       height: 140,
       child: ListView.builder(
@@ -393,7 +373,7 @@ class _MonthViewState extends State<MonthView> {
           DateTime currentIndexDay = firstDate.add(Duration(days: index));
           
           isSelected = now.day.compareTo(currentIndexDay.day) == 0;
-          dateHasTasks = widget.datesWithTasks.containsKey(currentIndexDay);
+          dateHasTasks = widget.datesWithTasks.containsValue(currentIndexDay);
 
           formattedDates = CalendarDateFormatter.parseAll(currentIndexDay);
           
