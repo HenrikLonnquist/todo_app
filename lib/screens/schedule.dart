@@ -116,6 +116,7 @@ class _SchedulePageState extends State<SchedulePage> {
                       const Divider(
                         thickness: 1,
                       ),
+                      // TODO: i should integrated this to calendar later on.
                       Expanded(
                         flex: 4,
                         child: Row(
@@ -283,6 +284,9 @@ class _CalendarState extends State<Calendar> {
               onPressed: () {
                 setState(() {
                   focusedDate = DateTime(widget.focusDate.year, widget.focusDate.month, widget.focusDate.day);
+                  
+                  // if there is tasks showing
+                  widget.onDateChange(focusedDate);
                 });
               },
               child: const Text(
