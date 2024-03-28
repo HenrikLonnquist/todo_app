@@ -204,6 +204,9 @@ class Calendar extends StatefulWidget {
   State<Calendar> createState() => _CalendarState();
 }
 
+
+enum CalendarView {workdays, weekdays, month, year}
+
 class _CalendarState extends State<Calendar> {  
   late DateTime focusedDate = widget.focusDate;
 
@@ -227,19 +230,21 @@ class _CalendarState extends State<Calendar> {
     "Nov": 11,
     "Dec": 12,
   };
+  
+  Map<String, int> weekDaysMap = {
+    "Mon": 1,
+    "Tue": 2,
+    "Wed": 3,
+    "Thu": 4,
+    "Fri": 5,
+    "Sat": 6,
+    "Sun": 7,
+  };
 
   late String? selectedValue = monthMap.keys.toList()[widget.focusDate.month - 1];
 
-  late Map<String, Widget> viewState = {
-    "Month": const Placeholder(),//*Current listview. builder
-    // "Month": MonthView()//*Current listview. builder
-    "7-day": const Placeholder(),
-    // "7-day": WeekDaysView(),
-    "Workdays": const Placeholder(),
-    // "Workdays": WorkDaysView(),
-  };
-
-  late String selectedViewState = viewState.keys.toList()[0];
+  CalendarView selectedViewState = CalendarView.month;
+  late CalendarView prevSelectedViewState = CalendarView.month;
 
 
   
@@ -247,6 +252,33 @@ class _CalendarState extends State<Calendar> {
 
   @override
   Widget build(BuildContext context) {
+    
+    Map<CalendarView, Widget> viewState = {
+      CalendarView.workdays: const Placeholder(),
+      CalendarView.weekdays: const Placeholder(),
+      CalendarView.month: MonthView(
+            // dateNow: prevSelectedViewState == selectedViewState 
+            // // && focusedDate != 
+            // ? focusedDate 
+            // : widget.focusDate,
+            dateNow: focusedDate,
+            today: widget.focusDate,
+            days: DateTime(focusedDate.year, focusedDate.month + 1, 0).day,
+            datesWithTasks: widget.datesWithTasks,
+            onDateChange: (value) {
+              setState(() {
+                focusedDate = value;
+                widget.onDateChange.call(value);
+              });
+            },
+          ),
+      // "7-day": WeekDaysView(),
+      // "Workdays": WorkDaysView(),
+    };
+    if (selectedViewState != prevSelectedViewState) {
+      prevSelectedViewState = selectedViewState;
+    }
+
     return Column(
       children: [
         Row(
@@ -262,22 +294,34 @@ class _CalendarState extends State<Calendar> {
               ),
             ),
             const Spacer(flex: 2),
-            DropdownButton2(
-                // change to 5,7 or 30 day calendar
-              value: selectedViewState,
-              items: viewState.keys.map((value) {
-                return DropdownMenuItem(
-                  value: value,
-                  child: Text(value)
-                  );
-              }).toList(),
-              onChanged: (value) {
-
+            SegmentedButton(
+              showSelectedIcon: false,
+              selected: {selectedViewState},
+              onSelectionChanged: (value) {
                 setState(() {
-                  selectedViewState = value!;
+                  selectedViewState = value.first;
                 });
-
               },
+              segments: const [
+                ButtonSegment(
+                  value: CalendarView.workdays,
+                  label: Text("Workdays"),
+                  // enabled: selectedViewState != CalendarView.workdays 
+                  // icon:
+                ),
+                ButtonSegment(
+                  value: CalendarView.weekdays,
+                  label: Text("Weekdays"),
+                  // enabled: selectedViewState != CalendarView.weekdays 
+                  // icon:
+                ),
+                ButtonSegment(
+                  value: CalendarView.month,
+                  label: Text("Month"),
+                  // enabled: selectedViewState != CalendarView.month 
+                  // icon:
+                )
+              ],
             ),
             const Spacer(flex: 2,),
             ElevatedButton(
@@ -310,7 +354,7 @@ class _CalendarState extends State<Calendar> {
                   
                   focusedDate = DateTime(focusedDate.year, month, 15);
 
-                  // widget.onDateChange.call(focusedDate);
+                  widget.onDateChange.call(focusedDate);
 
                 });
               },
@@ -319,17 +363,7 @@ class _CalendarState extends State<Calendar> {
             
           ],
         ),
-        MonthView(
-          dateNow: focusedDate,
-          days: DateTime(focusedDate.year, focusedDate.month + 1, 0).day,
-          datesWithTasks: widget.datesWithTasks,
-          onDateChange: (value) {
-            setState(() {
-              focusedDate = value;
-              widget.onDateChange.call(value);
-            });
-          },
-        ),
+        viewState[selectedViewState]!
       ],
     );
   }
@@ -340,6 +374,7 @@ class MonthView extends StatefulWidget{
     super.key,
     required this.days,
     required this.dateNow,
+    required this.today,
     required this.onDateChange,
     required this.datesWithTasks,
   });
@@ -348,7 +383,7 @@ class MonthView extends StatefulWidget{
   final Function(DateTime) onDateChange;
   final Map datesWithTasks;
   final int days;
-  final DateTime dateNow;
+  final DateTime dateNow, today;
 
   @override
   State<MonthView> createState() => _MonthViewState();
@@ -358,7 +393,7 @@ class _MonthViewState extends State<MonthView> {
   //* 30 days showing
   late DateTime now;
   late DateTime firstDate;
-  late DateTime imToday = widget.dateNow;
+  late DateTime imToday = widget.today;
   late Map<String, String> formattedDates;
 
   late bool dateHasTasks;
