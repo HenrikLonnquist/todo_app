@@ -1,6 +1,8 @@
 // ignore_for_file: avoid_print
 
+
 import "package:dropdown_button2/dropdown_button2.dart";
+import "package:flutter/cupertino.dart";
 import "package:flutter/material.dart";
 import "package:todo_app/components/card_field.dart";
 import "package:todo_app/components/right_sidepanel.dart";
@@ -11,11 +13,8 @@ import "package:todo_app/utils/date_formatter.dart";
 class SchedulePage extends StatefulWidget {
   const SchedulePage({
     super.key,
-    // required this.title,
     required this.dataList,
   });
-
-  // final String title;
 
   final Map dataList;
 
@@ -27,30 +26,21 @@ class _SchedulePageState extends State<SchedulePage> {
   
   bool isRightPanelOpen = false;
 
-  Map tasksWithDueDate = {};
+  
 
   DateTime now = DateTime.now();
 
-  late var mainTasks = widget.dataList["main_tasks"];
-
-  late DateTime matchTaskWithSelectedDate = DateTime(now.year, now.month, now.day);
+  late DateTime selectedDate = DateTime(now.year, now.month, now.day);
   
   late int pressedTask;
 
+  late List dataList = widget.dataList["main_tasks"];
 
 
   @override
   Widget build(BuildContext context) {
-    tasksWithDueDate.clear();
-    var dataTask = widget.dataList["main_tasks"];
-    for (var i = 0; i < dataTask.length; i++) {
-      // var taskCheck = dataTask[i].toString();
-      //  && taskCheck.contains(matchTaskWithSelectedDate)
-      if (dataTask[i]["due_date"] != "") {
-        var parsedDate = DateTime.parse(dataTask[i]["due_date"]);
-        tasksWithDueDate[i] = parsedDate;
-      }
-    }
+
+    
 
     return Row(
       children: [
@@ -87,6 +77,10 @@ class _SchedulePageState extends State<SchedulePage> {
                   padding: const EdgeInsets.all(8.0),
                   decoration: BoxDecoration(
                     color: Colors.white,
+                    border: Border.all(
+                      color: Colors.black,
+                      width: 1,
+                    ),
                     borderRadius: BorderRadius.circular(10),
                   ),
                   child: Column(
@@ -104,54 +98,28 @@ class _SchedulePageState extends State<SchedulePage> {
                         // lastDate: now.add(Duration(days: 5 - now.weekday + 1)),
                         //! TODO: rename property - initial date?
                         focusDate: DateTime(now.year, now.month, now.day),
-                        // viewState: workdays, weekdays, monthly,
-                        datesWithTasks: tasksWithDueDate,
-                        onDateChange: (value) {
+                        dataList: dataList,
+                        onPressedTask: (value) {
                           setState(() {
-                            matchTaskWithSelectedDate = value;
+                            if (isRightPanelOpen && pressedTask != value) {
+                              pressedTask = value;
+                              return;
+                            }
+                            pressedTask = value;
+                            isRightPanelOpen = !isRightPanelOpen;
                           });
                         },
-                      ),
-                      // TODO: switch to a gridview.builder?
-                      const Divider(
-                        thickness: 1,
-                      ),
-                      // TODO: i should integrated this to calendar later on.
-                      Expanded(
-                        flex: 4,
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            for (var task in tasksWithDueDate.keys) 
-                            if (tasksWithDueDate[task].compareTo(matchTaskWithSelectedDate) == 0) InkWell(
-                              onTap: () {
-                                setState(() {
-                                  if (isRightPanelOpen && pressedTask != task) {
-                                    pressedTask = task;
-                                    return;
-                                  }
-                                
-                                  pressedTask = task;
-                                  isRightPanelOpen = !isRightPanelOpen;
-                                });
-                              },
-                              child: Card(
-                                child: Column(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Text("${mainTasks[task]["name"]}"),
-                                  ],
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
+                        onDateChange: (value) {
+                          setState(() {
+                            selectedDate = value;
+                          });
+                        },
                       ),
                       CardField(
                         onSubmitted: (value) {
                           var template = DataUtils.dataTemplate(
                             name: value,
-                            dueDate: matchTaskWithSelectedDate.toString()
+                            dueDate: selectedDate.toString()
                           );
                           widget.dataList["main_tasks"].add(template);
                           setState(() {
@@ -168,14 +136,14 @@ class _SchedulePageState extends State<SchedulePage> {
         ),
         if (isRightPanelOpen) RightSidePanel(
           child: SubTaskLIst(
-            title: mainTasks[pressedTask]["name"],
-            mainTask: mainTasks[pressedTask], 
+            title: dataList[pressedTask]["name"],
+            mainTask: dataList[pressedTask], 
             onChanged: (value) {
               if (value.runtimeType == String) {
                 Map templateSub = {
                   "name": value
                 };
-                mainTasks[pressedTask]["sub_tasks"].add(templateSub);
+                dataList[pressedTask]["sub_tasks"].add(templateSub);
               }
               setState(() {
                 DataUtils.writeJsonFile(widget.dataList);
@@ -192,12 +160,16 @@ class Calendar extends StatefulWidget {
   const Calendar({
     super.key,
     required this.focusDate,
-    required this.onDateChange, 
-    this.datesWithTasks = const {},
+    required this.onDateChange,
+    this.onPressedTask,
+    required this.dataList ,
+    this.child,
   });
 
+  final Widget? child;
+  final Function(int)? onPressedTask;
   final DateTime focusDate;
-  final Map datesWithTasks;
+  final List dataList;
   final Function(DateTime) onDateChange;
 
   @override
@@ -205,10 +177,11 @@ class Calendar extends StatefulWidget {
 }
 
 
-enum CalendarView {workdays, weekdays, month, year}
+enum CalendarViewState {workdays, weekdays, month}
 
 class _CalendarState extends State<Calendar> {  
   late DateTime focusedDate = widget.focusDate;
+  late List dataTasks = widget.dataList;
 
   int daysBetween(DateTime from, DateTime to) {
     from = DateTime(from.year, from.month, from.day);
@@ -231,140 +204,194 @@ class _CalendarState extends State<Calendar> {
     "Dec": 12,
   };
   
-  Map<String, int> weekDaysMap = {
-    "Mon": 1,
-    "Tue": 2,
-    "Wed": 3,
-    "Thu": 4,
-    "Fri": 5,
-    "Sat": 6,
-    "Sun": 7,
-  };
+  List weekDaysMap = [
+    "Mon",
+    "Tue",
+    "Wed",
+    "Thu",
+    "Fri",
+    "Sat",
+    "Sun",
+  ];
 
-  late String? selectedValue = monthMap.keys.toList()[widget.focusDate.month - 1];
+  late int? selectedValue = widget.focusDate.month - 1;
 
-  CalendarView selectedViewState = CalendarView.month;
-  late CalendarView prevSelectedViewState = CalendarView.month;
+  CalendarViewState selectedViewState = CalendarViewState.weekdays;
 
+  Map tasksWithDueDate = {};
 
-  
-
+  void onDateChange(DateTime value){
+    setState(() {
+      focusedDate = value;
+      widget.onDateChange.call(value);
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
-    
-    Map<CalendarView, Widget> viewState = {
-      CalendarView.workdays: const Placeholder(),
-      CalendarView.weekdays: const Placeholder(),
-      CalendarView.month: MonthView(
-            // dateNow: prevSelectedViewState == selectedViewState 
-            // // && focusedDate != 
-            // ? focusedDate 
-            // : widget.focusDate,
-            dateNow: focusedDate,
-            today: widget.focusDate,
-            days: DateTime(focusedDate.year, focusedDate.month + 1, 0).day,
-            datesWithTasks: widget.datesWithTasks,
-            onDateChange: (value) {
-              setState(() {
-                focusedDate = value;
-                widget.onDateChange.call(value);
-              });
-            },
-          ),
+    tasksWithDueDate.clear();
+    for (var i = 0; i < dataTasks.length; i++) {
+      if (dataTasks[i]["due_date"] != "") {
+        var parsedDate = DateTime.parse(dataTasks[i]["due_date"]);
+        tasksWithDueDate[i] = parsedDate;
+      }
+    }
+    print("calendar: $selectedViewState");
+    Map<CalendarViewState, Widget> viewState = {
+      CalendarViewState.workdays: const Placeholder(),
+      // CalendarViewState.weekdays: WeekDaysView(),
+      CalendarViewState.weekdays: MonthView(
+        viewState: CalendarViewState.weekdays,
+        dateNow: focusedDate,
+        today: widget.focusDate,
+        days: 7,
+        datesWithTasks: tasksWithDueDate,
+        onDateChange: onDateChange,
+        child: Column(
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: [
+                for(var i = 0; i < weekDaysMap.length; i++) Column(
+                  children: [
+                    Text(
+                      '${weekDaysMap[i]}',
+                      style: const TextStyle(
+                        fontSize: 20,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            )
+          ],
+        )
+      ),
+      CalendarViewState.month: MonthView(
+        viewState: CalendarViewState.month,
+        dateNow: focusedDate,
+        today: widget.focusDate,
+        days: DateTime(focusedDate.year, focusedDate.month + 1, 0).day,
+        datesWithTasks: tasksWithDueDate,
+        onDateChange: onDateChange,
+      ),
       // "7-day": WeekDaysView(),
       // "Workdays": WorkDaysView(),
     };
-    if (selectedViewState != prevSelectedViewState) {
-      prevSelectedViewState = selectedViewState;
-    }
 
-    return Column(
-      children: [
-        Row(
-          children: [
-            Padding(
-              padding: const EdgeInsets.only(left: 12.0),
-              child: Text(
-                CalendarDateFormatter.dayName(focusedDate),
-                style: const TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
+    return Expanded(
+      child: Column(
+        children: [
+          Row(
+            children: [
+              Container(
+                width: 120,
+                child: Padding(
+                  padding: const EdgeInsets.only(left: 12.0),
+                  child: Text(
+                    CalendarDateFormatter.dayName(focusedDate),
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
                 ),
               ),
-            ),
-            const Spacer(flex: 2),
-            SegmentedButton(
-              showSelectedIcon: false,
-              selected: {selectedViewState},
-              onSelectionChanged: (value) {
-                setState(() {
-                  selectedViewState = value.first;
-                });
-              },
-              segments: const [
-                ButtonSegment(
-                  value: CalendarView.workdays,
-                  label: Text("Workdays"),
-                  // enabled: selectedViewState != CalendarView.workdays 
-                  // icon:
-                ),
-                ButtonSegment(
-                  value: CalendarView.weekdays,
-                  label: Text("Weekdays"),
-                  // enabled: selectedViewState != CalendarView.weekdays 
-                  // icon:
-                ),
-                ButtonSegment(
-                  value: CalendarView.month,
-                  label: Text("Month"),
-                  // enabled: selectedViewState != CalendarView.month 
-                  // icon:
+              const Spacer(flex: 2),
+              SegmentedButton(
+                showSelectedIcon: false,
+                selected: {selectedViewState},
+                onSelectionChanged: (value) {
+                  setState(() {
+                    selectedViewState = value.first;
+                  });
+                },
+                segments: const [
+                  ButtonSegment(
+                    value: CalendarViewState.workdays,
+                    label: Text("Workdays"),
+                    // enabled: selectedViewState != CalendarViewState.workdays 
+                    // icon:
+                  ),
+                  ButtonSegment(
+                    value: CalendarViewState.weekdays,
+                    label: Text("Weekdays"),
+                    // enabled: selectedViewState != CalendarViewState.weekdays 
+                    // icon:
+                  ),
+                  ButtonSegment(
+                    value: CalendarViewState.month,
+                    label: Text("Month"),
+                    // enabled: selectedViewState != CalendarViewState.month 
+                    // icon:
+                  )
+                ],
+              ),
+              const Spacer(flex: 2,),
+              ElevatedButton(
+                onPressed: () {
+                  setState(() {
+                    focusedDate = DateTime(widget.focusDate.year, widget.focusDate.month, widget.focusDate.day);
+                    selectedValue = focusedDate.month;
+                    // if there is tasks showing
+                    widget.onDateChange(focusedDate);
+                  });
+                },
+                child: const Text(
+                  "Today",
                 )
-              ],
-            ),
-            const Spacer(flex: 2,),
-            ElevatedButton(
-              onPressed: () {
-                setState(() {
-                  focusedDate = DateTime(widget.focusDate.year, widget.focusDate.month, widget.focusDate.day);
-                  
-                  // if there is tasks showing
-                  widget.onDateChange(focusedDate);
-                });
-              },
-              child: const Text(
-                "Today",
-              )
-            ),
-            const SizedBox(width: 10),
-            DropdownButton2(
-              value: selectedValue,
-              items: monthMap.keys.map((value) {
-                return DropdownMenuItem(
-                  value: value,
-                  child: Text(value),
-                );
-              }).toList(),
-              onChanged: (value) {
-                setState(() {
-                  selectedValue = value;
-
-                  int month = monthMap[value]!;
-                  
-                  focusedDate = DateTime(focusedDate.year, month, 15);
-
-                  widget.onDateChange.call(focusedDate);
-
-                });
-              },
+              ),
+              const SizedBox(width: 10),
+              DropdownButton2(
+                value: monthMap.keys.toList()[selectedValue! - 1],
+                items: monthMap.keys.map((value) {
+                  return DropdownMenuItem(
+                    value: value,
+                    child: Text(value),
+                  );
+                }).toList(),
+                onChanged: (value) {
+                  setState(() {
+                    selectedValue = monthMap[value]!;
+      
+                    focusedDate = DateTime(focusedDate.year, selectedValue!, 15);
+      
+                    widget.onDateChange.call(focusedDate);
+      
+                  });
+                },
+                
+              ),
               
-            ),
-            
-          ],
-        ),
-        viewState[selectedViewState]!
-      ],
+            ],
+          ),
+          const Divider(
+            thickness: 1,
+          ),
+          viewState[selectedViewState]!,
+          //! Remove the if condition? or change it to something else for
+          //! the other view states. 
+          /**
+           * Weekdays and workdays, need a verical view of tasks.
+           */
+          if (selectedViewState == CalendarViewState.month)
+          Row(
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: [
+              for(var task in tasksWithDueDate.keys) 
+              if (tasksWithDueDate[task].compareTo(focusedDate) == 0) InkWell(
+                onTap: () {
+                  widget.onPressedTask!.call(task);
+                },
+                child: Card(
+                  child: Text("${dataTasks[task]["name"]}"),
+                ),
+              )
+            ],
+          )
+          
+        ],
+      ),
     );
   }
 }
@@ -377,9 +404,14 @@ class MonthView extends StatefulWidget{
     required this.today,
     required this.onDateChange,
     required this.datesWithTasks,
+    required this.viewState,
+    this.child,
+    this.onTap,
   });
 
-
+  final CalendarViewState viewState;
+  final Widget? child;
+  final Function()? onTap;
   final Function(DateTime) onDateChange;
   final Map datesWithTasks;
   final int days;
@@ -392,6 +424,7 @@ class MonthView extends StatefulWidget{
 class _MonthViewState extends State<MonthView> {
   //* 30 days showing
   late DateTime now;
+  late CalendarViewState viewState;
   late DateTime firstDate;
   late DateTime imToday = widget.today;
   late Map<String, String> formattedDates;
@@ -402,8 +435,17 @@ class _MonthViewState extends State<MonthView> {
   @override
   Widget build(BuildContext context) {
     now = widget.dateNow;
-    firstDate = now.subtract(Duration(days: now.day - 1));
-    return SizedBox(
+    viewState = widget.viewState;
+    switch (viewState) {
+      case CalendarViewState.month:
+        firstDate = now.subtract(Duration(days: now.day - 1));
+        break;
+      case CalendarViewState.weekdays:
+      case CalendarViewState.workdays:
+        firstDate = now.subtract(Duration(days: now.weekday - 1));
+        break;
+    }
+    return widget.child ?? SizedBox(
       height: 140,
       child: ListView.builder(
         scrollDirection: Axis.horizontal,
@@ -411,9 +453,10 @@ class _MonthViewState extends State<MonthView> {
         itemBuilder: (context, index) {
           DateTime currentIndexDay = firstDate.add(Duration(days: index));
           
+          
           isSelected = now.day.compareTo(currentIndexDay.day) == 0;
           dateHasTasks = widget.datesWithTasks.containsValue(currentIndexDay);
-
+      
           formattedDates = CalendarDateFormatter.parseAll(currentIndexDay);
           
           // TODO: create an function or class for this.
@@ -487,17 +530,40 @@ class _MonthViewState extends State<MonthView> {
   }
 }
 
-class WeekDaysView extends StatelessWidget {
+class WeekDaysView extends StatefulWidget {
   const WeekDaysView({
-    super.key,
+    super.key, 
+    // required this.onDateChange, 
+    // required this.datesWithTasks, 
+    // required this.days, 
+    // required this.dateNow, 
+    // required this.today,
   });
 
+  // final Function(DateTime) onDateChange;
+  // final Map datesWithTasks;
+  // final int days;
+  // final DateTime dateNow, today;
+
+  @override
+  State<WeekDaysView> createState() => _WeekDaysViewState();
+}
+
+class _WeekDaysViewState extends State<WeekDaysView> {
+  // late DateTime now = widget.dateNow;
   //* 7 days(weekdays) showing
   // firstDate: now.subtract(Duration(days: now.weekday - 1)),
   // lastDate: firstDate.add(Duration(days: 6)),
-
   @override
   Widget build(BuildContext context) {
-    return const Placeholder();
+    return Expanded(
+      child: ListView.builder(
+        
+        itemCount: 7,
+        itemBuilder: ((context, index) {
+          
+        })
+      )
+    );
   }
 }
