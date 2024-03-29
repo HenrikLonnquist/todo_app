@@ -218,7 +218,7 @@ class _CalendarState extends State<Calendar> {
 
   late String? selectedValue = monthMap.keys.toList()[widget.focusDate.month - 1];
 
-  CalendarViewState selectedViewState = CalendarViewState.month;
+  CalendarViewState selectedViewState = CalendarViewState.weekdays;
 
   Map tasksWithDueDate = {};
 
@@ -299,7 +299,7 @@ class _CalendarState extends State<Calendar> {
                                   borderRadius: BorderRadius.circular(10),
                                   color: 
                                   weekDaysDates.subtract(Duration(days: weekDaysDates.weekday - 1)).add(Duration(days: i)).day
-                                  == weekDaysDates.day
+                                  == widget.focusDate.day
                                   ? Colors.deepPurple
                                   : null,
                                 ),
@@ -311,7 +311,7 @@ class _CalendarState extends State<Calendar> {
                                     fontSize: 20,
                                     color: 
                                       weekDaysDates.subtract(Duration(days: weekDaysDates.weekday - 1)).add(Duration(days: i)).day
-                                      == weekDaysDates.day
+                                      == widget.focusDate.day
                                       ? Colors.white
                                       : Colors.black,
                                   ),
@@ -399,8 +399,7 @@ class _CalendarState extends State<Calendar> {
         taskArea: Row(
           mainAxisAlignment: MainAxisAlignment.start,
           children: [
-            // Text('${widget.datesWithTasks.keys}')
-            for(var task in tasksWithDueDate.keys) 
+            for(var task in tasksWithDueDate.keys)
             if (tasksWithDueDate[task].compareTo(focusedDate) == 0) InkWell(
               onTap: () {
                 widget.onPressedTask!.call(task);
@@ -416,6 +415,8 @@ class _CalendarState extends State<Calendar> {
       // "Workdays": WorkDaysView(),
     };
 
+
+
     return Expanded(
       child: Column(
         children: [
@@ -428,7 +429,7 @@ class _CalendarState extends State<Calendar> {
                   child: Text(
                     selectedViewState == CalendarViewState.month
                     ? CalendarDateFormatter.dayName(focusedDate)
-                    :CalendarDateFormatter.monthName(focusedDate),
+                    :CalendarDateFormatter.monthName(weekDaysDates),
 
                     style: TextStyle(
                       fontSize: 
@@ -475,7 +476,7 @@ class _CalendarState extends State<Calendar> {
                 onPressed: () {
                   setState(() {
                     focusedDate = DateTime(widget.focusDate.year, widget.focusDate.month, widget.focusDate.day);
-                    // selectedValue = focusedDate.month;
+                    weekDaysDates = focusedDate;
                     // if there is tasks showing
                     widget.onDateChange(focusedDate);
                   });
@@ -485,7 +486,9 @@ class _CalendarState extends State<Calendar> {
                 )
               ),
               const SizedBox(width: 10),
-              DropdownButton2(
+              // CalendarViewState.month == CalendarViewState.month 
+              selectedViewState == CalendarViewState.month 
+              ? DropdownButton2(
                 value: monthMap.keys.toList()[focusedDate.month - 1],
                 items: monthMap.keys.map((value) {
                   return DropdownMenuItem(
@@ -511,6 +514,35 @@ class _CalendarState extends State<Calendar> {
                   });
                 },
                 
+              )
+              : Padding(
+                padding: const EdgeInsets.all(4.0),
+                child: Row(
+                  children: [
+                    IconButton(
+                      onPressed: () {
+                        setState(() {
+                          weekDaysDates = weekDaysDates.subtract(Duration(days: weekDaysDates.weekday - 1 + 7));
+                        });
+                      }, 
+                      icon: const Icon(
+                        Icons.arrow_back_ios_rounded,
+                        size: 18,
+                      )
+                    ),
+                    IconButton(
+                      onPressed: () {
+                        setState(() {
+                          weekDaysDates = weekDaysDates.add(Duration(days: (7 - weekDaysDates.weekday) + 1));
+                        });
+                      }, 
+                      icon: const Icon(
+                        Icons.arrow_forward_ios_rounded,
+                        size: 18,
+                      )
+                    ),
+                  ],
+                ),
               ),
               
             ],
@@ -571,7 +603,6 @@ class _MonthViewState extends State<MonthView> {
   
   @override
   Widget build(BuildContext context) {
-    print(widget.dateNow.day);
     now = widget.dateNow;
     viewState = widget.viewState;
     switch (viewState) {
