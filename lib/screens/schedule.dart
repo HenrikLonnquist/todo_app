@@ -218,7 +218,7 @@ class _CalendarState extends State<Calendar> {
 
   late String? selectedValue = monthMap.keys.toList()[widget.focusDate.month - 1];
 
-  CalendarViewState selectedViewState = CalendarViewState.weekdays;
+  CalendarViewState selectedViewState = CalendarViewState.month;
 
   Map tasksWithDueDate = {};
 
@@ -396,6 +396,21 @@ class _CalendarState extends State<Calendar> {
         days: DateTime(focusedDate.year, focusedDate.month + 1, 0).day,
         datesWithTasks: tasksWithDueDate,
         onDateChange: onDateChange,
+        taskArea: Row(
+          mainAxisAlignment: MainAxisAlignment.start,
+          children: [
+            // Text('${widget.datesWithTasks.keys}')
+            for(var task in tasksWithDueDate.keys) 
+            if (tasksWithDueDate[task].compareTo(focusedDate) == 0) InkWell(
+              onTap: () {
+                widget.onPressedTask!.call(task);
+              },
+              child: Card(
+                child: Text("${dataTasks[task]["name"]}"),
+              ),
+            )
+          ],
+        ),
       ),
       // "7-day": WeekDaysView(),
       // "Workdays": WorkDaysView(),
@@ -506,24 +521,7 @@ class _CalendarState extends State<Calendar> {
           /**
            * Weekdays and workdays, need a verical view of tasks.
            */
-          // if (selectedViewState == CalendarViewState.month)
-          // const Divider(
-          //   thickness: 1,
-          // ),
-          // Row(
-          //   mainAxisAlignment: MainAxisAlignment.start,
-          //   children: [
-          //     for(var task in tasksWithDueDate.keys) 
-          //     if (tasksWithDueDate[task].compareTo(focusedDate) == 0) InkWell(
-          //       onTap: () {
-          //         widget.onPressedTask!.call(task);
-          //       },
-          //       child: Card(
-          //         child: Text("${dataTasks[task]["name"]}"),
-          //       ),
-          //     )
-          //   ],
-          // )
+
           
         ],
       ),
@@ -542,10 +540,13 @@ class MonthView extends StatefulWidget{
     required this.viewState,
     this.child,
     this.onTap,
-  });
+    this.taskArea,
+  }) 
+  : assert( child == null || taskArea == null);
 
   final CalendarViewState viewState;
   final Widget? child;
+  final Widget? taskArea;
   final Function()? onTap;
   final Function(DateTime) onDateChange;
   final Map datesWithTasks;
@@ -563,6 +564,7 @@ class _MonthViewState extends State<MonthView> {
   late DateTime firstDate;
   late DateTime imToday = widget.today;
   late Map<String, String> formattedDates;
+  late Map tasksWithDueDate = widget.datesWithTasks;
 
   late bool dateHasTasks;
   late bool isSelected;
@@ -581,87 +583,96 @@ class _MonthViewState extends State<MonthView> {
         firstDate = now.subtract(Duration(days: now.weekday - 1));
         break;
     }
-    return widget.child ?? SizedBox(
-      height: 140,
-      child: ListView.builder(
-        scrollDirection: Axis.horizontal,
-        itemCount: widget.days,
-        itemBuilder: (context, index) {
-          DateTime currentIndexDay = firstDate.add(Duration(days: index));
+    return widget.child ?? Column(
+      children: [
+        SizedBox(
+          height: 140,
+          child: ListView.builder(
+            scrollDirection: Axis.horizontal,
+            itemCount: widget.days,
+            itemBuilder: (context, index) {
+              DateTime currentIndexDay = firstDate.add(Duration(days: index));
+              
+              
+              isSelected = now.day.compareTo(currentIndexDay.day) == 0;
+              dateHasTasks = widget.datesWithTasks.containsValue(currentIndexDay);
           
-          
-          isSelected = now.day.compareTo(currentIndexDay.day) == 0;
-          dateHasTasks = widget.datesWithTasks.containsValue(currentIndexDay);
-      
-          formattedDates = CalendarDateFormatter.parseAll(currentIndexDay);
-          
-          // TODO: create an function or class for this.
-          // check out the "timeline_widget.dart" file for how its done.
-          return InkWell(
-            onTap: () {
-              setState(() {
-                widget.onDateChange.call(currentIndexDay);
-              });
-            },
-            child: Container(
-              width: 68.0,
-              margin: const EdgeInsets.all(8.0),
-              padding: dateHasTasks ? 
-              const EdgeInsets.fromLTRB(8, 8, 8, 0) : 
-              const  EdgeInsets.fromLTRB(8, 8, 8, 9),
-              decoration: BoxDecoration(
-                border: Border.all(
-                  color: imToday.compareTo(currentIndexDay) == 0 
-                  && !isSelected 
-                  ? Colors.black 
-                  : Colors.black.withOpacity(0.1),
-                  width: 1,
+              formattedDates = CalendarDateFormatter.parseAll(currentIndexDay);
+              
+              // TODO: create an function or class for this.
+              // check out the "timeline_widget.dart" file for how its done.
+              return InkWell(
+                onTap: () {
+                  setState(() {
+                    widget.onDateChange.call(currentIndexDay);
+                  });
+                },
+                child: Container(
+                  width: 68.0,
+                  margin: const EdgeInsets.all(8.0),
+                  padding: dateHasTasks ? 
+                  const EdgeInsets.fromLTRB(8, 8, 8, 0) : 
+                  const  EdgeInsets.fromLTRB(8, 8, 8, 9),
+                  decoration: BoxDecoration(
+                    border: Border.all(
+                      color: imToday.compareTo(currentIndexDay) == 0 
+                      && !isSelected 
+                      ? Colors.black 
+                      : Colors.black.withOpacity(0.1),
+                      width: 1,
+                    ),
+                    color: isSelected ? Colors.deepPurple : null,
+                    borderRadius: BorderRadius.circular(16.0),
+                  ),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        formattedDates["monthName"]!,
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: isSelected ? Colors.white : const Color(0xff6D5D6E),
+                        ),
+                      ),
+                      const SizedBox(
+                        width: 8.0,
+                      ),
+                      Text(
+                        "${currentIndexDay.day}",
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                          color: isSelected ? Colors.white : const Color(0xff393646),
+                        ),
+                      ),
+                      const SizedBox(
+                        width: 8.0,
+                      ),
+                      Text(
+                        formattedDates["shortDay"]!,
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: isSelected ? Colors.white : const Color(0xff6D5D6E),
+                        ),
+                      ),
+                      if (dateHasTasks) const Icon(
+                        Icons.circle,
+                        size: 10,
+                        color: Colors.green,
+                      ),
+                    ],
+                  ),
                 ),
-                color: isSelected ? Colors.deepPurple : null,
-                borderRadius: BorderRadius.circular(16.0),
-              ),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    formattedDates["monthName"]!,
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: isSelected ? Colors.white : const Color(0xff6D5D6E),
-                    ),
-                  ),
-                  const SizedBox(
-                    width: 8.0,
-                  ),
-                  Text(
-                    "${currentIndexDay.day}",
-                    style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                      color: isSelected ? Colors.white : const Color(0xff393646),
-                    ),
-                  ),
-                  const SizedBox(
-                    width: 8.0,
-                  ),
-                  Text(
-                    formattedDates["shortDay"]!,
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: isSelected ? Colors.white : const Color(0xff6D5D6E),
-                    ),
-                  ),
-                  if (dateHasTasks) const Icon(
-                    Icons.circle,
-                    size: 10,
-                    color: Colors.green,
-                  ),
-                ],
-              ),
-            ),
-          );
-        },
-      ),
+              );
+            },
+          ),
+        ),
+        const Divider(
+          thickness: 1,
+        ),
+        widget.taskArea!,
+        
+      ],
     );
   }
 }
