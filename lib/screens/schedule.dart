@@ -222,6 +222,8 @@ class _CalendarState extends State<Calendar> {
 
   Map tasksWithDueDate = {};
 
+  late DateTime weekDaysDates = widget.focusDate;
+
   void onDateChange(DateTime value){
     setState(() {
       focusedDate = value;
@@ -238,13 +240,14 @@ class _CalendarState extends State<Calendar> {
         tasksWithDueDate[i] = parsedDate;
       }
     }
-    print("calendar: $selectedViewState");
+    
+    
     Map<CalendarViewState, Widget> viewState = {
       CalendarViewState.workdays: const Placeholder(),
       // CalendarViewState.weekdays: WeekDaysView(),
       CalendarViewState.weekdays: MonthView(
         viewState: CalendarViewState.weekdays,
-        dateNow: focusedDate,
+        dateNow: weekDaysDates,
         today: widget.focusDate,
         days: 7,
         datesWithTasks: tasksWithDueDate,
@@ -295,20 +298,20 @@ class _CalendarState extends State<Calendar> {
                                 decoration: BoxDecoration(
                                   borderRadius: BorderRadius.circular(10),
                                   color: 
-                                  focusedDate.subtract(Duration(days: focusedDate.weekday - 1)).add(Duration(days: i)).day
-                                  == focusedDate.day
+                                  weekDaysDates.subtract(Duration(days: weekDaysDates.weekday - 1)).add(Duration(days: i)).day
+                                  == weekDaysDates.day
                                   ? Colors.deepPurple
                                   : null,
                                 ),
                                 child: Text(
                                   '${
-                                      focusedDate.subtract(Duration(days: focusedDate.weekday - 1)).add(Duration(days: i)).day
+                                      weekDaysDates.subtract(Duration(days: weekDaysDates.weekday - 1)).add(Duration(days: i)).day
                                     }',
                                   style: TextStyle(
                                     fontSize: 20,
                                     color: 
-                                      focusedDate.subtract(Duration(days: focusedDate.weekday - 1)).add(Duration(days: i)).day
-                                      == focusedDate.day
+                                      weekDaysDates.subtract(Duration(days: weekDaysDates.weekday - 1)).add(Duration(days: i)).day
+                                      == weekDaysDates.day
                                       ? Colors.white
                                       : Colors.black,
                                   ),
@@ -335,8 +338,6 @@ class _CalendarState extends State<Calendar> {
                               var matchNewIndex = tasksWithDueDate.keys.toList()[newIndex];
                               final Map item = widget.database["main_tasks"].removeAt(matchOldIndex);
                               widget.database["main_tasks"].insert(matchNewIndex, item);
-                              // print(dataTasks);
-                              // print(widget.database);
 
                               setState(() {
                                 DataUtils.writeJsonFile(widget.database);
@@ -347,7 +348,7 @@ class _CalendarState extends State<Calendar> {
                             itemBuilder: (context, index) {
                               var mainTaskID = tasksWithDueDate.keys.toList()[index];
                               var mainTaskDate = tasksWithDueDate.values.toList()[index];
-                              var currentDate = focusedDate.subtract(Duration(days: focusedDate.weekday - 1)).add(Duration(days: i));
+                              var currentDate = weekDaysDates.subtract(Duration(days: weekDaysDates.weekday - 1)).add(Duration(days: i));
 
                               if ( mainTaskDate.day == currentDate.day) {
                                 return ReorderableDragStartListener(
@@ -568,6 +569,7 @@ class _MonthViewState extends State<MonthView> {
   
   @override
   Widget build(BuildContext context) {
+    print(widget.dateNow.day);
     now = widget.dateNow;
     viewState = widget.viewState;
     switch (viewState) {
