@@ -2,9 +2,7 @@
 
 
 import "package:dropdown_button2/dropdown_button2.dart";
-import "package:flutter/cupertino.dart";
 import "package:flutter/material.dart";
-import "package:intl/intl.dart";
 import "package:todo_app/components/card_field.dart";
 import "package:todo_app/components/right_sidepanel.dart";
 import "package:todo_app/components/task_list.dart";
@@ -254,48 +252,74 @@ class _CalendarState extends State<Calendar> {
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
                 for(var i = 0; i < weekDaysMap.length; i++) 
-                Expanded(
-                  child: Container(
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(10),
-                      color: 
-                      focusedDate.subtract(Duration(days: focusedDate.weekday - 1)).add(Duration(days: i)).day
-                      == focusedDate.day
-                      ? Colors.deepPurple
-                      : null,
+                Column(
+                  children: [
+                    Text(
+                      '${weekDaysMap[i]}',
+                      style: const TextStyle(
+                        fontSize: 20,
+                        // color: 
+                        //   focusedDate.subtract(Duration(days: focusedDate.weekday - 1)).add(Duration(days: i)).day
+                        //   == focusedDate.day
+                        //   ? Colors.white
+                        //   : Colors.black,
+                      ),
                     ),
-                    child: Column(
+                    Container(
+                      width: 40,
+                      height: 40,
+                      alignment: AlignmentDirectional.center,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(10),
+                        color: 
+                        focusedDate.subtract(Duration(days: focusedDate.weekday - 1)).add(Duration(days: i)).day
+                        == focusedDate.day
+                        ? Colors.deepPurple
+                        : null,
+                      ),
+                      child: Text(
+                        '${
+                            focusedDate.subtract(Duration(days: focusedDate.weekday - 1)).add(Duration(days: i)).day
+                          }',
+                        style: TextStyle(
+                          fontSize: 20,
+                          color: 
+                            focusedDate.subtract(Duration(days: focusedDate.weekday - 1)).add(Duration(days: i)).day
+                            == focusedDate.day
+                            ? Colors.white
+                            : Colors.black,
+                        ),
+                      ),
+                    ),
+                    const Divider(
+                      color: Colors.black,
+                      thickness: 10,
+                    ),
+                    Column(
                       children: [
-                        Text(
-                          '${weekDaysMap[i]}',
-                          style: TextStyle(
-                            fontSize: 20,
-                            color: 
-                              focusedDate.subtract(Duration(days: focusedDate.weekday - 1)).add(Duration(days: i)).day
-                              == focusedDate.day
-                              ? Colors.white
-                              : Colors.black,
+                        for(var task in tasksWithDueDate.keys)
+                        if (
+                          tasksWithDueDate[task].day
+                          .compareTo(focusedDate.subtract(Duration(days: focusedDate.weekday - 1)).add(Duration(days: i)).day)
+                          == 0
+                        )
+                        InkWell(
+                          onTap: () {},
+                          child: Card(
+                            child: Text(
+                              "${dataTasks[task]["name"]}",
+                              style: TextStyle(
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            )
                           ),
-                        ),
-                        Text(
-                          '${
-                              focusedDate.subtract(Duration(days: focusedDate.weekday - 1)).add(Duration(days: i)).day
-                            }',
-                          style: TextStyle(
-                            fontSize: 20,
-                            color: 
-                              focusedDate.subtract(Duration(days: focusedDate.weekday - 1)).add(Duration(days: i)).day
-                              == focusedDate.day
-                              ? Colors.white
-                              : Colors.black,
-                          ),
-                        ),
+                        )
                       ],
-                    ),
-                  ),
+                    )
+                  ],
                 ),
               ],
-            )
+            ),
           ],
         )
       ),
@@ -410,9 +434,6 @@ class _CalendarState extends State<Calendar> {
               
             ],
           ),
-          const Divider(
-            thickness: 1,
-          ),
           viewState[selectedViewState]!,
           //! Remove the if condition? or change it to something else for
           //! the other view states. 
@@ -420,6 +441,9 @@ class _CalendarState extends State<Calendar> {
            * Weekdays and workdays, need a verical view of tasks.
            */
           if (selectedViewState == CalendarViewState.month)
+          const Divider(
+            thickness: 1,
+          ),
           Row(
             mainAxisAlignment: MainAxisAlignment.start,
             children: [
