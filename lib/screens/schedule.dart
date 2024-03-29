@@ -4,6 +4,7 @@
 import "package:dropdown_button2/dropdown_button2.dart";
 import "package:flutter/cupertino.dart";
 import "package:flutter/material.dart";
+import "package:intl/intl.dart";
 import "package:todo_app/components/card_field.dart";
 import "package:todo_app/components/right_sidepanel.dart";
 import "package:todo_app/components/task_list.dart";
@@ -214,7 +215,7 @@ class _CalendarState extends State<Calendar> {
     "Sun",
   ];
 
-  late int? selectedValue = widget.focusDate.month - 1;
+  late String? selectedValue = monthMap.keys.toList()[widget.focusDate.month - 1];
 
   CalendarViewState selectedViewState = CalendarViewState.weekdays;
 
@@ -252,15 +253,46 @@ class _CalendarState extends State<Calendar> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
-                for(var i = 0; i < weekDaysMap.length; i++) Column(
-                  children: [
-                    Text(
-                      '${weekDaysMap[i]}',
-                      style: const TextStyle(
-                        fontSize: 20,
-                      ),
+                for(var i = 0; i < weekDaysMap.length; i++) 
+                Expanded(
+                  child: Container(
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(10),
+                      color: 
+                      focusedDate.subtract(Duration(days: focusedDate.weekday - 1)).add(Duration(days: i)).day
+                      == focusedDate.day
+                      ? Colors.deepPurple
+                      : null,
                     ),
-                  ],
+                    child: Column(
+                      children: [
+                        Text(
+                          '${weekDaysMap[i]}',
+                          style: TextStyle(
+                            fontSize: 20,
+                            color: 
+                              focusedDate.subtract(Duration(days: focusedDate.weekday - 1)).add(Duration(days: i)).day
+                              == focusedDate.day
+                              ? Colors.white
+                              : Colors.black,
+                          ),
+                        ),
+                        Text(
+                          '${
+                              focusedDate.subtract(Duration(days: focusedDate.weekday - 1)).add(Duration(days: i)).day
+                            }',
+                          style: TextStyle(
+                            fontSize: 20,
+                            color: 
+                              focusedDate.subtract(Duration(days: focusedDate.weekday - 1)).add(Duration(days: i)).day
+                              == focusedDate.day
+                              ? Colors.white
+                              : Colors.black,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
                 ),
               ],
             )
@@ -289,9 +321,15 @@ class _CalendarState extends State<Calendar> {
                 child: Padding(
                   padding: const EdgeInsets.only(left: 12.0),
                   child: Text(
-                    CalendarDateFormatter.dayName(focusedDate),
-                    style: const TextStyle(
-                      fontSize: 18,
+                    selectedViewState == CalendarViewState.month
+                    ? CalendarDateFormatter.dayName(focusedDate)
+                    :CalendarDateFormatter.monthName(focusedDate),
+
+                    style: TextStyle(
+                      fontSize: 
+                      selectedViewState == CalendarViewState.month
+                      ? 18
+                      : 22,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
@@ -332,7 +370,7 @@ class _CalendarState extends State<Calendar> {
                 onPressed: () {
                   setState(() {
                     focusedDate = DateTime(widget.focusDate.year, widget.focusDate.month, widget.focusDate.day);
-                    selectedValue = focusedDate.month;
+                    // selectedValue = focusedDate.month;
                     // if there is tasks showing
                     widget.onDateChange(focusedDate);
                   });
@@ -343,18 +381,25 @@ class _CalendarState extends State<Calendar> {
               ),
               const SizedBox(width: 10),
               DropdownButton2(
-                value: monthMap.keys.toList()[selectedValue! - 1],
+                value: monthMap.keys.toList()[focusedDate.month - 1],
                 items: monthMap.keys.map((value) {
                   return DropdownMenuItem(
                     value: value,
-                    child: Text(value),
+                    child: Text(
+                      value,
+                      style: TextStyle(
+                        color: monthMap[value]! == focusedDate.month
+                        ? Colors.purple
+                        : null,
+                      ),
+                    ),
                   );
                 }).toList(),
                 onChanged: (value) {
                   setState(() {
-                    selectedValue = monthMap[value]!;
+                    selectedValue = value;
       
-                    focusedDate = DateTime(focusedDate.year, selectedValue!, 15);
+                    focusedDate = DateTime(focusedDate.year, monthMap[value]!, 15);
       
                     widget.onDateChange.call(focusedDate);
       
