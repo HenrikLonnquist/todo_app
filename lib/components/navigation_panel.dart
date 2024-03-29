@@ -22,7 +22,7 @@ class _NavigationPanelState extends State<NavigationPanel> {
       dataList: dataList
     ),
     SchedulePage(
-      dataList: dataList
+      database: dataList
     ),
     TodayTasks(dataList: dataList)
   ];

@@ -2,7 +2,9 @@
 
 
 import "package:dropdown_button2/dropdown_button2.dart";
+import "package:flutter/cupertino.dart";
 import "package:flutter/material.dart";
+import "package:flutter/widgets.dart";
 import "package:todo_app/components/card_field.dart";
 import "package:todo_app/components/right_sidepanel.dart";
 import "package:todo_app/components/task_list.dart";
@@ -12,10 +14,10 @@ import "package:todo_app/utils/date_formatter.dart";
 class SchedulePage extends StatefulWidget {
   const SchedulePage({
     super.key,
-    required this.dataList,
+    required this.database,
   });
 
-  final Map dataList;
+  final Map database;
 
   @override
   State<SchedulePage> createState() => _SchedulePageState();
@@ -33,7 +35,7 @@ class _SchedulePageState extends State<SchedulePage> {
   
   late int pressedTask;
 
-  late List dataList = widget.dataList["main_tasks"];
+  late List dataList = widget.database["main_tasks"];
 
 
   @override
@@ -97,7 +99,7 @@ class _SchedulePageState extends State<SchedulePage> {
                         // lastDate: now.add(Duration(days: 5 - now.weekday + 1)),
                         //! TODO: rename property - initial date?
                         focusDate: DateTime(now.year, now.month, now.day),
-                        dataList: dataList,
+                        database: widget.database,
                         onPressedTask: (value) {
                           setState(() {
                             if (isRightPanelOpen && pressedTask != value) {
@@ -114,15 +116,16 @@ class _SchedulePageState extends State<SchedulePage> {
                           });
                         },
                       ),
+                      // TODO: if there is no date in the txt then add today or selected date.
                       CardField(
                         onSubmitted: (value) {
                           var template = DataUtils.dataTemplate(
                             name: value,
                             dueDate: selectedDate.toString()
                           );
-                          widget.dataList["main_tasks"].add(template);
+                          widget.database["main_tasks"].add(template);
                           setState(() {
-                            DataUtils.writeJsonFile(widget.dataList);
+                            DataUtils.writeJsonFile(widget.database);
                           });
                         },
                       ),
@@ -145,7 +148,7 @@ class _SchedulePageState extends State<SchedulePage> {
                 dataList[pressedTask]["sub_tasks"].add(templateSub);
               }
               setState(() {
-                DataUtils.writeJsonFile(widget.dataList);
+                DataUtils.writeJsonFile(widget.database);
               });
             }, 
           ),
@@ -161,14 +164,14 @@ class Calendar extends StatefulWidget {
     required this.focusDate,
     required this.onDateChange,
     this.onPressedTask,
-    required this.dataList ,
+    required this.database ,
     this.child,
   });
 
   final Widget? child;
   final Function(int)? onPressedTask;
   final DateTime focusDate;
-  final List dataList;
+  final Map database;
   final Function(DateTime) onDateChange;
 
   @override
@@ -180,7 +183,7 @@ enum CalendarViewState {workdays, weekdays, month}
 
 class _CalendarState extends State<Calendar> {  
   late DateTime focusedDate = widget.focusDate;
-  late List dataTasks = widget.dataList;
+  late List dataTasks = widget.database["main_tasks"];
 
   int daysBetween(DateTime from, DateTime to) {
     from = DateTime(from.year, from.month, from.day);
@@ -246,81 +249,143 @@ class _CalendarState extends State<Calendar> {
         days: 7,
         datesWithTasks: tasksWithDueDate,
         onDateChange: onDateChange,
-        child: Column(
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
+        child: Expanded(
+          child: Container(
+            decoration: BoxDecoration(
+              border: Border.all(
+                color: Colors.black,
+                width: 1,
+              ),
+            ),
+            child: Row(
               children: [
                 for(var i = 0; i < weekDaysMap.length; i++) 
-                Column(
-                  children: [
-                    Text(
-                      '${weekDaysMap[i]}',
-                      style: const TextStyle(
-                        fontSize: 20,
-                        // color: 
-                        //   focusedDate.subtract(Duration(days: focusedDate.weekday - 1)).add(Duration(days: i)).day
-                        //   == focusedDate.day
-                        //   ? Colors.white
-                        //   : Colors.black,
-                      ),
+                Expanded(
+                  child: Container(
+                    decoration: const BoxDecoration(
+                      border: Border(
+                        right: BorderSide(
+                          color: Colors.black,
+                          width: 1,
+                        )
+                      )
                     ),
-                    Container(
-                      width: 40,
-                      height: 40,
-                      alignment: AlignmentDirectional.center,
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(10),
-                        color: 
-                        focusedDate.subtract(Duration(days: focusedDate.weekday - 1)).add(Duration(days: i)).day
-                        == focusedDate.day
-                        ? Colors.deepPurple
-                        : null,
-                      ),
-                      child: Text(
-                        '${
-                            focusedDate.subtract(Duration(days: focusedDate.weekday - 1)).add(Duration(days: i)).day
-                          }',
-                        style: TextStyle(
-                          fontSize: 20,
-                          color: 
-                            focusedDate.subtract(Duration(days: focusedDate.weekday - 1)).add(Duration(days: i)).day
-                            == focusedDate.day
-                            ? Colors.white
-                            : Colors.black,
-                        ),
-                      ),
-                    ),
-                    const Divider(
-                      color: Colors.black,
-                      thickness: 10,
-                    ),
-                    Column(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
-                        for(var task in tasksWithDueDate.keys)
-                        if (
-                          tasksWithDueDate[task].day
-                          .compareTo(focusedDate.subtract(Duration(days: focusedDate.weekday - 1)).add(Duration(days: i)).day)
-                          == 0
-                        )
-                        InkWell(
-                          onTap: () {},
-                          child: Card(
-                            child: Text(
-                              "${dataTasks[task]["name"]}",
-                              style: TextStyle(
-                                overflow: TextOverflow.ellipsis,
+                        SizedBox(
+                          height: 85,
+                          child: Column(
+                            children: [
+                              Text(
+                                '${weekDaysMap[i]}',
+                                style: const TextStyle(
+                                  fontSize: 20,
+                                  // color: 
+                                  //   focusedDate.subtract(Duration(days: focusedDate.weekday - 1)).add(Duration(days: i)).day
+                                  //   == focusedDate.day
+                                  //   ? Colors.white
+                                  //   : Colors.black,
+                                ),
                               ),
-                            )
+                              Container(
+                                width: 40,
+                                height: 40,
+                                alignment: AlignmentDirectional.center,
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(10),
+                                  color: 
+                                  focusedDate.subtract(Duration(days: focusedDate.weekday - 1)).add(Duration(days: i)).day
+                                  == focusedDate.day
+                                  ? Colors.deepPurple
+                                  : null,
+                                ),
+                                child: Text(
+                                  '${
+                                      focusedDate.subtract(Duration(days: focusedDate.weekday - 1)).add(Duration(days: i)).day
+                                    }',
+                                  style: TextStyle(
+                                    fontSize: 20,
+                                    color: 
+                                      focusedDate.subtract(Duration(days: focusedDate.weekday - 1)).add(Duration(days: i)).day
+                                      == focusedDate.day
+                                      ? Colors.white
+                                      : Colors.black,
+                                  ),
+                                ),
+                              ),
+                              const Divider(
+                                color: Colors.black,
+                                thickness: 1,
+                              ),
+                            ],
                           ),
-                        )
+                        ),
+                        Expanded(
+                          child: ReorderableListView.builder(
+                            buildDefaultDragHandles: false,
+                            onReorder: (oldIndex, newIndex) {
+                              if(oldIndex < newIndex) {
+                                newIndex -= 1;
+                              }
+
+                              // Trying to match two different types, only works because taskswithduedate
+                              // has the key as an the list index from database.
+                              var matchOldIndex = tasksWithDueDate.keys.toList()[oldIndex];                             
+                              var matchNewIndex = tasksWithDueDate.keys.toList()[newIndex];
+                              final Map item = widget.database["main_tasks"].removeAt(matchOldIndex);
+                              widget.database["main_tasks"].insert(matchNewIndex, item);
+                              // print(dataTasks);
+                              // print(widget.database);
+
+                              setState(() {
+                                DataUtils.writeJsonFile(widget.database);
+                              });
+
+                            },
+                            itemCount: tasksWithDueDate.length,
+                            itemBuilder: (context, index) {
+                              var mainTaskID = tasksWithDueDate.keys.toList()[index];
+                              var mainTaskDate = tasksWithDueDate.values.toList()[index];
+                              var currentDate = focusedDate.subtract(Duration(days: focusedDate.weekday - 1)).add(Duration(days: i));
+
+                              if ( mainTaskDate.day == currentDate.day) {
+                                return ReorderableDragStartListener(
+                                  key: Key("$index"),
+                                  index: index,
+                                  child: InkWell(
+                                    onTap: () {
+                                      widget.onPressedTask!.call(tasksWithDueDate.keys.toList()[index]);
+                                    },
+                                    child: Padding(
+                                      padding: const EdgeInsets.all(4),
+                                      child: Card(
+                                        child: Center(
+                                          child: Text(
+                                            "${dataTasks[mainTaskID]["name"]}",
+                                            style: const TextStyle(
+                                            ),
+                                          ),
+                                        )
+                                      ),
+                                    ),
+                                  ),
+                                );
+                              } else {
+                                return Container(
+                                  key: Key("$index"),
+                                );
+                              }
+                            }
+                          ),
+                        ),
                       ],
-                    )
-                  ],
+                    ),
+                  ),
                 ),
               ],
             ),
-          ],
+          ),
         )
       ),
       CalendarViewState.month: MonthView(
@@ -440,24 +505,24 @@ class _CalendarState extends State<Calendar> {
           /**
            * Weekdays and workdays, need a verical view of tasks.
            */
-          if (selectedViewState == CalendarViewState.month)
-          const Divider(
-            thickness: 1,
-          ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.start,
-            children: [
-              for(var task in tasksWithDueDate.keys) 
-              if (tasksWithDueDate[task].compareTo(focusedDate) == 0) InkWell(
-                onTap: () {
-                  widget.onPressedTask!.call(task);
-                },
-                child: Card(
-                  child: Text("${dataTasks[task]["name"]}"),
-                ),
-              )
-            ],
-          )
+          // if (selectedViewState == CalendarViewState.month)
+          // const Divider(
+          //   thickness: 1,
+          // ),
+          // Row(
+          //   mainAxisAlignment: MainAxisAlignment.start,
+          //   children: [
+          //     for(var task in tasksWithDueDate.keys) 
+          //     if (tasksWithDueDate[task].compareTo(focusedDate) == 0) InkWell(
+          //       onTap: () {
+          //         widget.onPressedTask!.call(task);
+          //       },
+          //       child: Card(
+          //         child: Text("${dataTasks[task]["name"]}"),
+          //       ),
+          //     )
+          //   ],
+          // )
           
         ],
       ),
