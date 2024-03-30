@@ -28,7 +28,7 @@ class _MainTasksPageState extends State<MainTasksPage> {
   
   bool isRightPanelOpen = false;
 
-  late int mainTaskIndex;
+  int mainTaskIndex = 0;
 
 
   @override
@@ -107,7 +107,8 @@ class _MainTasksPageState extends State<MainTasksPage> {
             ],
           ), 
         ),
-        if (isRightPanelOpen && widget.dataList["main_tasks"].isNotEmpty) RightSidePanel(
+        if (widget.dataList["main_tasks"].isNotEmpty) RightSidePanel(
+          show: isRightPanelOpen,
           child: SubTaskLIst(
             title: widget.dataList["main_tasks"][mainTaskIndex]["name"],
             mainTask: widget.dataList["main_tasks"][mainTaskIndex],

@@ -6,19 +6,23 @@ class RightSidePanel extends StatelessWidget {
   const RightSidePanel({
     super.key,
     this.child, 
+    required this.show,
   });
 
+  final bool show;
   final Widget? child;
 
   @override
   Widget build(BuildContext context) {
-    return Expanded(
+    return show 
+    ? Expanded(
       child: Container(
         color: Colors.blueAccent,
         padding: const EdgeInsets.all(10),
         child: child,
       ),
-    );
+    )
+    : const SizedBox(height: 0);
   }
 }
 

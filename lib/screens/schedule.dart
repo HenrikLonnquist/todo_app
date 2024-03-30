@@ -2,6 +2,7 @@
 
 
 import "package:dropdown_button2/dropdown_button2.dart";
+import "package:easy_date_timeline/easy_date_timeline.dart";
 import "package:flutter/cupertino.dart";
 import "package:flutter/material.dart";
 import "package:flutter/widgets.dart";
@@ -27,22 +28,17 @@ class _SchedulePageState extends State<SchedulePage> {
   
   bool isRightPanelOpen = false;
 
-  
-
   DateTime now = DateTime.now();
 
   late DateTime selectedDate = DateTime(now.year, now.month, now.day);
   
-  late int pressedTask;
+  int pressedTask = 0;
 
   late List dataList = widget.database["main_tasks"];
 
 
   @override
   Widget build(BuildContext context) {
-
-    
-
     return Row(
       children: [
         Container(
@@ -94,9 +90,6 @@ class _SchedulePageState extends State<SchedulePage> {
                       //   },
                       // ),
                       Calendar(
-                        //* 5 days(workdays) showing
-                        // firstDate: now.subtract(Duration(days: now.weekday - 1)),
-                        // lastDate: now.add(Duration(days: 5 - now.weekday + 1)),
                         //! TODO: rename property - initial date?
                         focusDate: DateTime(now.year, now.month, now.day),
                         database: widget.database,
@@ -116,7 +109,7 @@ class _SchedulePageState extends State<SchedulePage> {
                           });
                         },
                       ),
-                      // TODO: if there is no date in the txt then add today or selected date.
+                      // TODO: if there is no date in the txt then add to today or selected date.
                       CardField(
                         onSubmitted: (value) {
                           var template = DataUtils.dataTemplate(
@@ -136,7 +129,8 @@ class _SchedulePageState extends State<SchedulePage> {
             ],
           ), 
         ),
-        if (isRightPanelOpen) RightSidePanel(
+        RightSidePanel(
+          show: isRightPanelOpen,
           child: SubTaskLIst(
             title: dataList[pressedTask]["name"],
             mainTask: dataList[pressedTask], 
@@ -223,7 +217,7 @@ class _CalendarState extends State<Calendar> {
 
   late String? selectedValue = monthMap.keys.toList()[widget.focusDate.month - 1];
 
-  CalendarViewState selectedViewState = CalendarViewState.today;
+  CalendarViewState selectedViewState = CalendarViewState.weekdays;
 
   Map tasksWithDueDate = {};
 
@@ -401,6 +395,7 @@ class _CalendarState extends State<Calendar> {
                                 ? 1
                                 : weekDaysDates.weekday) - 1)).add(Duration(days: i));
 
+                                //! Maybe I should have used the task list component instead
                                 if ( mainTaskDate.day == currentDate.day) {
                                   return ReorderableDragStartListener(
                                     key: Key("$index"),
@@ -422,6 +417,7 @@ class _CalendarState extends State<Calendar> {
                                             child: Text(
                                               "${dataTasks[mainTaskID]["name"]}",
                                               style: const TextStyle(
+                                                overflow: TextOverflow.ellipsis,
                                               ),
                                             ),
                                           )
@@ -588,13 +584,6 @@ class _CalendarState extends State<Calendar> {
             ],
           ),
           viewState,
-          //! Remove the if condition? or change it to something else for
-          //! the other view states. 
-          /**
-           * Weekdays and workdays, need a verical view of tasks.
-           */
-
-          
         ],
       ),
     );
