@@ -1,11 +1,11 @@
 // ignore_for_file: avoid_print
 
 
+import "package:flutter/material.dart";
 import "package:dropdown_button2/dropdown_button2.dart";
 import "package:easy_date_timeline/easy_date_timeline.dart";
-import "package:flutter/cupertino.dart";
-import "package:flutter/material.dart";
-import "package:flutter/widgets.dart";
+import "package:drag_and_drop_lists/drag_and_drop_lists.dart";
+
 import "package:todo_app/components/card_field.dart";
 import "package:todo_app/components/right_sidepanel.dart";
 import "package:todo_app/components/task_list.dart";
@@ -327,29 +327,23 @@ class _CalendarState extends State<Calendar> {
                                         alignment: AlignmentDirectional.center,
                                         decoration: BoxDecoration(
                                           borderRadius: BorderRadius.circular(10),
-                                          color: 
-                                          weekDaysDates.subtract(Duration(days: (
-                                            selectedViewState == CalendarViewState.today 
-                                            ? 1
-                                            : weekDaysDates.weekday) - 1)).add(Duration(days: i)).day
+                                          color: (selectedViewState == CalendarViewState.today
+                                          ? weekDaysDates.add(Duration(days: i)).day
+                                          : weekDaysDates.subtract(Duration(days: weekDaysDates.weekday - 1)).add(Duration(days: i)).day)
                                           == widget.focusDate.day
                                           ? Colors.deepPurple
                                           : null,
                                         ),
                                         child: Text(
-                                          '${
-                                            selectedViewState == CalendarViewState.today
-                                            ? weekDaysDates.day 
-                                            : weekDaysDates.subtract(Duration(days: (weekDaysDates.weekday) - 1)).add(Duration(days: i)).day
-                                            }',
+                                          selectedViewState == CalendarViewState.today 
+                                          ? "${weekDaysDates.add(Duration(days: i)).day}"
+                                          : "${weekDaysDates.subtract(Duration(days: weekDaysDates.weekday - 1)).add(Duration(days: i)).day}",
                                           style: TextStyle(
                                             fontSize: 20,
                                             // TODO: maybe make this(condition check) into a function?
-                                            color: 
-                                              weekDaysDates.subtract(Duration(days: (
-                                                selectedViewState == CalendarViewState.today 
-                                                ? 1
-                                                : weekDaysDates.weekday) - 1)).add(Duration(days: i)).day
+                                            color: (selectedViewState == CalendarViewState.today
+                                              ? weekDaysDates.add(Duration(days: i)).day
+                                              : weekDaysDates.subtract(Duration(days: weekDaysDates.weekday - 1)).add(Duration(days: i)).day)
                                               == widget.focusDate.day
                                               ? Colors.white
                                               : Colors.black,
@@ -478,6 +472,7 @@ class _CalendarState extends State<Calendar> {
                 onSelectionChanged: (value) {
                   setState(() {
                     selectedViewState = value.first;
+                    print(weekDaysDates);
                   });
                 },
                 segments: const [
@@ -551,9 +546,9 @@ class _CalendarState extends State<Calendar> {
                       onPressed: () {
                         setState(() {
                           if (selectedViewState == CalendarViewState.today) {
-                            weekDaysDates =  weekDaysDates.subtract(const Duration(days: 1));
+                            weekDaysDates =  DateTime(weekDaysDates.year, weekDaysDates.month, weekDaysDates.day - 1);
                           } else {
-                            weekDaysDates = weekDaysDates.subtract(Duration(days: weekDaysDates.weekday - 1 + 7));
+                            weekDaysDates = DateTime(weekDaysDates.year, weekDaysDates.month, weekDaysDates.day - (7 - weekDaysDates.weekday + 1));
                           }
                         });
                       }, 
@@ -568,7 +563,7 @@ class _CalendarState extends State<Calendar> {
                           if (selectedViewState == CalendarViewState.today) {
                             weekDaysDates =  weekDaysDates.add(const Duration(days: 1));
                           } else {
-                            weekDaysDates = weekDaysDates.add(Duration(days: (7 - weekDaysDates.weekday) + 1));
+                            weekDaysDates = DateTime(weekDaysDates.year, weekDaysDates.month, weekDaysDates.day + (7 - weekDaysDates.weekday) + 1);
                           }
                         });
                       }, 
