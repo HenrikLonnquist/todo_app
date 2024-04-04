@@ -1,11 +1,9 @@
 // ignore_for_file: avoid_print
 
 
-import "package:flutter/material.dart";
 import "package:dropdown_button2/dropdown_button2.dart";
 import "package:easy_date_timeline/easy_date_timeline.dart";
-import "package:drag_and_drop_lists/drag_and_drop_lists.dart";
-
+import "package:flutter/material.dart";
 import "package:todo_app/components/card_field.dart";
 import "package:todo_app/components/right_sidepanel.dart";
 import "package:todo_app/components/task_list.dart";
@@ -109,10 +107,10 @@ class _SchedulePageState extends State<SchedulePage> {
                           });
                         },
                       ),
-                      // TODO: if there is no date in the txt then add to today or selected date.
                       CardField(
                         onSubmitted: (value) {
                           var template = DataUtils.dataTemplate(
+                            // database: widget.database,
                             name: value,
                             dueDate: selectedDate.toString()
                           );
@@ -286,6 +284,7 @@ class _CalendarState extends State<Calendar> {
               ),
               child: Row(
                 children: [
+
                   for(var i = 0; i < calendarViewStateDays[selectedViewState]!; i++) 
                   Expanded(
                     child: Container(
@@ -297,137 +296,168 @@ class _CalendarState extends State<Calendar> {
                           )
                         )
                       ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          SizedBox(
-                            height: 85,
-                            child: Column(
-                              crossAxisAlignment: selectedViewState == CalendarViewState.today 
-                              ? CrossAxisAlignment.start
-                              : CrossAxisAlignment.center,
-                              children: [
-                                Container(
-                                  padding: selectedViewState == CalendarViewState.today 
-                                  ? const EdgeInsets.only(left: 11.0)
-                                  : null,
-                                  child: Column(
-                                    children: [
-                                      Text(
-                                        selectedViewState == CalendarViewState.today
-                                        ? "${weekDaysMap[weekDaysDates.weekday - 1]}"
-                                        : "${weekDaysMap[i]}",
-                                        style: const TextStyle(
-                                          fontSize: 20,
-                                        ),
-                                      ),
-                                      Container(
-                                        width: 40,
-                                        height: 40,
-                                        alignment: AlignmentDirectional.center,
-                                        decoration: BoxDecoration(
-                                          borderRadius: BorderRadius.circular(10),
-                                          color: (selectedViewState == CalendarViewState.today
-                                          ? weekDaysDates.add(Duration(days: i)).day
-                                          : weekDaysDates.subtract(Duration(days: weekDaysDates.weekday - 1)).add(Duration(days: i)).day)
-                                          == widget.focusDate.day
-                                          ? Colors.deepPurple
-                                          : null,
-                                        ),
-                                        child: Text(
-                                          selectedViewState == CalendarViewState.today 
-                                          ? "${weekDaysDates.add(Duration(days: i)).day}"
-                                          : "${weekDaysDates.subtract(Duration(days: weekDaysDates.weekday - 1)).add(Duration(days: i)).day}",
-                                          style: TextStyle(
-                                            fontSize: 20,
-                                            // TODO: maybe make this(condition check) into a function?
-                                            color: (selectedViewState == CalendarViewState.today
-                                              ? weekDaysDates.add(Duration(days: i)).day
-                                              : weekDaysDates.subtract(Duration(days: weekDaysDates.weekday - 1)).add(Duration(days: i)).day)
-                                              == widget.focusDate.day
-                                              ? Colors.white
-                                              : Colors.black,
+                      child: DragTarget(
+                        onAcceptWithDetails: (details) {
+                          DateTime droppedDate = (weekDaysDates.subtract(Duration(days: weekDaysDates.weekday - 1))).add(Duration(days: i));
+                          widget.database["main_tasks"][details.data]["due_date"] = droppedDate.toString();
+                          setState(() {
+                            DataUtils.writeJsonFile(widget.database);
+                          });
+                        },
+                        builder: (context, accepted, rejected) {
+                          return Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              SizedBox(
+                                height: 85,
+                                child: Column(
+                                  crossAxisAlignment: selectedViewState == CalendarViewState.today 
+                                  ? CrossAxisAlignment.start
+                                  : CrossAxisAlignment.center,
+                                  children: [
+                                    Container(
+                                      padding: selectedViewState == CalendarViewState.today 
+                                      ? const EdgeInsets.only(left: 11.0)
+                                      : null,
+                                      child: Column(
+                                        children: [
+                                          Text(
+                                            selectedViewState == CalendarViewState.today
+                                            ? "${weekDaysMap[weekDaysDates.weekday - 1]}"
+                                            : "${weekDaysMap[i]}",
+                                            style: const TextStyle(
+                                              fontSize: 20,
+                                            ),
                                           ),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                                const Divider(
-                                  color: Colors.black,
-                                  thickness: 1,
-                                ),
-                              ],
-                            ),
-                          ),
-                          Expanded(
-                            child: ReorderableListView.builder(
-                              buildDefaultDragHandles: false,
-                              onReorder: (oldIndex, newIndex) {
-                                if(oldIndex < newIndex) {
-                                  newIndex -= 1;
-                                }
-
-                                // Trying to match two different types, only works because taskswithduedate
-                                // has the key as an the list index from database.
-                                var matchOldIndex = tasksWithDueDate.keys.toList()[oldIndex];                             
-                                var matchNewIndex = tasksWithDueDate.keys.toList()[newIndex];
-                                final Map item = widget.database["main_tasks"].removeAt(matchOldIndex);
-                                widget.database["main_tasks"].insert(matchNewIndex, item);
-
-                                setState(() {
-                                  DataUtils.writeJsonFile(widget.database);
-                                });
-
-                              },
-                              itemCount: tasksWithDueDate.length,
-                              itemBuilder: (context, index) {
-                                var mainTaskID = tasksWithDueDate.keys.toList()[index];
-                                var mainTaskDate = tasksWithDueDate.values.toList()[index];
-                                var currentDate = weekDaysDates.subtract(Duration(days: (
-                                selectedViewState == CalendarViewState.today
-                                ? 1
-                                : weekDaysDates.weekday) - 1)).add(Duration(days: i));
-
-                                //! Maybe I should have used the task list component instead
-                                if ( mainTaskDate.day == currentDate.day) {
-                                  return ReorderableDragStartListener(
-                                    key: Key("$index"),
-                                    index: index,
-                                    child: InkWell(
-                                      onTap: () {
-                                        widget.onPressedTask!.call(tasksWithDueDate.keys.toList()[index]);
-                                      },
-                                      child: Padding(
-                                        padding: const EdgeInsets.all(4),
-                                        child: Card(
-                                          child: Container(
-                                            padding: selectedViewState == CalendarViewState.today
-                                            ? const EdgeInsets.only(left: 10)
-                                            : null,
-                                            alignment: selectedViewState == CalendarViewState.today
-                                            ? AlignmentDirectional.centerStart
-                                            : AlignmentDirectional.center,
+                                          Container(
+                                            width: 40,
+                                            height: 40,
+                                            alignment: AlignmentDirectional.center,
+                                            decoration: BoxDecoration(
+                                              borderRadius: BorderRadius.circular(10),
+                                              color: 
+                                              weekDaysDates.subtract(Duration(days: (
+                                                selectedViewState == CalendarViewState.today 
+                                                ? 1
+                                                : weekDaysDates.weekday) - 1)).add(Duration(days: i)).day
+                                              == widget.focusDate.day
+                                              ? Colors.deepPurple
+                                              : null,
+                                            ),
                                             child: Text(
-                                              "${dataTasks[mainTaskID]["name"]}",
-                                              style: const TextStyle(
-                                                overflow: TextOverflow.ellipsis,
+                                              '${
+                                                selectedViewState == CalendarViewState.today
+                                                ? weekDaysDates.day 
+                                                : weekDaysDates.subtract(Duration(days: (weekDaysDates.weekday) - 1)).add(Duration(days: i)).day
+                                                }',
+                                              style: TextStyle(
+                                                fontSize: 20,
+                                                // TODO: maybe make this(condition check) into a function?
+                                                color: 
+                                                  weekDaysDates.subtract(Duration(days: (
+                                                    selectedViewState == CalendarViewState.today 
+                                                    ? 1
+                                                    : weekDaysDates.weekday) - 1)).add(Duration(days: i)).day
+                                                  == widget.focusDate.day
+                                                  ? Colors.white
+                                                  : Colors.black,
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                    const Divider(
+                                      color: Colors.black,
+                                      thickness: 1,
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              Expanded(
+                                child: ListView.builder(
+                                  // buildDefaultDragHandles: false,
+                                  // onReorder: (oldIndex, newIndex) {
+                                  //   if(oldIndex < newIndex) {
+                                  //     newIndex -= 1;
+                                  //   }
+                                    
+                                  //   // Trying to match two different types, only works because taskswithduedate
+                                  //   // has the key as an the list index from database.
+                                  //   var matchOldIndex = tasksWithDueDate.keys.toList()[oldIndex];                             
+                                  //   var matchNewIndex = tasksWithDueDate.keys.toList()[newIndex];
+                                  //   final Map item = widget.database["main_tasks"].removeAt(matchOldIndex);
+                                  //   widget.database["main_tasks"].insert(matchNewIndex, item);
+                                    
+                                  //   setState(() {
+                                  //     DataUtils.writeJsonFile(widget.database);
+                                  //   });
+                                    
+                                  // },
+                                  itemCount: tasksWithDueDate.length,
+                                  itemBuilder: (context, index) {
+                                    var mainTaskID = tasksWithDueDate.keys.toList()[index];
+                                    var mainTaskDate = tasksWithDueDate.values.toList()[index];
+                                    var currentDate = weekDaysDates.subtract(Duration(days: (
+                                    selectedViewState == CalendarViewState.today
+                                    ? 1
+                                    : weekDaysDates.weekday) - 1)).add(Duration(days: i));
+                                    
+                                    //! Maybe I should have used the task list component instead
+                                    if ( mainTaskDate.day == currentDate.day) {
+                                      return Draggable<int>(
+                                        data: mainTaskID,
+                                        childWhenDragging: const SizedBox(height: 0,),
+                                        feedback: Card(
+                                          child: SizedBox(
+                                            width: 120,
+                                            height: 20,
+                                            child: Center(
+                                              child: Text(
+                                                "${dataTasks[mainTaskID]["name"]}",
+                                                style: const TextStyle(
+                                                  overflow: TextOverflow.ellipsis,
+                                                ),
                                               ),
                                             ),
                                           )
                                         ),
-                                      ),
-                                    ),
-                                  );
-                                } else {
-                                  return Container(
-                                    key: Key("$index"),
-                                  );
-                                }
-                              }
-                            ),
-                          ),
-                        ],
+                                        child: InkWell(
+                                          onTap: () {
+                                            widget.onPressedTask!.call(tasksWithDueDate.keys.toList()[index]);
+                                          },
+                                          child: Padding(
+                                            padding: const EdgeInsets.all(4),
+                                            child: Card(
+                                              child: Container(
+                                                padding: selectedViewState == CalendarViewState.today
+                                                ? const EdgeInsets.only(left: 10)
+                                                : null,
+                                                alignment: selectedViewState == CalendarViewState.today
+                                                ? AlignmentDirectional.centerStart
+                                                : AlignmentDirectional.center,
+                                                child: Text(
+                                                  "${dataTasks[mainTaskID]["name"]}",
+                                                  style: const TextStyle(
+                                                    overflow: TextOverflow.ellipsis,
+                                                  ),
+                                                ),
+                                              )
+                                            ),
+                                          ),
+                                        ),
+                                      );
+                                    } else {
+                                      return Container(
+                                        key: Key("$index"),
+                                      );
+                                    }
+                                  }
+                                ),
+                              ),
+                            ],
+                          );
+                        }
                       ),
                     ),
                   ),
@@ -446,7 +476,7 @@ class _CalendarState extends State<Calendar> {
         children: [
           Row(
             children: [
-              Container(
+              SizedBox(
                 width: 120,
                 child: Padding(
                   padding: const EdgeInsets.only(left: 12.0),
@@ -472,7 +502,6 @@ class _CalendarState extends State<Calendar> {
                 onSelectionChanged: (value) {
                   setState(() {
                     selectedViewState = value.first;
-                    print(weekDaysDates);
                   });
                 },
                 segments: const [
@@ -546,9 +575,9 @@ class _CalendarState extends State<Calendar> {
                       onPressed: () {
                         setState(() {
                           if (selectedViewState == CalendarViewState.today) {
-                            weekDaysDates =  DateTime(weekDaysDates.year, weekDaysDates.month, weekDaysDates.day - 1);
+                            weekDaysDates =  weekDaysDates.subtract(const Duration(days: 1));
                           } else {
-                            weekDaysDates = DateTime(weekDaysDates.year, weekDaysDates.month, weekDaysDates.day - (7 - weekDaysDates.weekday + 1));
+                            weekDaysDates = DateTime(weekDaysDates.year, weekDaysDates.month, weekDaysDates.day - (weekDaysDates.weekday + 1));
                           }
                         });
                       }, 
@@ -563,7 +592,7 @@ class _CalendarState extends State<Calendar> {
                           if (selectedViewState == CalendarViewState.today) {
                             weekDaysDates =  weekDaysDates.add(const Duration(days: 1));
                           } else {
-                            weekDaysDates = DateTime(weekDaysDates.year, weekDaysDates.month, weekDaysDates.day + (7 - weekDaysDates.weekday) + 1);
+                            weekDaysDates = weekDaysDates.add(Duration(days: (7 - weekDaysDates.weekday) + 1));
                           }
                         });
                       }, 
@@ -655,7 +684,7 @@ class _MonthViewState extends State<MonthView> {
           
               formattedDates = CalendarDateFormatter.parseAll(currentIndexDay);
               
-              // TODO: create an function or class for this.
+              // TODO: create an function(Widget) or class for this.
               // check out the "timeline_widget.dart" file for how its done.
               return InkWell(
                 onTap: () {
@@ -733,40 +762,3 @@ class _MonthViewState extends State<MonthView> {
   }
 }
 
-class WeekDaysView extends StatefulWidget {
-  const WeekDaysView({
-    super.key, 
-    // required this.onDateChange, 
-    // required this.datesWithTasks, 
-    // required this.days, 
-    // required this.dateNow, 
-    // required this.today,
-  });
-
-  // final Function(DateTime) onDateChange;
-  // final Map datesWithTasks;
-  // final int days;
-  // final DateTime dateNow, today;
-
-  @override
-  State<WeekDaysView> createState() => _WeekDaysViewState();
-}
-
-class _WeekDaysViewState extends State<WeekDaysView> {
-  // late DateTime now = widget.dateNow;
-  //* 7 days(weekdays) showing
-  // firstDate: now.subtract(Duration(days: now.weekday - 1)),
-  // lastDate: firstDate.add(Duration(days: 6)),
-  @override
-  Widget build(BuildContext context) {
-    return Expanded(
-      child: ListView.builder(
-        
-        itemCount: 7,
-        itemBuilder: ((context, index) {
-          
-        })
-      )
-    );
-  }
-}

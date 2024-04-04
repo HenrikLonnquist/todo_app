@@ -8,7 +8,9 @@ class DataUtils {
 
   const DataUtils._();
 
+  // TODO: functions for adding main+subtasks, changing date, renaming
 
+  // NEW MAIN TASK
   static Map dataTemplate( 
   {
     required String name,
