@@ -80,7 +80,14 @@
     "user_lists": [
         {
             "user_list_name": "New User List 0",
-            "main_tasks": []
+            "main_tasks": [
+                {
+                    "name": "test",
+                    "due_date": "",
+                    "sub_tasks": [],
+                    "notes": ""
+                }
+            ]
         },
         {
             "user_list_name": "New User List 1",

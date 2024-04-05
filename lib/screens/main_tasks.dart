@@ -12,7 +12,10 @@ class MainTasksPage extends StatefulWidget {
     super.key,
     required this.title,
     required this.dataList,
+    this.onUserListUpdate,
   });
+
+  final Function()? onUserListUpdate;
 
   final String title;
 
@@ -99,6 +102,10 @@ class _MainTasksPageState extends State<MainTasksPage> {
                     
                     setState(() {
                       _newTaskController.text = "";
+                      if(widget.onUserListUpdate != null) {
+                        widget.onUserListUpdate!.call();
+                        return;
+                      }
                       DataUtils.writeJsonFile(widget.dataList);
                     });
                   },

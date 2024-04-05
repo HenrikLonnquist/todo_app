@@ -15,18 +15,19 @@ class NavigationPanel extends StatefulWidget {
 
 class _NavigationPanelState extends State<NavigationPanel> {
   Map dataList = {};
-  int _selectedIndex = 0;
+  int _selectedIndex = 3;
 
+  // TODO: maybe create a new list for users; have the 
+  // constant pages and user pages separate
   late List<Widget> pages = <Widget>[
     MainTasksPage(
       title: "Main Tasks",
-      dataList: dataList
+      dataList: dataList,
     ),
     SchedulePage(
       database: dataList
     ),
     TodayTasks(dataList: dataList),
-
   ];
 
   void _changePage(int) {
@@ -44,7 +45,12 @@ class _NavigationPanelState extends State<NavigationPanel> {
     for(var i = 0; i < dataList["user_lists"].length; i++) {
       pages.add(MainTasksPage( 
         title: dataList["user_lists"][i]["user_list_name"],
-        dataList: dataList["user_lists"][i]
+        dataList: dataList["user_lists"][i],
+        onUserListUpdate: () {
+          setState(() {
+            DataUtils.writeJsonFile(dataList);
+          });
+        },
       ));
     }
   }
@@ -74,7 +80,7 @@ class _NavigationPanelState extends State<NavigationPanel> {
                   icon: const Icon(Icons.schedule_rounded), 
                   label: const Text("Schedule"),
                 ),
-                Divider(thickness: 2,),
+                const Divider(thickness: 2,),
                 const SizedBox(height: 10),
                 // PageLists that the user has created.
                 const Text('User Lists'),
@@ -109,6 +115,11 @@ class _NavigationPanelState extends State<NavigationPanel> {
                       pages.add(MainTasksPage(
                         title: dataList["user_lists"][userListLength]["user_list_name"],
                         dataList: dataList["user_lists"][userListLength],
+                        onUserListUpdate: () {
+                          setState(() {
+                            DataUtils.writeJsonFile(dataList);
+                          });
+                        },
                       ));
                     });
                   }, 
