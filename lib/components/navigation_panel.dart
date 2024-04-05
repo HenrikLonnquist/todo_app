@@ -84,6 +84,7 @@ class _NavigationPanelState extends State<NavigationPanel> {
                 const SizedBox(height: 10),
                 // PageLists that the user has created.
                 const Text('User Lists'),
+                const SizedBox(height: 10),
                 for (var i = 0; i < dataList["user_lists"].length; i++)
                 ElevatedButton.icon(
                   onPressed: () {
@@ -97,7 +98,7 @@ class _NavigationPanelState extends State<NavigationPanel> {
                   ),
                 ),
 
-                const SizedBox(height: 10),
+                const SizedBox(height: 15),
                 ElevatedButton.icon(
                   onPressed: () {
                     setState(() {
