@@ -1,5 +1,6 @@
 // ignore_for_file: avoid_print
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 // import 'package:intl/intl.dart';
 import 'package:todo_app/components/card_field.dart';
@@ -12,12 +13,15 @@ class MainTasksPage extends StatefulWidget {
     super.key,
     required this.title,
     required this.dataList,
-    this.onUserListUpdate,
+    this.onUserUpdate,
+    this.userList = false,
   });
 
-  final Function()? onUserListUpdate;
+  final Function()? onUserUpdate;
 
   final String title;
+
+  final bool? userList;
 
   final Map dataList;
 
@@ -29,10 +33,24 @@ class _MainTasksPageState extends State<MainTasksPage> {
 
   final TextEditingController _newTaskController = TextEditingController();
   
+  final TextEditingController _titleController  = TextEditingController();
+  
   bool isRightPanelOpen = false;
 
   int mainTaskIndex = 0;
 
+  @override
+  void initState() {
+    _titleController.text = widget.title;
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    _newTaskController.dispose();
+    _titleController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -47,22 +65,50 @@ class _MainTasksPageState extends State<MainTasksPage> {
           padding: const EdgeInsets.all(10),
           color: Colors.blue, 
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Padding(
                 padding: const EdgeInsets.only(left: 8.0),
-                child: Title(
-                  color: Colors.black, 
-                  child: Text(
-                    widget.title,
+                child: IntrinsicWidth(
+                  child: TextField(
+                    enabled: widget.userList! ? true : false,
+                    controller: _titleController,
+                    onSubmitted: (value) {
+                      setState(() {
+                        // TODO: title wont change
+                        _titleController.text = value;
+                        print(_titleController.text);
+                        widget.dataList["user_list_name"] = value;
+                        widget.onUserUpdate!.call();
+                      });
+                    },
                     style: const TextStyle(
                       fontSize: 26,
                       fontWeight: FontWeight.bold,
-                      // fontFamily: ,
+                      // fontFamily: ,                    
+                    ),
+                    cursorColor: Colors.black,
+                    decoration: const InputDecoration(
+                      border: InputBorder.none,
+                      isDense: true,
                     ),
                   ),
                 ),
               ),
+              // Padding(
+              //   padding: const EdgeInsets.only(left: 8.0),
+              //   child: Title(
+              //     color: Colors.black, 
+              //     child: Text(
+              //       widget.title,
+              //       style: const TextStyle(
+              //         fontSize: 26,
+              //         fontWeight: FontWeight.bold,
+              //         // fontFamily: ,
+              //       ),
+              //     ),
+              //   ),
+              // ),
               const SizedBox(
                 height: 10,
               ),
@@ -102,8 +148,8 @@ class _MainTasksPageState extends State<MainTasksPage> {
                     
                     setState(() {
                       _newTaskController.text = "";
-                      if(widget.onUserListUpdate != null) {
-                        widget.onUserListUpdate!.call();
+                      if(widget.onUserUpdate != null) {
+                        widget.onUserUpdate!.call();
                         return;
                       }
                       DataUtils.writeJsonFile(widget.dataList);
