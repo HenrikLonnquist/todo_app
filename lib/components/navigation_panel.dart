@@ -46,7 +46,8 @@ class _NavigationPanelState extends State<NavigationPanel> {
       pages.add(MainTasksPage( 
         title: dataList["user_lists"][i]["user_list_name"],
         dataList: dataList["user_lists"][i],
-        onUserListUpdate: () {
+        userList: true,
+        onUserUpdate: () {
           setState(() {
             DataUtils.writeJsonFile(dataList);
           });
@@ -116,7 +117,7 @@ class _NavigationPanelState extends State<NavigationPanel> {
                       pages.add(MainTasksPage(
                         title: dataList["user_lists"][userListLength]["user_list_name"],
                         dataList: dataList["user_lists"][userListLength],
-                        onUserListUpdate: () {
+                        onUserUpdate: () {
                           setState(() {
                             DataUtils.writeJsonFile(dataList);
                           });
