@@ -1,5 +1,6 @@
 // ignore_for_file: avoid_print
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:todo_app/screens/main_tasks.dart';
 import 'package:todo_app/screens/schedule.dart';
@@ -14,7 +15,7 @@ class NavigationPanel extends StatefulWidget {
 
 class _NavigationPanelState extends State<NavigationPanel> {
   Map dataList = {};
-  int _navigationRailIndex = 1;
+  int _selectedIndex = 0;
 
   late List<Widget> pages = <Widget>[
     MainTasksPage(
@@ -24,13 +25,28 @@ class _NavigationPanelState extends State<NavigationPanel> {
     SchedulePage(
       database: dataList
     ),
-    TodayTasks(dataList: dataList)
+    TodayTasks(dataList: dataList),
+
   ];
+
+  void _changePage(int) {
+    setState(() {
+      _selectedIndex = int;
+    });
+  }
 
   @override
   void initState() {
     super.initState();
     dataList = DataUtils.readJsonFile();
+    
+    //* Adding user lists.
+    for(var i = 0; i < dataList["user_lists"].length; i++) {
+      pages.add(MainTasksPage( 
+        title: dataList["user_lists"][i]["user_list_name"],
+        dataList: dataList["user_lists"][i]
+      ));
+    }
   }
 
   @override
@@ -42,38 +58,68 @@ class _NavigationPanelState extends State<NavigationPanel> {
             // TODO: change it to a fixed width. Just like MS Todo
             width: MediaQuery.of(context).size.width * 0.2,
             height: MediaQuery.of(context).size.height,
-            child: NavigationRail(
-              // backgroundColor: ,
-              selectedIndex: _navigationRailIndex,
-              onDestinationSelected: (index) {
-                setState(() {
-                  _navigationRailIndex = index;
-                });
-              },
-              labelType: NavigationRailLabelType.all,
-              destinations: const [
-                NavigationRailDestination(
-                  icon: Icon(Icons.home), 
-                  label: Text("Main Tasks"),
+            child: Column(
+              children: [
+                ElevatedButton.icon(
+                  onPressed: () {
+                    _changePage(0);
+                  },
+                  icon: const Icon(Icons.home), 
+                  label: const Text("Main Tasks"),
                 ),
-                NavigationRailDestination(
-                  icon: Icon(Icons.schedule_rounded), 
-                  label: Text("Schedule"),
+                ElevatedButton.icon(
+                  onPressed: () {
+                    _changePage(1);
+                  },
+                  icon: const Icon(Icons.schedule_rounded), 
+                  label: const Text("Schedule"),
                 ),
-                
+                Divider(thickness: 2,),
+                const SizedBox(height: 10),
+                // PageLists that the user has created.
+                const Text('User Lists'),
+                for (var i = 0; i < dataList["user_lists"].length; i++)
+                ElevatedButton.icon(
+                  onPressed: () {
+                    setState(() {
+                      _selectedIndex = 3 + i;
+                    });
+                  }, 
+                  icon: const Icon(Icons.abc_outlined),
+                  label: Text(
+                    "${dataList["user_lists"][i]["user_list_name"]}"
+                  ),
+                ),
+
+                const SizedBox(height: 10),
+                ElevatedButton.icon(
+                  onPressed: () {
+                    setState(() {
+                      int userListLength = dataList["user_lists"].length;
+
+                      dataList["user_lists"].add(
+                        {
+                          "user_list_name": "New User List",
+                          "main_tasks": []
+                        }
+                      );
+
+                      DataUtils.writeJsonFile(dataList);
+
+                      pages.add(MainTasksPage(
+                        title: dataList["user_lists"][userListLength]["user_list_name"],
+                        dataList: dataList["user_lists"][userListLength],
+                      ));
+                    });
+                  }, 
+                  icon: const Icon(Icons.add),
+                  label: const Text("New List")
+                ),
               ],
-              trailing: const Column(
-                children: [
-                  Divider(thickness: 2,),
-                  SizedBox(height: 10),
-                  // PageLists that the user has created.
-                  Text('User Lists')
-                ],
-              ),
             ),
           ),
           Expanded(
-            child: pages.elementAt(_navigationRailIndex),
+            child: pages.elementAt(_selectedIndex),
           )
         ],
       ),
