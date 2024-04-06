@@ -79,7 +79,7 @@
     ],
     "user_lists": [
         {
-            "user_list_name": "New User List 0",
+            "user_list_name": "test",
             "main_tasks": [
                 {
                     "name": "test",
@@ -90,7 +90,7 @@
             ]
         },
         {
-            "user_list_name": "New User List 1",
+            "user_list_name": "test 2",
             "main_tasks": []
         },
         {

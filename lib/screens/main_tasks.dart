@@ -54,6 +54,11 @@ class _MainTasksPageState extends State<MainTasksPage> {
 
   @override
   Widget build(BuildContext context) {
+    if(widget.onUserUpdate != null){
+      _titleController.text = widget.dataList["user_list_name"];
+    } else {
+      _titleController.text = widget.title;
+    }
     return Row(
       children: [
         Container(
@@ -85,6 +90,7 @@ class _MainTasksPageState extends State<MainTasksPage> {
                     style: const TextStyle(
                       fontSize: 26,
                       fontWeight: FontWeight.bold,
+                      color: Colors.black,
                       // fontFamily: ,                    
                     ),
                     cursorColor: Colors.black,
