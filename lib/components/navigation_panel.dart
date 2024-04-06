@@ -2,6 +2,7 @@
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:todo_app/screens/main_tasks.dart';
 import 'package:todo_app/screens/schedule.dart';
 import 'package:todo_app/utils/data_utils.dart';
@@ -15,7 +16,7 @@ class NavigationPanel extends StatefulWidget {
 
 class _NavigationPanelState extends State<NavigationPanel> {
   Map dataList = {};
-  int _selectedIndex = 3;
+  int _selectedIndex = 2;
 
   // TODO: maybe create a new list for users; have the 
   // constant pages and user pages separate
@@ -73,6 +74,13 @@ class _NavigationPanelState extends State<NavigationPanel> {
                   },
                   icon: const Icon(Icons.home), 
                   label: const Text("Main Tasks"),
+                ),
+                ElevatedButton.icon(
+                  onPressed: () {
+                    _changePage(2);
+                  },
+                  icon: const Icon(Icons.sunny), 
+                  label: const Text("Today"),
                 ),
                 ElevatedButton.icon(
                   onPressed: () {
@@ -141,7 +149,7 @@ class _NavigationPanelState extends State<NavigationPanel> {
 }
 
 class TodayTasks extends StatelessWidget {
-  const TodayTasks({
+  TodayTasks({
     super.key,
     required this.dataList,
   });
@@ -150,9 +158,32 @@ class TodayTasks extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    Map todaysTasks = {"main_tasks": []};  
+    var dataTaskLists = [];
+    dataTaskLists.add(dataList["main_tasks"]);
+    var dataUserList = dataList["user_lists"];
+
+    DateTime now = DateTime.now();
+    DateTime dateNow = DateTime(now.year, now.month, now.day);
+
+    for(var i in dataUserList){
+      if(i["main_tasks"].length != 0) {
+        dataTaskLists.add(i["main_tasks"]);
+      }
+    }
+
+    for(var taskList in dataTaskLists){
+      for(var task in taskList) {
+        var taskDate = task["due_date"];
+        if(taskDate != "" && DateTime.parse(taskDate) == dateNow) {
+          todaysTasks["main_tasks"].add(task);
+        }
+      }
+    }
+
     return MainTasksPage(
       title: "Today",
-      dataList: dataList
+      dataList: todaysTasks
     );
   }
 }
