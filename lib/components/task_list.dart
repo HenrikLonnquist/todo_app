@@ -1,6 +1,8 @@
 // ignore_for_file: avoid_print
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:todo_app/components/card_field.dart';
 import 'package:todo_app/components/title_field.dart';
 
@@ -99,6 +101,30 @@ class SubTaskLIst extends StatefulWidget {
 }
 
 class _SubTaskLIstState extends State<SubTaskLIst> {
+
+  final FocusNode _notesFocus = FocusNode();
+  final TextEditingController _notesController = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    _notesController.text = widget.mainTask["notes"];
+    _notesFocus.addListener(() {
+      if(!_notesFocus.hasFocus){
+        setState(() {
+          widget.mainTask["notes"] = _notesController.text; 
+          widget.onChanged!.call(widget.mainTask);
+        });
+      } 
+    });
+  }
+
+  @override
+  void dispose() {
+    _notesFocus.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -159,21 +185,22 @@ class _SubTaskLIstState extends State<SubTaskLIst> {
           child: widget.mainTask["due_date"] != "" 
           ? Text(widget.mainTask["due_date"].toString().split(" ")[0]) 
           : const Text("Due Date"),
+        ),
+        // TODO: need a dialog to notify that it has been saved
+        Card(
+          child: TextFormField(
+            focusNode: _notesFocus,
+            controller: _notesController,
+            maxLines: null,
+            decoration: const InputDecoration(
+              contentPadding: EdgeInsets.only(left: 8),
+              hintText: "Notes",
+              border: InputBorder.none,
+            ),
+          ),
         )
-        // Card(
-        //   color: Colors.white,
-        //   child: CalendarDatePicker(
-        //     initialDate: DateTime.now(),
-        //     firstDate: DateTime.now(), 
-        //     lastDate: DateTime.now().add(const Duration(days: 30)),
-        //     onDateChanged: (selectedDate) {
-        //       print("testing");
-        //     }
-        //   ),
-        // )
         //* TODO: reminder: time + date
         //* TODO: repeat: dates(days)
-        //* TODO: notes: Textfield
       ],
     );
   }

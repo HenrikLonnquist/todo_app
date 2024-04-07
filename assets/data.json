@@ -78,7 +78,7 @@
         },
         {
             "name": "testing today page",
-            "due_date": "2024-04-07 00:00:00.000",
+            "due_date": "2024-04-08 00:00:00.000",
             "sub_tasks": [
                 {
                     "name": "test"
@@ -96,7 +96,7 @@
                     "name": "test 5"
                 }
             ],
-            "notes": ""
+            "notes": "testing\nmultiline\nhere"
         },
         {
             "name": "another",
