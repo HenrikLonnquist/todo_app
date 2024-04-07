@@ -34,6 +34,8 @@ class _MainTasksPageState extends State<MainTasksPage> {
   final TextEditingController _newTaskController = TextEditingController();
   
   final TextEditingController _titleController  = TextEditingController();
+
+  late String pageTitle = widget.title;
   
   bool isRightPanelOpen = false;
 
@@ -54,11 +56,12 @@ class _MainTasksPageState extends State<MainTasksPage> {
 
   @override
   Widget build(BuildContext context) {
-    if(widget.onUserUpdate != null){
+    if (widget.dataList["user_list_name"] != null) {
       _titleController.text = widget.dataList["user_list_name"];
     } else {
       _titleController.text = widget.title;
     }
+
     return Row(
       children: [
         Container(
@@ -158,7 +161,8 @@ class _MainTasksPageState extends State<MainTasksPage> {
                         widget.onUserUpdate!.call();
                         return;
                       }
-                      DataUtils.writeJsonFile(widget.dataList);
+                      print("${widget.dataList}");
+                      // DataUtils.writeJsonFile(widget.dataList);
                     });
                   },
                 ),
@@ -178,9 +182,11 @@ class _MainTasksPageState extends State<MainTasksPage> {
                 };
                 widget.dataList["main_tasks"][mainTaskIndex]["sub_tasks"].add(templateSub);
               }
-              setState(() {
-                DataUtils.writeJsonFile(widget.dataList);
-              });
+              //! BUG: When changing a tasks due date it will remove that task from todays list
+              //! and show another task. Which is not what I want, I want the same task(that i switched date on)
+              //! to stay in rightpanel while the todays list updates and removes the task.
+              widget.onUserUpdate!.call();
+              print(widget.dataList);
             }, 
           ),
         ),              

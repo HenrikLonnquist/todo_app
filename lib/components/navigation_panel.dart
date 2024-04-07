@@ -1,10 +1,9 @@
 // ignore_for_file: avoid_print
 
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 import 'package:todo_app/screens/main_tasks.dart';
 import 'package:todo_app/screens/schedule.dart';
+import 'package:todo_app/screens/today_tasks.dart';
 import 'package:todo_app/utils/data_utils.dart';
 
 class NavigationPanel extends StatefulWidget {
@@ -16,19 +15,19 @@ class NavigationPanel extends StatefulWidget {
 
 class _NavigationPanelState extends State<NavigationPanel> {
   Map dataList = {};
-  int _selectedIndex = 2;
+  int _selectedIndex = 1;
 
-  // TODO: maybe create a new list for users; have the 
-  // constant pages and user pages separate
   late List<Widget> pages = <Widget>[
     MainTasksPage(
       title: "Main Tasks",
       dataList: dataList,
     ),
-    SchedulePage(
-      database: dataList
+    TodayTasks(
+      dataList: dataList,
     ),
-    TodayTasks(dataList: dataList),
+    SchedulePage(
+      database: dataList,
+    ),
   ];
 
   void _changePage(int) {
@@ -77,14 +76,14 @@ class _NavigationPanelState extends State<NavigationPanel> {
                 ),
                 ElevatedButton.icon(
                   onPressed: () {
-                    _changePage(2);
+                    _changePage(1);
                   },
                   icon: const Icon(Icons.sunny), 
                   label: const Text("Today"),
                 ),
                 ElevatedButton.icon(
                   onPressed: () {
-                    _changePage(1);
+                    _changePage(2);
                   },
                   icon: const Icon(Icons.schedule_rounded), 
                   label: const Text("Schedule"),
@@ -144,46 +143,6 @@ class _NavigationPanelState extends State<NavigationPanel> {
           )
         ],
       ),
-    );
-  }
-}
-
-class TodayTasks extends StatelessWidget {
-  TodayTasks({
-    super.key,
-    required this.dataList,
-  });
-
-  final Map dataList;
-
-  @override
-  Widget build(BuildContext context) {
-    Map todaysTasks = {"main_tasks": []};  
-    var dataTaskLists = [];
-    dataTaskLists.add(dataList["main_tasks"]);
-    var dataUserList = dataList["user_lists"];
-
-    DateTime now = DateTime.now();
-    DateTime dateNow = DateTime(now.year, now.month, now.day);
-
-    for(var i in dataUserList){
-      if(i["main_tasks"].length != 0) {
-        dataTaskLists.add(i["main_tasks"]);
-      }
-    }
-
-    for(var taskList in dataTaskLists){
-      for(var task in taskList) {
-        var taskDate = task["due_date"];
-        if(taskDate != "" && DateTime.parse(taskDate) == dateNow) {
-          todaysTasks["main_tasks"].add(task);
-        }
-      }
-    }
-
-    return MainTasksPage(
-      title: "Today",
-      dataList: todaysTasks
     );
   }
 }

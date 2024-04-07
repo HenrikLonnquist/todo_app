@@ -119,11 +119,6 @@ class SubTaskLIst extends StatelessWidget {
             dataList: mainTask["sub_tasks"],
             subTask: true,
             onChanged: (listValue) {
-              // List
-              print("side panel: $listValue");
-              // this is will always be a sub task list
-              // and I have to send it back to main task 
-        
               onChanged!.call(listValue);
             },
           ),
@@ -154,12 +149,12 @@ class SubTaskLIst extends StatelessWidget {
 
             if (selectedDate != null && selectedDate != dataDate) {
               print(selectedDate);
-              // mainTask["due_date"] = selectedDate.toString().split(" ")[0];
-              // onChanged!.call(mainTask);
+              mainTask["due_date"] = selectedDate.toString();
+              onChanged!.call(mainTask);
             }
 
           }, 
-          child: const Text("Due Date"),
+          child: mainTask["due_date"] != "" ? Text("${mainTask["due_date"].toString().split(" ")[0]}") : const Text("Due Date"),
         )
         // Card(
         //   color: Colors.white,
