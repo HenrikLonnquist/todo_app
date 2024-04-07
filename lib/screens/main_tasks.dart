@@ -64,8 +64,6 @@ class _MainTasksPageState extends State<MainTasksPage> {
       _titleController.text = widget.title;
     }
 
-    print("widget.datdaList: ${widget.dataList}");
-    print("prevTask: $prevTask");
     return Row(
       children: [
         Container(
@@ -152,7 +150,7 @@ class _MainTasksPageState extends State<MainTasksPage> {
                         return;
                       }
                       print("${widget.dataList}");
-                      // DataUtils.writeJsonFile(widget.dataList);
+                      DataUtils.writeJsonFile(widget.dataList);
                     });
                   },
                 ),
@@ -180,7 +178,13 @@ class _MainTasksPageState extends State<MainTasksPage> {
               //! BUG: When changing a tasks due date it will remove that task from todays list
               //! and show another task. Which is not what I want, I want the same task(that i switched date on)
               //! to stay in rightpanel while the todays list updates and removes the task from the list.
-              widget.onUserUpdate!.call();
+              if (widget.onUserUpdate != null) {
+                widget.onUserUpdate!.call();
+                return;
+              }
+              setState(() {
+                DataUtils.writeJsonFile(widget.dataList);
+              });
               
             }, 
           ),

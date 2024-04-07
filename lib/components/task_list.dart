@@ -95,7 +95,6 @@ class SubTaskLIst extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    print("subtasklist: $mainTask");
     return Column(
       mainAxisAlignment: MainAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
