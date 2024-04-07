@@ -175,13 +175,12 @@ class _MainTasksPageState extends State<MainTasksPage> {
                 };
                 widget.dataList["main_tasks"][mainTaskIndex]["sub_tasks"].add(templateSub);
               }
-              //! BUG: When changing a tasks due date it will remove that task from todays list
-              //! and show another task. Which is not what I want, I want the same task(that i switched date on)
-              //! to stay in rightpanel while the todays list updates and removes the task from the list.
+
               if (widget.onUserUpdate != null) {
                 widget.onUserUpdate!.call();
                 return;
               }
+              
               setState(() {
                 DataUtils.writeJsonFile(widget.dataList);
               });

@@ -81,7 +81,7 @@ class _TaskListState extends State<TaskList> {
   }
 }
 
-class SubTaskLIst extends StatelessWidget {
+class SubTaskLIst extends StatefulWidget {
   const SubTaskLIst({
     super.key,
     required this.title,
@@ -94,6 +94,11 @@ class SubTaskLIst extends StatelessWidget {
   final String title;
 
   @override
+  State<SubTaskLIst> createState() => _SubTaskLIstState();
+}
+
+class _SubTaskLIstState extends State<SubTaskLIst> {
+  @override
   Widget build(BuildContext context) {
     return Column(
       mainAxisAlignment: MainAxisAlignment.start,
@@ -105,7 +110,7 @@ class SubTaskLIst extends StatelessWidget {
           child: Title(
             color: Colors.black, 
             child: Text(
-              title,
+              widget.title,
               style: const TextStyle(
                 fontSize: 26,
                 fontWeight: FontWeight.bold,
@@ -116,10 +121,10 @@ class SubTaskLIst extends StatelessWidget {
         ),
         Expanded(
           child: TaskList(
-            dataList: mainTask["sub_tasks"],
+            dataList: widget.mainTask["sub_tasks"],
             subTask: true,
             onChanged: (listValue) {
-              onChanged!.call(listValue);
+              widget.onChanged!.call(listValue);
             },
           ),
         ),
@@ -127,7 +132,7 @@ class SubTaskLIst extends StatelessWidget {
           alignment: Alignment.bottomCenter,
           child: CardField(
             onSubmitted: (stringValue) {
-              onChanged!.call(stringValue);
+              widget.onChanged!.call(stringValue);
             },
           )
         ),
@@ -136,7 +141,7 @@ class SubTaskLIst extends StatelessWidget {
         ElevatedButton(
           onPressed: () async {
 
-            DateTime dataDate =  DateTime.parse(mainTask["due_date"]);
+            DateTime dataDate =  DateTime.parse(widget.mainTask["due_date"]);
             // TODO: might switch to calendar date picker 2 package later on.
             DateTime? selectedDate = await showDatePicker(
               context: context,
@@ -147,14 +152,15 @@ class SubTaskLIst extends StatelessWidget {
               
             ); 
 
+            
             if (selectedDate != null && selectedDate != dataDate) {
-              mainTask["due_date"] = selectedDate.toString();
-              onChanged!.call(mainTask);
+              widget.mainTask["due_date"] = selectedDate.toString();
+              widget.onChanged!.call(widget.mainTask);
             }
 
           }, 
-          child: mainTask["due_date"] != "" 
-          ? Text(mainTask["due_date"].toString().split(" ")[0]) 
+          child: widget.mainTask["due_date"] != "" 
+          ? Text(widget.mainTask["due_date"].toString().split(" ")[0]) 
           : const Text("Due Date"),
         )
         // Card(
