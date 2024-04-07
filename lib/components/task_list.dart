@@ -95,6 +95,7 @@ class SubTaskLIst extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    print("subtasklist: $mainTask");
     return Column(
       mainAxisAlignment: MainAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
@@ -141,20 +142,21 @@ class SubTaskLIst extends StatelessWidget {
             DateTime? selectedDate = await showDatePicker(
               context: context,
               initialDate: dataDate,
-              firstDate: DateTime.now(), 
+              firstDate: DateTime.now().subtract(const Duration(days: 365)), 
               lastDate: DateTime.now().add(const Duration(days: 30)),
                
               
             ); 
 
             if (selectedDate != null && selectedDate != dataDate) {
-              print(selectedDate);
               mainTask["due_date"] = selectedDate.toString();
               onChanged!.call(mainTask);
             }
 
           }, 
-          child: mainTask["due_date"] != "" ? Text("${mainTask["due_date"].toString().split(" ")[0]}") : const Text("Due Date"),
+          child: mainTask["due_date"] != "" 
+          ? Text(mainTask["due_date"].toString().split(" ")[0]) 
+          : const Text("Due Date"),
         )
         // Card(
         //   color: Colors.white,

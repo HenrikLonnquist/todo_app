@@ -41,6 +41,8 @@ class _MainTasksPageState extends State<MainTasksPage> {
 
   int mainTaskIndex = 0;
 
+  late Map prevTask = widget.dataList;
+
   @override
   void initState() {
     _titleController.text = widget.title;
@@ -62,6 +64,8 @@ class _MainTasksPageState extends State<MainTasksPage> {
       _titleController.text = widget.title;
     }
 
+    print("widget.datdaList: ${widget.dataList}");
+    print("prevTask: $prevTask");
     return Row(
       children: [
         Container(
@@ -104,20 +108,6 @@ class _MainTasksPageState extends State<MainTasksPage> {
                   ),
                 ),
               ),
-              // Padding(
-              //   padding: const EdgeInsets.only(left: 8.0),
-              //   child: Title(
-              //     color: Colors.black, 
-              //     child: Text(
-              //       widget.title,
-              //       style: const TextStyle(
-              //         fontSize: 26,
-              //         fontWeight: FontWeight.bold,
-              //         // fontFamily: ,
-              //       ),
-              //     ),
-              //   ),
-              // ),
               const SizedBox(
                 height: 10,
               ),
@@ -170,11 +160,16 @@ class _MainTasksPageState extends State<MainTasksPage> {
             ],
           ), 
         ),
-        if (widget.dataList["main_tasks"].isNotEmpty) RightSidePanel(
+        if(prevTask["main_tasks"].isNotEmpty || widget.dataList["main_tasks"].isNotEmpty)
+        RightSidePanel(
           show: isRightPanelOpen,
           child: SubTaskLIst(
-            title: widget.dataList["main_tasks"][mainTaskIndex]["name"],
-            mainTask: widget.dataList["main_tasks"][mainTaskIndex],
+            title: widget.dataList["main_tasks"].isNotEmpty 
+            ? widget.dataList["main_tasks"][mainTaskIndex]["name"]
+            : prevTask["main_tasks"][mainTaskIndex]["name"],
+            mainTask: widget.dataList["main_tasks"].isNotEmpty
+            ? widget.dataList["main_tasks"][mainTaskIndex]
+            : prevTask["main_tasks"][mainTaskIndex],
             onChanged: (value) {
               if (value.runtimeType == String) {
                 Map templateSub = {
@@ -184,9 +179,9 @@ class _MainTasksPageState extends State<MainTasksPage> {
               }
               //! BUG: When changing a tasks due date it will remove that task from todays list
               //! and show another task. Which is not what I want, I want the same task(that i switched date on)
-              //! to stay in rightpanel while the todays list updates and removes the task.
+              //! to stay in rightpanel while the todays list updates and removes the task from the list.
               widget.onUserUpdate!.call();
-              print(widget.dataList);
+              
             }, 
           ),
         ),              
