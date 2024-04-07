@@ -2,6 +2,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:todo_app/components/card_field.dart';
+import 'package:todo_app/components/title_field.dart';
 
 class TaskList extends StatefulWidget {
   const TaskList({
@@ -106,17 +107,13 @@ class _SubTaskLIstState extends State<SubTaskLIst> {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Padding(
-          padding: const EdgeInsets.only(left: 8.0),
-          child: Title(
-            color: Colors.black, 
-            child: Text(
-              widget.title,
-              style: const TextStyle(
-                fontSize: 26,
-                fontWeight: FontWeight.bold,
-                // fontFamily: ,
-              ),
-            ),
+          padding: const EdgeInsets.only(left: 8),
+          child: TitleField(
+            inputValue: widget.title,
+            onChange: (value) {
+              widget.mainTask["name"] = value;
+              widget.onChanged!.call(widget.mainTask);
+            },
           ),
         ),
         Expanded(

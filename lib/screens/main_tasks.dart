@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:todo_app/components/card_field.dart';
 import 'package:todo_app/components/right_sidepanel.dart';
 import 'package:todo_app/components/task_list.dart';
+import 'package:todo_app/components/title_field.dart';
 import 'package:todo_app/utils/data_utils.dart';
 
 class MainTasksPage extends StatefulWidget {
@@ -33,9 +34,7 @@ class _MainTasksPageState extends State<MainTasksPage> {
 
   final TextEditingController _newTaskController = TextEditingController();
   
-  final TextEditingController _titleController  = TextEditingController();
-
-  late String pageTitle = widget.title;
+  String pageTitle = "";
   
   bool isRightPanelOpen = false;
 
@@ -43,27 +42,22 @@ class _MainTasksPageState extends State<MainTasksPage> {
 
   late Map prevTask = widget.dataList;
 
-  @override
-  void initState() {
-    _titleController.text = widget.title;
-    super.initState();
-  }
+
 
   @override
   void dispose() {
     _newTaskController.dispose();
-    _titleController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    if (widget.dataList["user_list_name"] != null) {
-      _titleController.text = widget.dataList["user_list_name"];
+    if (widget.dataList["user_list_name"] != null && widget.dataList["user_list_name"] != pageTitle) {
+      pageTitle = widget.dataList["user_list_name"];
+      isRightPanelOpen = false;
     } else {
-      _titleController.text = widget.title;
+      pageTitle = widget.title;
     }
-
     return Row(
       children: [
         Container(
@@ -79,31 +73,13 @@ class _MainTasksPageState extends State<MainTasksPage> {
             children: [
               Padding(
                 padding: const EdgeInsets.only(left: 8.0),
-                child: IntrinsicWidth(
-                  child: TextField(
-                    enabled: widget.userList! ? true : false,
-                    controller: _titleController,
-                    onSubmitted: (value) {
-                      setState(() {
-                        // TODO: title wont change
-                        _titleController.text = value;
-                        print(_titleController.text);
-                        widget.dataList["user_list_name"] = value;
-                        widget.onUserUpdate!.call();
-                      });
-                    },
-                    style: const TextStyle(
-                      fontSize: 26,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.black,
-                      // fontFamily: ,                    
-                    ),
-                    cursorColor: Colors.black,
-                    decoration: const InputDecoration(
-                      border: InputBorder.none,
-                      isDense: true,
-                    ),
-                  ),
+                child: TitleField(
+                  enabled: widget.userList!,
+                  inputValue: pageTitle,
+                  onChange: (value) {
+                    widget.dataList["user_list_name"] = value;
+                    widget.onUserUpdate!.call();
+                  },
                 ),
               ),
               const SizedBox(
@@ -176,18 +152,17 @@ class _MainTasksPageState extends State<MainTasksPage> {
                 widget.dataList["main_tasks"][mainTaskIndex]["sub_tasks"].add(templateSub);
               }
 
-              if (widget.onUserUpdate != null) {
-                widget.onUserUpdate!.call();
-                return;
-              }
-              
               setState(() {
+                if (widget.onUserUpdate != null) {
+                  widget.onUserUpdate!.call();
+                  return;
+                }
+              
                 DataUtils.writeJsonFile(widget.dataList);
               });
-              
             }, 
           ),
-        ),              
+        ),
       ],
     );
   }
