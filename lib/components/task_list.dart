@@ -187,6 +187,7 @@ class _SubTaskLIstState extends State<SubTaskLIst> {
           : const Text("Due Date"),
         ),
         // TODO: need a dialog to notify that it has been saved
+        // TODO: need to keyboardlistener for escape and shift+enter to save text.
         Card(
           child: TextFormField(
             focusNode: _notesFocus,
