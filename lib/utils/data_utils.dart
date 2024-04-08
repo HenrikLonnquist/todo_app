@@ -14,6 +14,7 @@ class DataUtils {
   static Map dataTemplate( 
   {
     required String name,
+    String reminder = "",
     String dueDate = "", 
     List subList = const [], 
     String notes = "", 
@@ -21,6 +22,7 @@ class DataUtils {
     return {
       "name": name,
       // "id": int //time?
+      "reminder": reminder,
       "due_date": dueDate,
       "sub_tasks": subList,
       "notes": notes,
