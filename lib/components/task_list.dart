@@ -63,10 +63,9 @@ class _TaskListState extends State<TaskList> {
             child: ListTile(
               // leading:
               title: Text("${widget.dataList[index]["name"]}"),
-              // TODO: below change back to: widget.subTask ? ... : null
               trailing: IconButton(
                 icon: const Icon(
-                  Icons.more_vert_rounded,
+                  Icons.highlight_remove_rounded,
                   size: 20,
                   color: Colors.black,
                 ),
