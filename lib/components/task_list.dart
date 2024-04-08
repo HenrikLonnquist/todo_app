@@ -1,11 +1,12 @@
 // ignore_for_file: avoid_print
-
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
+import 'package:intl/intl.dart';
 import 'package:todo_app/components/card_field.dart';
 import 'package:todo_app/components/title_field.dart';
+import 'package:todo_app/screens/schedule.dart';
 
 class TaskList extends StatefulWidget {
   const TaskList({
@@ -160,6 +161,188 @@ class _SubTaskLIstState extends State<SubTaskLIst> {
             )
           ),
           const Divider(thickness: 2,),
+          ElevatedButton.icon(
+            onPressed: () async {
+
+              DateTime now = DateTime.now();
+              DateTime selectedDate = now;
+
+              DateTime? tabDateTimePicker = await showDialog(
+                barrierColor: Colors.transparent,
+                context: context, 
+                builder: (context) {
+                  return Center(
+                    child: Container(
+                      height: 320,
+                      width: 250,
+                      color: Colors.pinkAccent,
+                      child: StatefulBuilder(
+                        builder: (context, setState) {
+                          return DefaultTabController(
+                            initialIndex: 1,
+                            length: 2,
+                            child:  Column(
+                              children: [
+                                const Card(
+                                  child: TabBar(
+                                    tabs: [
+                                      Tab(
+                                        child: Text("Date"),
+                                      ),
+                                      Tab(
+                                        child: Text("Time"),
+                                      )
+                                    ]
+                                  ),
+                                ),
+                                Expanded(
+                                  child: TabBarView(
+                                    children: [
+                                      Column(
+                                        children: [
+                                          //* Optional
+                                          Column(
+                                            children: [
+                                              Text(DateFormat("E d MMM y").format(selectedDate)),
+                                              Row(
+                                                children: [
+                                      
+                                                  TextButton(
+                                                    onPressed: () {
+                                                      setState((){
+                                                        now = DateTime(now.year, now.month - 1, 1);
+                                                      });
+                                                    }, 
+                                                    child: const Icon(
+                                                      Icons.arrow_back_ios,
+                                                      size: 20,
+                                                    ),
+                                                  ),  
+                                                  const Spacer(),
+                                                  Text("${DateFormat("MMMM").format(now)} ${DateFormat("y").format(now)}"),
+                                                  const Spacer(),
+                                                  TextButton(
+                                                    onPressed: () {
+                                                      setState((){
+                                                        now = DateTime(now.year, now.month + 1, 1);
+                                                      });
+                                                    }, 
+                                                    child: const Icon(
+                                                      Icons.arrow_forward_ios,
+                                                      size: 20,
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                            ],
+                                          ),
+                                          GridView.builder(
+                                            shrinkWrap: true,
+                                            physics: const NeverScrollableScrollPhysics(),
+                                            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                                              crossAxisCount: 7,
+                                            ), 
+                                            itemCount: DateTime(now.year, now.month + 1, 0).day,
+                                            itemBuilder: (context, index) {
+                                              return Card(
+                                                color: now.month == selectedDate.month && (index + 1) == selectedDate.day ? Colors.tealAccent : null,
+                                                child: InkWell(
+                                                  onTap: () {
+                                                    setState(() {
+                                                      selectedDate = DateTime(now.year, now.month, (index + 1));
+                                                      // DefaultTabController.of(context).animateTo(1);
+                                                    });
+                                                  },
+                                                  child: Center(child: Text("${index + 1}"))
+                                                ),
+                                              );
+                                            },
+                                          ),
+                                        ],
+                                      ),
+                                      Column(
+                                        children: [
+                                          const Text("Enter time"),
+                                          Row(
+                                            children: [
+                                              Card(
+                                                child: IntrinsicWidth(
+                                                  child: TextFormField(
+                                                    autofocus: true,
+                                                    inputFormatters: [
+                                                      LengthLimitingTextInputFormatter(2),
+                                                    ],
+                                                    initialValue: TimeOfDay.fromDateTime(now).hour.toString(),
+                                                    textAlign: TextAlign.center,
+                                                    style: const TextStyle(
+                                                      fontSize: 25,
+                                                      fontWeight: FontWeight.w500,
+                                                    ),
+                                                    onFieldSubmitted: (value) {
+                                                  
+                                                    },
+                                                    decoration: const InputDecoration(
+                                                      contentPadding: EdgeInsets.all(16),
+                                                    ),
+                                                  ),
+                                                ),
+                                              )
+                                            ],
+                                          ),
+                                          const Row(
+                                            children: [
+                                              Text("Hour"),
+                                              Text("Minute"),
+                                            ],
+                                          )
+                                        ]
+                                      ),
+                                      // const Icon(Icons.time_to_leave),
+                                    ]
+                                  ),
+                                ),
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.end,
+                                  children: [
+                                    ElevatedButton(
+                                      onPressed: () {
+                                      }, 
+                                      child: const Text("Cancel")
+                                    ),
+                                    ElevatedButton(
+                                      onPressed: () {
+                                      }, 
+                                      child: const Text("Save")
+                                    ),
+                                    
+                                  ]
+                                )
+                              ],
+                            ),
+                          );
+                        }
+                      ),
+                    )
+                  );
+                }
+              );
+
+              // DateTime? selectedTime = await showDatePicker(
+              //   context: context,
+              //   initialDate: widget.mainTask["reminder"] != "" 
+              //   ? DateTime.now()
+              //   : widget.mainTask["reminder"].split(" ")[1],
+              //   firstDate: DateTime.now().subtract(const Duration(days: 365 * 2)), 
+              //   lastDate: DateTime.now().add(const Duration(days: 365 * 2)),
+              // ); 
+              // if (selectedTime != null && selectedTime != widget.mainTask["reminder"]) {
+              //   widget.mainTask["reminder"] = selectedTime;
+              //   // widget.onChanged!.call(widget.mainTask);
+              // }
+            },
+            icon: const Icon(Icons.timer), 
+            label: const Text("Remind me")
+          ),
           //* due dates: date
           ElevatedButton(
             onPressed: () async {
