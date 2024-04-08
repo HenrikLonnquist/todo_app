@@ -3,6 +3,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/widgets.dart';
 import 'package:todo_app/components/card_field.dart';
 import 'package:todo_app/components/title_field.dart';
 
@@ -31,6 +32,8 @@ class _TaskListState extends State<TaskList> {
   @override
   Widget build(BuildContext context) {
     return ReorderableListView.builder(
+      shrinkWrap: true,
+      physics: widget.subTask ? const NeverScrollableScrollPhysics() : null,
       buildDefaultDragHandles: false,
       onReorder: ((oldIndex, newIndex) {
         setState(() {
@@ -127,82 +130,76 @@ class _SubTaskLIstState extends State<SubTaskLIst> {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.start,
-      mainAxisSize: MainAxisSize.min,
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        Padding(
-          padding: const EdgeInsets.only(left: 8),
-          child: TitleField(
-            inputValue: widget.title,
-            onChange: (value) {
-              widget.mainTask["name"] = value;
-              widget.onChanged!.call(widget.mainTask);
-            },
+    return SingleChildScrollView(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Padding(
+            padding: const EdgeInsets.only(left: 8),
+            child: TitleField(
+              inputValue: widget.title,
+              onChange: (value) {
+                widget.mainTask["name"] = value;
+                widget.onChanged!.call(widget.mainTask);
+              },
+            ),
           ),
-        ),
-        Expanded(
-          child: TaskList(
+          TaskList(
             dataList: widget.mainTask["sub_tasks"],
             subTask: true,
             onChanged: (listValue) {
               widget.onChanged!.call(listValue);
             },
           ),
-        ),
-        Align(
-          alignment: Alignment.bottomCenter,
-          child: CardField(
-            onSubmitted: (stringValue) {
-              widget.onChanged!.call(stringValue);
-            },
-          )
-        ),
-        const Divider(thickness: 2,),
-        //* due dates: date
-        ElevatedButton(
-          onPressed: () async {
-
-            DateTime dataDate =  DateTime.parse(widget.mainTask["due_date"]);
-            // TODO: might switch to calendar date picker 2 package later on.
-            DateTime? selectedDate = await showDatePicker(
-              context: context,
-              initialDate: dataDate,
-              firstDate: DateTime.now().subtract(const Duration(days: 365)), 
-              lastDate: DateTime.now().add(const Duration(days: 30)),
-               
-              
-            ); 
-
-            
-            if (selectedDate != null && selectedDate != dataDate) {
-              widget.mainTask["due_date"] = selectedDate.toString();
-              widget.onChanged!.call(widget.mainTask);
-            }
-
-          }, 
-          child: widget.mainTask["due_date"] != "" 
-          ? Text(widget.mainTask["due_date"].toString().split(" ")[0]) 
-          : const Text("Due Date"),
-        ),
-        // TODO: need a dialog to notify that it has been saved
-        // TODO: need to keyboardlistener for escape and shift+enter to save text.
-        Card(
-          child: TextFormField(
-            focusNode: _notesFocus,
-            controller: _notesController,
-            maxLines: null,
-            decoration: const InputDecoration(
-              contentPadding: EdgeInsets.only(left: 8),
-              hintText: "Notes",
-              border: InputBorder.none,
+          Align(
+            alignment: Alignment.bottomCenter,
+            child: CardField(
+              onSubmitted: (stringValue) {
+                widget.onChanged!.call(stringValue);
+              },
+            )
+          ),
+          const Divider(thickness: 2,),
+          //* due dates: date
+          ElevatedButton(
+            onPressed: () async {
+              DateTime dataDate =  DateTime.parse(widget.mainTask["due_date"]);
+              // TODO: might switch to calendar date picker 2 package later on.
+              DateTime? selectedDate = await showDatePicker(
+                context: context,
+                initialDate: dataDate,
+                firstDate: DateTime.now().subtract(const Duration(days: 365)), 
+                lastDate: DateTime.now().add(const Duration(days: 30)),
+              ); 
+                
+              if (selectedDate != null && selectedDate != dataDate) {
+                widget.mainTask["due_date"] = selectedDate.toString();
+                widget.onChanged!.call(widget.mainTask);
+              }
+            }, 
+            child: widget.mainTask["due_date"] != "" 
+            ? Text(widget.mainTask["due_date"].toString().split(" ")[0]) 
+            : const Text("Due Date"),
+          ),
+          // TODO: need a dialog to notify that it has been saved
+          // TODO: need to keyboardlistener for escape and shift+enter to save text.
+          Card(
+            child: TextFormField(
+              focusNode: _notesFocus,
+              controller: _notesController,
+              maxLines: null,
+              decoration: const InputDecoration(
+                contentPadding: EdgeInsets.only(left: 8),
+                hintText: "Notes",
+                border: InputBorder.none,
+              ),
             ),
           ),
-        )
-        //* TODO: reminder: time + date
-        //* TODO: repeat: dates(days)
-      ],
+          //* TODO: reminder: time + date
+          //* TODO: repeat: dates(days)
+        ],
+      ),
     );
   }
 }

@@ -15,12 +15,13 @@ class RightSidePanel extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return show 
-    ? Expanded(
-      child: Container(
-        color: Colors.blueAccent,
-        padding: const EdgeInsets.all(10),
-        child: child,
-      ),
+    ? Container(
+      height: MediaQuery.of(context).size.height,
+      width: 380,
+      // width: MediaQuery.of(context).size.width * 0.3,
+      color: Colors.blueAccent,
+      padding: const EdgeInsets.all(10),
+      child: child,
     )
     : const SizedBox(height: 0);
   }

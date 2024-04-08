@@ -63,7 +63,8 @@ class _NavigationPanelState extends State<NavigationPanel> {
         children: [
           SizedBox(
             // TODO: change it to a fixed width. Just like MS Todo
-            width: MediaQuery.of(context).size.width * 0.2,
+            width: 220,
+            // width: MediaQuery.of(context).size.width * 0.2,
             height: MediaQuery.of(context).size.height,
             child: Column(
               children: [

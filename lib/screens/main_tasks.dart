@@ -2,6 +2,7 @@
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 // import 'package:intl/intl.dart';
 import 'package:todo_app/components/card_field.dart';
 import 'package:todo_app/components/right_sidepanel.dart';
@@ -60,79 +61,78 @@ class _MainTasksPageState extends State<MainTasksPage> {
     }
     return Row(
       children: [
-        Container(
-          // duration: const Duration(seconds: 10),
-          // curve: Curves.fastEaseInToSlowEaseOut,
-          width: isRightPanelOpen ? 
-          MediaQuery.of(context).size.width * 0.5 :
-          MediaQuery.of(context).size.width * 0.8,
-          padding: const EdgeInsets.all(10),
-          color: Colors.blue, 
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Padding(
-                padding: const EdgeInsets.only(left: 8.0),
-                child: TitleField(
-                  enabled: widget.userList!,
-                  inputValue: pageTitle,
-                  onChange: (value) {
-                    widget.dataList["user_list_name"] = value;
-                    widget.onUserUpdate!.call();
-                  },
+        Expanded(
+          child: Container(
+            // duration: const Duration(seconds: 10),
+            // curve: Curves.fastEaseInToSlowEaseOut,
+            padding: const EdgeInsets.all(10),
+            color: Colors.blue, 
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.only(left: 8.0),
+                  child: TitleField(
+                    enabled: widget.userList!,
+                    inputValue: pageTitle,
+                    onChange: (value) {
+                      widget.dataList["user_list_name"] = value;
+                      widget.onUserUpdate!.call();
+                    },
+                  ),
                 ),
-              ),
-              const SizedBox(
-                height: 10,
-              ),
-              Expanded(
-                child: TaskList(
-                  dataList: widget.dataList["main_tasks"],
-                  subTask: false,
-                  onChanged: (value) {
-                    setState(() {
-                      if (widget.dataList["main_tasks"].isEmpty) {
-                        isRightPanelOpen = false;
-                      }
-                      DataUtils.writeJsonFile(widget.dataList);
-                    });
-                  },
-                  onTap: (indexTask) {
-                    setState(() {
-                      if (isRightPanelOpen && mainTaskIndex != indexTask) {
+                const SizedBox(
+                  height: 10,
+                ),
+                Expanded(
+                  child: TaskList(
+                    dataList: widget.dataList["main_tasks"],
+                    subTask: false,
+                    onChanged: (value) {
+                      setState(() {
+                        if (widget.dataList["main_tasks"].isEmpty) {
+                          isRightPanelOpen = false;
+                        }
+                        DataUtils.writeJsonFile(widget.dataList);
+                      });
+                    },
+                    onTap: (indexTask) {
+                      setState(() {
+                        if (isRightPanelOpen && mainTaskIndex != indexTask) {
+                          mainTaskIndex = indexTask;
+                          return;
+                        } 
+                        isRightPanelOpen = !isRightPanelOpen;
                         mainTaskIndex = indexTask;
-                        return;
-                      } 
-                      isRightPanelOpen = !isRightPanelOpen;
-                      mainTaskIndex = indexTask;
-                    });
-                  },
+                      });
+                    },
+                  ),
                 ),
-              ),
-              Padding(
-                padding: const EdgeInsets.all(2.0),
-                child: CardField(
-                  onSubmitted: (value) {
-                    
-                    var template = DataUtils.dataTemplate(
-                      name: value,
-                    );
-                    widget.dataList["main_tasks"].add(template);
-                    
-                    setState(() {
-                      _newTaskController.text = "";
-                      if(widget.onUserUpdate != null) {
-                        widget.onUserUpdate!.call();
-                        return;
-                      }
-                      print("${widget.dataList}");
-                      DataUtils.writeJsonFile(widget.dataList);
-                    });
-                  },
-                ),
-              )
-            ],
-          ), 
+                Padding(
+                  padding: const EdgeInsets.all(2.0),
+                  child: CardField(
+                    onSubmitted: (value) {
+                      
+                      var template = DataUtils.dataTemplate(
+                        name: value,
+                      );
+                      widget.dataList["main_tasks"].add(template);
+                      
+                      setState(() {
+                        _newTaskController.text = "";
+                        if(widget.onUserUpdate != null) {
+                          widget.onUserUpdate!.call();
+                          return;
+                        }
+                        print("${widget.dataList}");
+                        DataUtils.writeJsonFile(widget.dataList);
+                      });
+                    },
+                  ),
+                )
+              ],
+            ), 
+          ),
         ),
         if(prevTask["main_tasks"].isNotEmpty || widget.dataList["main_tasks"].isNotEmpty)
         RightSidePanel(
