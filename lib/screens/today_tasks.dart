@@ -37,7 +37,7 @@ class _TodayTasksState extends State<TodayTasks> {
 
     for(var taskList in dataTaskLists){
       for(var task in taskList) {
-        var taskDate = task["due_date"];
+        String taskDate = task["due_date"];
         if(taskDate != "" && DateTime.parse(taskDate) == dateNow) {
           todaysTasks["main_tasks"].add(task);
         }
