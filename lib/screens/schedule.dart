@@ -156,7 +156,7 @@ class Calendar extends StatefulWidget {
     required this.focusDate,
     required this.onDateChange,
     this.onPressedTask,
-    required this.database ,
+    this.database = const {"main_tasks": []},
     this.child,
   });
 
@@ -175,7 +175,7 @@ enum CalendarViewState {today, workdays, weekdays, month}
 
 class _CalendarState extends State<Calendar> {  
   late DateTime focusedDate = widget.focusDate;
-  late List dataTasks = widget.database["main_tasks"];
+  late List dataTasks = widget.database["main_tasks"] ?? [];
   Map<CalendarViewState, int> calendarViewStateDays = {
     CalendarViewState.today: 1,
     CalendarViewState.workdays: 5,
@@ -237,7 +237,7 @@ class _CalendarState extends State<Calendar> {
         tasksWithDueDate[i] = parsedDate;
       }
     }
-
+  
     Widget viewState;
     switch (selectedViewState) {
       case CalendarViewState.month:
