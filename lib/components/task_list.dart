@@ -266,10 +266,12 @@ class _SubTaskLIstState extends State<SubTaskLIst> {
                                           Row(
                                             children: [
                                               Card(
-                                                child: IntrinsicWidth(
+                                                child: SizedBox(
+                                                  width: 70,
                                                   child: TextFormField(
                                                     autofocus: true,
                                                     inputFormatters: [
+                                                      FilteringTextInputFormatter.digitsOnly,
                                                       LengthLimitingTextInputFormatter(2),
                                                     ],
                                                     initialValue: TimeOfDay.fromDateTime(now).hour.toString(),
@@ -278,15 +280,29 @@ class _SubTaskLIstState extends State<SubTaskLIst> {
                                                       fontSize: 25,
                                                       fontWeight: FontWeight.w500,
                                                     ),
-                                                    onFieldSubmitted: (value) {
-                                                  
-                                                    },
                                                     decoration: const InputDecoration(
                                                       contentPadding: EdgeInsets.all(16),
                                                     ),
+                                                    validator: (value) {
+                                                      try {
+                                                        
+                                                      } catch (e) {
+                                                        print(e);
+                                                      }
+                                                    },
+                                                    onFieldSubmitted: (value) {
+                                                    },
+                                                    
                                                   ),
                                                 ),
-                                              )
+                                              ),
+                                              const Text(
+                                                "  :  ",
+                                                style: TextStyle(
+                                                  fontSize: 25,
+                                                  fontWeight: FontWeight.w500,
+                                                )
+                                              ),
                                             ],
                                           ),
                                           const Row(
