@@ -175,7 +175,7 @@ class _SubTaskLIstState extends State<SubTaskLIst> {
                     child: Container(
                       height: 320,
                       width: 250,
-                      color: Colors.pinkAccent,
+                      color: Colors.orangeAccent,
                       child: StatefulBuilder(
                         builder: (context, setState) {
                           return DefaultTabController(
@@ -250,7 +250,6 @@ class _SubTaskLIstState extends State<SubTaskLIst> {
                                                   onTap: () {
                                                     setState(() {
                                                       selectedDate = DateTime(now.year, now.month, (index + 1));
-                                                      // DefaultTabController.of(context).animateTo(1);
                                                     });
                                                   },
                                                   child: Center(child: Text("${index + 1}"))
@@ -280,17 +279,34 @@ class _SubTaskLIstState extends State<SubTaskLIst> {
                                                       fontSize: 25,
                                                       fontWeight: FontWeight.w500,
                                                     ),
-                                                    decoration: const InputDecoration(
-                                                      contentPadding: EdgeInsets.all(16),
+                                                    decoration: InputDecoration(
+                                                      errorStyle: const TextStyle(
+                                                        height: 0,
+                                                      ),
+                                                      contentPadding: const EdgeInsets.all(16),
+                                                      focusedErrorBorder: OutlineInputBorder(
+                                                        borderRadius: BorderRadius.circular(12),
+                                                        borderSide: const BorderSide(
+                                                          color: Colors.red,
+                                                          width: 2,
+                                                        )
+                                                      ),
                                                     ),
+                                                    autovalidateMode: AutovalidateMode.onUserInteraction,
                                                     validator: (value) {
                                                       try {
+                                                        int hour = int.parse(value!);
+                                                        if (hour > 24) {
+                                                          return "";
+                                                        }
+                                                        return null;
                                                         
                                                       } catch (e) {
-                                                        print(e);
+                                                        return null;
                                                       }
                                                     },
                                                     onFieldSubmitted: (value) {
+                                                      print("submitted");
                                                     },
                                                     
                                                   ),
