@@ -161,6 +161,9 @@ class _SubTaskLIstState extends State<SubTaskLIst> {
             )
           ),
           const Divider(thickness: 2,),
+          //MARK: DUE DATE
+          //* maybe should have used a dropdownbutton for duedate instead or 
+          //* or the existing on due date as an option in the dropdownbutton.
           ElevatedButton.icon(
             onPressed: () async {
 
@@ -456,6 +459,15 @@ class _SubTaskLIstState extends State<SubTaskLIst> {
             ? Text(widget.mainTask["due_date"].toString().split(" ")[0]) 
             : const Text("Due Date"),
           ),
+          //MARK: repeat feature
+          //* maybe switch to a dropdownbutton or 
+          //* take the dropdownbutton i made in app_blocker project
+          ElevatedButton(
+            onPressed: () {
+            }, 
+            child: const Text("Repeat task"),
+          ),
+
           // TODO: need a dialog to notify that it has been saved
           // TODO: need to keyboardlistener for escape and shift+enter to save text.
           Card(
