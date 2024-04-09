@@ -165,7 +165,15 @@ class _SubTaskLIstState extends State<SubTaskLIst> {
             onPressed: () async {
 
               DateTime now = DateTime.now();
-              DateTime selectedDate = now;
+              DateTime currentDate = now;
+              DateTime? selectedDate;
+              int selectedHour = now.hour;
+              int selectedMinute = now.minute;
+
+              // probably have to have a focusnode or focus listener to validate when
+              // losing focus and such.. Can use it to validate as well, for when I press
+              // enter which will cause it lose focus. Error inputdecorator doesn't seem to work.
+              // I have to use globalkey for keys and maybe an form. Maybe can do without form widget.
 
               DateTime? tabDateTimePicker = await showDialog(
                 barrierColor: Colors.transparent,
@@ -203,7 +211,7 @@ class _SubTaskLIstState extends State<SubTaskLIst> {
                                           //* Optional
                                           Column(
                                             children: [
-                                              Text(DateFormat("E d MMM y").format(selectedDate)),
+                                              Text(DateFormat("E d MMM y").format(currentDate)),
                                               Row(
                                                 children: [
                                       
@@ -245,11 +253,11 @@ class _SubTaskLIstState extends State<SubTaskLIst> {
                                             itemCount: DateTime(now.year, now.month + 1, 0).day,
                                             itemBuilder: (context, index) {
                                               return Card(
-                                                color: now.month == selectedDate.month && (index + 1) == selectedDate.day ? Colors.tealAccent : null,
+                                                color: now.month == currentDate.month && (index + 1) == currentDate.day ? Colors.tealAccent : null,
                                                 child: InkWell(
                                                   onTap: () {
                                                     setState(() {
-                                                      selectedDate = DateTime(now.year, now.month, (index + 1));
+                                                      currentDate = DateTime(now.year, now.month, (index + 1));
                                                     });
                                                   },
                                                   child: Center(child: Text("${index + 1}"))
@@ -273,7 +281,7 @@ class _SubTaskLIstState extends State<SubTaskLIst> {
                                                       FilteringTextInputFormatter.digitsOnly,
                                                       LengthLimitingTextInputFormatter(2),
                                                     ],
-                                                    initialValue: TimeOfDay.fromDateTime(now).hour.toString(),
+                                                    initialValue: selectedHour.toString(),
                                                     textAlign: TextAlign.center,
                                                     style: const TextStyle(
                                                       fontSize: 25,
@@ -306,7 +314,7 @@ class _SubTaskLIstState extends State<SubTaskLIst> {
                                                       }
                                                     },
                                                     onFieldSubmitted: (value) {
-                                                      print("submitted");
+                                                      selectedHour = int.parse(value);
                                                     },
                                                     
                                                   ),
@@ -318,6 +326,54 @@ class _SubTaskLIstState extends State<SubTaskLIst> {
                                                   fontSize: 25,
                                                   fontWeight: FontWeight.w500,
                                                 )
+                                              ),
+                                              Card(
+                                                child: SizedBox(
+                                                  width: 70,
+                                                  child: TextFormField(
+                                                    autofocus: true,
+                                                    inputFormatters: [
+                                                      FilteringTextInputFormatter.digitsOnly,
+                                                      LengthLimitingTextInputFormatter(2),
+                                                    ],
+                                                    initialValue: selectedMinute.toString().padLeft(2, "0"),
+                                                    textAlign: TextAlign.center,
+                                                    style: const TextStyle(
+                                                      fontSize: 25,
+                                                      fontWeight: FontWeight.w500,
+                                                    ),
+                                                    decoration: InputDecoration(
+                                                      errorStyle: const TextStyle(
+                                                        height: 0,
+                                                      ),
+                                                      contentPadding: const EdgeInsets.all(16),
+                                                      focusedErrorBorder: OutlineInputBorder(
+                                                        borderRadius: BorderRadius.circular(12),
+                                                        borderSide: const BorderSide(
+                                                          color: Colors.red,
+                                                          width: 2,
+                                                        )
+                                                      ),
+                                                    ),
+                                                    autovalidateMode: AutovalidateMode.onUserInteraction,
+                                                    validator: (value) {
+                                                      try {
+                                                        int minute = int.parse(value!);
+                                                        if (minute > 24) {
+                                                          return "";
+                                                        }
+                                                        return null;
+                                                        
+                                                      } catch (e) {
+                                                        return null;
+                                                      }
+                                                    },
+                                                    onFieldSubmitted: (value) {
+                                                      selectedMinute = int.parse(value);
+                                                    },
+                                                    
+                                                  ),
+                                                ),
                                               ),
                                             ],
                                           ),
@@ -338,11 +394,15 @@ class _SubTaskLIstState extends State<SubTaskLIst> {
                                   children: [
                                     ElevatedButton(
                                       onPressed: () {
+                                        Navigator.pop(context);
                                       }, 
                                       child: const Text("Cancel")
                                     ),
                                     ElevatedButton(
                                       onPressed: () {
+                                        // save selected data to..
+                                        selectedDate = DateTime(currentDate.year, currentDate.month, currentDate.day, selectedHour, selectedMinute);
+                                        Navigator.pop(context, selectedDate);
                                       }, 
                                       child: const Text("Save")
                                     ),
@@ -358,6 +418,8 @@ class _SubTaskLIstState extends State<SubTaskLIst> {
                   );
                 }
               );
+
+              print(tabDateTimePicker);
 
               // DateTime? selectedTime = await showDatePicker(
               //   context: context,
