@@ -385,7 +385,6 @@ class _SubTaskLIstState extends State<SubTaskLIst> {
                                           )
                                         ]
                                       ),
-                                      // const Icon(Icons.time_to_leave),
                                     ]
                                   ),
                                 ),
@@ -400,7 +399,6 @@ class _SubTaskLIstState extends State<SubTaskLIst> {
                                     ),
                                     ElevatedButton(
                                       onPressed: () {
-                                        // save selected data to..
                                         selectedDate = DateTime(currentDate.year, currentDate.month, currentDate.day, selectedHour, selectedMinute);
                                         Navigator.pop(context, selectedDate);
                                       }, 
@@ -473,7 +471,7 @@ class _SubTaskLIstState extends State<SubTaskLIst> {
             ),
           ),
           //* TODO: reminder: time + date
-          //* TODO: repeat: dates(days)
+          //* TODO: repeat: dates(daily, weekly, monthly?)
         ],
       ),
     );
