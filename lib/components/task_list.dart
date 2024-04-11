@@ -172,20 +172,12 @@ class _SubTaskLIstState extends State<SubTaskLIst> {
               // ignore: empty_catches
               }
 
-
-
-
-              // probably have to have a focusnode or focus listener to validate when
-              // losing focus and such.. Can use it to validate as well, for when I press
-              // enter which will cause it lose focus. Error inputdecorator doesn't seem to work.
-              // I have to use globalkey for keys and maybe an form. Maybe can do without form widget.
-
               DateTime? tabDateTimePicker = await showDialog(
                 barrierColor: Colors.transparent,
                 context: context, 
                 builder: (context) {
                   return ReminderDialog(
-                    reminder: reminder, 
+                    reminder: reminder,
                   );
                 }
               );
@@ -235,7 +227,6 @@ class _SubTaskLIstState extends State<SubTaskLIst> {
               ),
             ),
           ),
-          //* TODO: reminder: time + date
           //* TODO: repeat: dates(days)
         ],
       ),
