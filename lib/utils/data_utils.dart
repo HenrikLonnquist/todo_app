@@ -16,6 +16,7 @@ class DataUtils {
     required String name,
     String reminder = "",
     String dueDate = "", 
+    String repeat = "", 
     List subList = const [], 
     String notes = "", 
   }) {
@@ -24,6 +25,7 @@ class DataUtils {
       // "id": int //time?
       "reminder": reminder,
       "due_date": dueDate,
+      "repeat": repeat,
       "sub_tasks": subList,
       "notes": notes,
     };
