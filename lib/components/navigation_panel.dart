@@ -56,12 +56,13 @@ class _NavigationPanelState extends State<NavigationPanel> {
     }
   }
 
-  final ButtonStyle _buttonStyle = ElevatedButton.styleFrom(
+  final ButtonStyle _buttonStyle = TextButton.styleFrom(
     backgroundColor: Colors.white,
     shape: const RoundedRectangleBorder(
       borderRadius: BorderRadius.zero,
     )
   );
+  
 
   @override
   Widget build(BuildContext context) {
