@@ -129,7 +129,7 @@ class _SchedulePageState extends State<SchedulePage> {
         ),
         RightSidePanel(
           show: isRightPanelOpen,
-          child: SubTaskLIst(
+          child: SubTaskList(
             title: dataList[pressedTask]["name"],
             mainTask: dataList[pressedTask], 
             onChanged: (value) {

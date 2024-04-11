@@ -87,8 +87,8 @@ class _TaskListState extends State<TaskList> {
   }
 }
 
-class SubTaskLIst extends StatefulWidget {
-  const SubTaskLIst({
+class SubTaskList extends StatefulWidget {
+  const SubTaskList({
     super.key,
     required this.title,
     required this.mainTask,
@@ -100,10 +100,10 @@ class SubTaskLIst extends StatefulWidget {
   final String title;
 
   @override
-  State<SubTaskLIst> createState() => _SubTaskLIstState();
+  State<SubTaskList> createState() => _SubTaskListState();
 }
 
-class _SubTaskLIstState extends State<SubTaskLIst> {
+class _SubTaskListState extends State<SubTaskList> {
 
   final FocusNode _notesFocus = FocusNode();
   final TextEditingController _notesController = TextEditingController();

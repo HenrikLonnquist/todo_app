@@ -137,7 +137,7 @@ class _MainTasksPageState extends State<MainTasksPage> {
         if(prevTask["main_tasks"].isNotEmpty || widget.dataList["main_tasks"].isNotEmpty)
         RightSidePanel(
           show: isRightPanelOpen,
-          child: SubTaskLIst(
+          child: SubTaskList(
             title: widget.dataList["main_tasks"].isNotEmpty 
             ? widget.dataList["main_tasks"][mainTaskIndex]["name"]
             : prevTask["main_tasks"][mainTaskIndex]["name"],
