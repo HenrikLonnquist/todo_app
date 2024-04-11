@@ -4,6 +4,7 @@
             "name": "this",
             "reminder": "",
             "due_date": "2024-03-29 00:00:00.000",
+            "repeat": "",
             "sub_tasks": [],
             "notes": ""
         },
@@ -11,6 +12,7 @@
             "name": "Name 1",
             "reminder": "",
             "due_date": "2024-03-23 00:00:00.000",
+            "repeat": "",
             "sub_tasks": [
                 {
                     "name": "sub name 1"
@@ -22,6 +24,7 @@
             "name": "try",
             "reminder": "",
             "due_date": "2024-03-29 00:00:00.000",
+            "repeat": "",
             "sub_tasks": [],
             "notes": ""
         },
@@ -29,6 +32,7 @@
             "name": "Name 2",
             "reminder": "",
             "due_date": "2024-03-23 00:00:00.000",
+            "repeat": "",
             "sub_tasks": [],
             "notes": ""
         },
@@ -36,6 +40,7 @@
             "name": "Name 3",
             "reminder": "",
             "due_date": "",
+            "repeat": "",
             "sub_tasks": [],
             "notes": ""
         },
@@ -43,6 +48,7 @@
             "name": "Name 4",
             "reminder": "",
             "due_date": "2024-03-30 00:00:00.000",
+            "repeat": "",
             "sub_tasks": [],
             "notes": ""
         },
@@ -50,6 +56,7 @@
             "name": "testa",
             "reminder": "",
             "due_date": "2024-03-25 00:00:00.000",
+            "repeat": "",
             "sub_tasks": [],
             "notes": ""
         },
@@ -57,6 +64,7 @@
             "name": "name 5",
             "reminder": "",
             "due_date": "2024-03-25 00:00:00.000",
+            "repeat": "",
             "sub_tasks": [],
             "notes": ""
         },
@@ -64,6 +72,7 @@
             "name": "test",
             "reminder": "",
             "due_date": "2024-03-28 00:00:00.000",
+            "repeat": "",
             "sub_tasks": [],
             "notes": ""
         },
@@ -71,6 +80,7 @@
             "name": "test",
             "reminder": "",
             "due_date": "2024-04-06 00:00:00.000",
+            "repeat": "",
             "sub_tasks": [],
             "notes": ""
         },
@@ -78,6 +88,7 @@
             "name": "test",
             "reminder": "",
             "due_date": "2024-04-01 00:00:00.000",
+            "repeat": "",
             "sub_tasks": [],
             "notes": ""
         },
@@ -85,6 +96,7 @@
             "name": "or not",
             "reminder": "",
             "due_date": "2024-03-28 00:00:00.000",
+            "repeat": "",
             "sub_tasks": [],
             "notes": ""
         },
@@ -92,6 +104,7 @@
             "name": "testing today page",
             "reminder": "2024-04-14 18:30:00.000",
             "due_date": "2024-04-11 00:00:00.000",
+            "repeat": "Daily",
             "sub_tasks": [
                 {
                     "name": "test"
@@ -109,7 +122,7 @@
                     "name": "test 5"
                 },
                 {
-                    "name": "6"
+                    "name": "1"
                 }
             ],
             "notes": "testing\nmultiline\nhere"
@@ -118,6 +131,7 @@
             "name": "another",
             "reminder": "",
             "due_date": "2024-04-06 00:00:00.000",
+            "repeat": "",
             "sub_tasks": [],
             "notes": ""
         },
@@ -125,6 +139,7 @@
             "name": "another one",
             "reminder": "",
             "due_date": "2024-04-06 00:00:00.000",
+            "repeat": "",
             "sub_tasks": [],
             "notes": ""
         }
@@ -137,6 +152,7 @@
                     "name": "test",
                     "reminder": "",
                     "due_date": "",
+                    "repeat": "",
                     "sub_tasks": [],
                     "notes": ""
                 }
