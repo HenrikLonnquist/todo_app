@@ -1,7 +1,9 @@
 // ignore_for_file: avoid_print
+import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/widgets.dart';
 import 'package:intl/intl.dart';
 import 'package:todo_app/components/card_field.dart';
 import 'package:todo_app/components/title_field.dart';
@@ -105,10 +107,20 @@ class _SubTaskLIstState extends State<SubTaskLIst> {
 
   final FocusNode _notesFocus = FocusNode();
   final TextEditingController _notesController = TextEditingController();
+  
+  final List items = [
+    "Daily",
+    "Weekly",
+    "Monthly",
+    "Custom",
+  ];
+  
+  Object? selectedDropItem;
 
   @override
   void initState() {
     super.initState();
+    selectedDropItem = widget.mainTask["repeat"].isEmpty ? null : widget.mainTask["repeat"];
     _notesController.text = widget.mainTask["notes"];
     _notesFocus.addListener(() {
       if(!_notesFocus.hasFocus){
@@ -122,6 +134,7 @@ class _SubTaskLIstState extends State<SubTaskLIst> {
 
   @override
   void dispose() {
+    _notesController.dispose();
     _notesFocus.dispose();
     super.dispose();
   }
@@ -212,6 +225,61 @@ class _SubTaskLIstState extends State<SubTaskLIst> {
             child: widget.mainTask["due_date"] != "" 
             ? Text(widget.mainTask["due_date"].toString().split(" ")[0]) 
             : const Text("Due Date"),
+          ),
+          // TODO: make this into a class.
+          const SizedBox(height: 1,),
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Expanded(
+                child: DropdownButton2(
+                  isExpanded: true,
+                  underline: const SizedBox(height: 0,),
+                  hint: selectedDropItem != null ? null : const Text("Repeat task"),
+                  value: selectedDropItem,
+                  items: items.map((value) {
+                    return DropdownMenuItem(
+                      value: value,
+                      child: Text(value),
+                    );
+                  }).toList(),
+                  onChanged: (value) {
+                    setState(() {
+                      selectedDropItem = value;
+                    });
+                  },
+                  buttonStyleData: ButtonStyleData(
+                    height: 32,
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).colorScheme.primaryContainer,
+                      borderRadius: const BorderRadius.horizontal(
+                        left: Radius.circular(8),
+                      ),
+                    )
+                  ),
+                  dropdownStyleData: DropdownStyleData(
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).colorScheme.primaryContainer,
+                    ),
+                  ),
+                ),
+              ),
+              ElevatedButton(
+                onPressed: () {
+                  setState(() {
+                    selectedDropItem = null;
+                  });
+                }, 
+                style: ElevatedButton.styleFrom(
+                  shape: const RoundedRectangleBorder(
+                    borderRadius: BorderRadius.horizontal(
+                      right: Radius.circular(8),
+                    )
+                  )
+                ),
+                child: const Icon(Icons.highlight_remove_sharp),
+              ),
+            ],
           ),
           // TODO: need a dialog to notify that it has been saved
           // TODO: need to keyboardlistener for escape and shift+enter to save text.
