@@ -1,12 +1,10 @@
 // ignore_for_file: avoid_print
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter/widgets.dart';
 import 'package:intl/intl.dart';
 import 'package:todo_app/components/card_field.dart';
 import 'package:todo_app/components/title_field.dart';
-import 'package:todo_app/screens/schedule.dart';
 
 class TaskList extends StatefulWidget {
   const TaskList({
@@ -171,16 +169,7 @@ class _SubTaskLIstState extends State<SubTaskLIst> {
               // ignore: empty_catches
               }
 
-              DateTime now = DateTime.now();
-              DateTime currentDate = reminder.toString().isEmpty ? now : reminder;
-              DateTime? selectedDate;
-              TextEditingController hourController = TextEditingController();
-              TextEditingController minuteController = TextEditingController();
 
-              final formKey = GlobalKey<FormState>();
-
-              hourController.text = reminder.toString().isEmpty ? now.hour.toString() : reminder.hour.toString();
-              minuteController.text = reminder.toString().isEmpty ? now.minute.toString().padLeft(2, "0") : reminder.minute.toString();
 
 
               // probably have to have a focusnode or focus listener to validate when
@@ -192,262 +181,8 @@ class _SubTaskLIstState extends State<SubTaskLIst> {
                 barrierColor: Colors.transparent,
                 context: context, 
                 builder: (context) {
-                  return Center(
-                    child: Container(
-                      height: 320,
-                      width: 250,
-                      color: Colors.orangeAccent,
-                      child: StatefulBuilder(
-                        builder: (context, setState) {
-                          return DefaultTabController(
-                            initialIndex: 1,
-                            length: 2,
-                            child:  Form(
-                              key: formKey,
-                              child: Column(
-                                children: [
-                                  const Card(
-                                    child: TabBar(
-                                      tabs: [
-                                        Tab(
-                                          child: Text("Date"),
-                                        ),
-                                        Tab(
-                                          child: Text("Time"),
-                                        )
-                                      ]
-                                    ),
-                                  ),
-                                  Expanded(
-                                    child: TabBarView(
-                                      children: [
-                                        Column(
-                                          children: [
-                                            //* Optional
-                                            Column(
-                                              children: [
-                                                Text(DateFormat("E d MMM y").format(currentDate)),
-                                                Row(
-                                                  children: [
-                                        
-                                                    TextButton(
-                                                      onPressed: () {
-                                                        setState((){
-                                                          now = DateTime(now.year, now.month - 1, 1);
-                                                        });
-                                                      }, 
-                                                      child: const Icon(
-                                                        Icons.arrow_back_ios,
-                                                        size: 20,
-                                                      ),
-                                                    ),  
-                                                    const Spacer(),
-                                                    Text("${DateFormat("MMMM").format(now)} ${DateFormat("y").format(now)}"),
-                                                    const Spacer(),
-                                                    TextButton(
-                                                      onPressed: () {
-                                                        setState((){
-                                                          now = DateTime(now.year, now.month + 1, 1);
-                                                        });
-                                                      }, 
-                                                      child: const Icon(
-                                                        Icons.arrow_forward_ios,
-                                                        size: 20,
-                                                      ),
-                                                    ),
-                                                  ],
-                                                ),
-                                              ],
-                                            ),
-                                            GridView.builder(
-                                              shrinkWrap: true,
-                                              physics: const NeverScrollableScrollPhysics(),
-                                              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                                                crossAxisCount: 7,
-                                              ), 
-                                              itemCount: DateTime(now.year, now.month + 1, 0).day,
-                                              itemBuilder: (context, index) {
-                                                return Card(
-                                                  color: now.month == currentDate.month && (index + 1) == currentDate.day ? Colors.tealAccent : null,
-                                                  child: InkWell(
-                                                    onTap: () {
-                                                      setState(() {
-                                                        currentDate = DateTime(now.year, now.month, (index + 1));
-                                                      });
-                                                    },
-                                                    child: Center(child: Text("${index + 1}"))
-                                                  ),
-                                                );
-                                              },
-                                            ),
-                                          ],
-                                        ),
-                                        Column(
-                                          children: [
-                                            const Text("Enter time"),
-                                            Row(
-                                              children: [
-                                                Card(
-                                                  child: SizedBox(
-                                                    width: 70,
-                                                    child: TextFormField(
-                                                      controller: hourController,
-                                                      autofocus: true,
-                                                      inputFormatters: [
-                                                        FilteringTextInputFormatter.digitsOnly,
-                                                        LengthLimitingTextInputFormatter(2),
-                                                      ],
-                                                      textAlign: TextAlign.center,
-                                                      style: const TextStyle(
-                                                        fontSize: 25,
-                                                        fontWeight: FontWeight.w500,
-                                                      ),
-                                                      decoration: InputDecoration(
-                                                        errorStyle: const TextStyle(
-                                                          height: 0,
-                                                        ),
-                                                        contentPadding: const EdgeInsets.all(16),
-                                                        errorBorder: OutlineInputBorder(
-                                                          borderRadius: BorderRadius.circular(12),
-                                                          borderSide: const BorderSide(
-                                                            color: Colors.red,
-                                                            width: 2,
-                                                          ),
-                                                        ),
-                                                        focusedErrorBorder: OutlineInputBorder(
-                                                          borderRadius: BorderRadius.circular(12),
-                                                          borderSide: const BorderSide(
-                                                            color: Colors.red,
-                                                            width: 2,
-                                                          )
-                                                        ),
-                                                      ),
-                                                      autovalidateMode: AutovalidateMode.always,
-                                                      validator: (value) {
-                                                        try {
-                                                          int hour = int.parse(value!);
-                                                          if (hour > 24) {
-                                                            return "";
-                                                          }
-                                                          return null;
-                                                          
-                                                        } catch (e) {
-                                                          return "";
-                                                        }
-                                                      },
-                                                    ),
-                                                  ),
-                                                ),
-                                                const Text(
-                                                  "  :  ",
-                                                  style: TextStyle(
-                                                    fontSize: 25,
-                                                    fontWeight: FontWeight.w500,
-                                                  )
-                                                ),
-                                                Card(
-                                                  child: SizedBox(
-                                                    width: 70,
-                                                    child: TextFormField(
-                                                      controller: minuteController,
-                                                      autofocus: true,
-                                                      inputFormatters: [
-                                                        FilteringTextInputFormatter.digitsOnly,
-                                                        LengthLimitingTextInputFormatter(2),
-                                                      ],
-                                                      textAlign: TextAlign.center,
-                                                      style: const TextStyle(
-                                                        fontSize: 25,
-                                                        fontWeight: FontWeight.w500,
-                                                      ),
-                                                      decoration: InputDecoration(
-                                                        errorStyle: const TextStyle(
-                                                          height: 0,
-                                                        ),
-                                                        contentPadding: const EdgeInsets.all(16),
-                                                        errorBorder: OutlineInputBorder(
-                                                          borderRadius: BorderRadius.circular(12),
-                                                          borderSide: const BorderSide(
-                                                            color: Colors.red,
-                                                            width: 2,
-                                                          )
-                                                        ),
-                                                        focusedErrorBorder: OutlineInputBorder(
-                                                          borderRadius: BorderRadius.circular(12),
-                                                          borderSide: const BorderSide(
-                                                            color: Colors.red,
-                                                            width: 2,
-                                                          )
-                                                        ),
-                                                      ),
-                                                      autovalidateMode: AutovalidateMode.always,
-                                                      validator: (value) {
-                                                        try {
-                                                          int minute = int.parse(value!);
-                                                          if (minute > 59) {
-                                                            return "";
-                                                          }
-                                                          return null;
-                                                        } catch (e) {
-                                                          return "";
-                                                        }
-                                                      },
-                                                    ),
-                                                  ),
-                                                ),
-                                              ],
-                                            ),
-                                            const Row(
-                                              children: [
-                                                Text("Hour"),
-                                                Text("Minute"),
-                                              ],
-                                            )
-                                          ]
-                                        ),
-                                      ]
-                                    ),
-                                  ),
-                                  Row(
-                                    mainAxisAlignment: MainAxisAlignment.end,
-                                    children: [
-                                      ElevatedButton(
-                                        onPressed: () {
-                                          Navigator.pop(context);
-                                        }, 
-                                        child: const Text("Cancel")
-                                      ),
-                                      //* TODO: Tho I still want to be able to null the onpressed property
-                                      //* when the input is empty.
-                                      ElevatedButton(
-                                        onPressed: () {
-                                          // validate check before submitting/updating database
-                                          if (!formKey.currentState!.validate()) {
-                                            // maybe an snackbar something like that to notify the user.
-                                            return ;
-                                          }
-                                          try {
-                                            int selectedHour = int.parse(hourController.text);
-                                            int selectedMinute = int.parse(minuteController.text);
-                              
-                                            selectedDate = DateTime(currentDate.year, currentDate.month, currentDate.day, selectedHour, selectedMinute);
-                                            Navigator.pop(context, selectedDate);
-                                          } catch (e) {
-                                            Navigator.pop(context, null);
-                                          }
-                                        }, 
-                                        child: const Text("Save")
-                                      ),
-                                      
-                                    ]
-                                  )
-                                ],
-                              ),
-                            ),
-                          );
-                        }
-                      ),
-                    )
+                  return ReminderDialog(
+                    reminder: reminder, 
                   );
                 }
               );
@@ -455,8 +190,6 @@ class _SubTaskLIstState extends State<SubTaskLIst> {
               if (tabDateTimePicker != null && tabDateTimePicker != widget.mainTask["reminder"]) {
                 widget.mainTask["reminder"] = tabDateTimePicker.toString();
                 widget.onChanged!.call(widget.mainTask);
-                hourController.dispose();
-                minuteController.dispose();
               }
             },
             icon: const Icon(Icons.timer), 
@@ -503,6 +236,321 @@ class _SubTaskLIstState extends State<SubTaskLIst> {
           //* TODO: repeat: dates(days)
         ],
       ),
+    );
+  }
+}
+
+class ReminderDialog extends StatefulWidget {
+  const ReminderDialog({
+    super.key,
+    required this.reminder,
+  });
+
+  final dynamic reminder;
+
+  @override
+  State<ReminderDialog> createState() => _ReminderDialogState();
+}
+
+class _ReminderDialogState extends State<ReminderDialog> {
+  DateTime now = DateTime.now();
+  late DateTime currentDate = widget.reminder.toString().isEmpty ? now : widget.reminder;
+  DateTime? selectedDate;
+  TextEditingController hourController = TextEditingController();
+  TextEditingController minuteController = TextEditingController();
+
+  final formKey = GlobalKey<FormState>();
+
+  
+  @override
+  void initState() {
+    hourController.text = widget.reminder.toString().isEmpty ? now.hour.toString() : widget.reminder.hour.toString();
+    minuteController.text = widget.reminder.toString().isEmpty ? now.minute.toString().padLeft(2, "0") : widget.reminder.minute.toString();
+    super.initState();
+  }
+
+  @override
+  void dispose(){
+    hourController.dispose();
+    minuteController.dispose();
+    super.dispose();
+  }
+
+  bool isFormValid = true;
+
+  @override
+  Widget build(BuildContext context) {
+    // if (
+    //   hourController.text.isEmpty
+    //   && minuteController.text.isEmpty
+    // ) {
+    //   isFormValid = false;
+    // } else {
+    //   isFormValid = true;
+    // }
+    return Center(
+      child: Container(
+        height: 320,
+        width: 250,
+        color: Colors.orangeAccent,
+        child: DefaultTabController(
+          initialIndex: 1,
+          length: 2,
+          child:  Form(
+            key: formKey,
+            child: Column(
+              children: [
+                const Card(
+                  child: TabBar(
+                    tabs: [
+                      Tab(
+                        child: Text("Date"),
+                      ),
+                      Tab(
+                        child: Text("Time"),
+                      )
+                    ]
+                  ),
+                ),
+                Expanded(
+                  child: TabBarView(
+                    children: [
+                      Column(
+                        children: [
+                          //* Optional
+                          Column(
+                            children: [
+                              Text(DateFormat("E d MMM y").format(currentDate)),
+                              Row(
+                                children: [
+                      
+                                  TextButton(
+                                    onPressed: () {
+                                      setState((){
+                                        now = DateTime(now.year, now.month - 1, 1);
+                                      });
+                                    }, 
+                                    child: const Icon(
+                                      Icons.arrow_back_ios,
+                                      size: 20,
+                                    ),
+                                  ),  
+                                  const Spacer(),
+                                  Text("${DateFormat("MMMM").format(now)} ${DateFormat("y").format(now)}"),
+                                  const Spacer(),
+                                  TextButton(
+                                    onPressed: () {
+                                      setState((){
+                                        now = DateTime(now.year, now.month + 1, 1);
+                                      });
+                                    }, 
+                                    child: const Icon(
+                                      Icons.arrow_forward_ios,
+                                      size: 20,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                          GridView.builder(
+                            shrinkWrap: true,
+                            physics: const NeverScrollableScrollPhysics(),
+                            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                              crossAxisCount: 7,
+                            ), 
+                            itemCount: DateTime(now.year, now.month + 1, 0).day,
+                            itemBuilder: (context, index) {
+                              return Card(
+                                color: now.month == currentDate.month && (index + 1) == currentDate.day ? Colors.tealAccent : null,
+                                child: InkWell(
+                                  onTap: () {
+                                    setState(() {
+                                      currentDate = DateTime(now.year, now.month, (index + 1));
+                                    });
+                                  },
+                                  child: Center(child: Text("${index + 1}"))
+                                ),
+                              );
+                            },
+                          ),
+                        ],
+                      ),
+                      Column(
+                        children: [
+                          const Text("Enter time"),
+                          Row(
+                            children: [
+                              Card(
+                                child: SizedBox(
+                                  width: 70,
+                                  child: TextFormField(
+                                    controller: hourController,
+                                    autofocus: true,
+                                    inputFormatters: [
+                                      FilteringTextInputFormatter.digitsOnly,
+                                      LengthLimitingTextInputFormatter(2),
+                                    ],
+                                    textAlign: TextAlign.center,
+                                    style: const TextStyle(
+                                      fontSize: 25,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                    decoration: InputDecoration(
+                                      errorStyle: const TextStyle(
+                                        height: 0,
+                                      ),
+                                      contentPadding: const EdgeInsets.all(16),
+                                      errorBorder: OutlineInputBorder(
+                                        borderRadius: BorderRadius.circular(12),
+                                        borderSide: const BorderSide(
+                                          color: Colors.red,
+                                          width: 2,
+                                        ),
+                                      ),
+                                      focusedErrorBorder: OutlineInputBorder(
+                                        borderRadius: BorderRadius.circular(12),
+                                        borderSide: const BorderSide(
+                                          color: Colors.red,
+                                          width: 2,
+                                        )
+                                      ),
+                                    ),
+                                    autovalidateMode: AutovalidateMode.always,
+                                    validator: (value) {
+                                      try {
+                                        int hour = int.parse(value!);
+                                        if (hour > 24) {
+                                          return "";
+                                        }
+                                        return null;
+                                        
+                                      } catch (e) {
+                                        return "";
+                                      }
+                                    },
+                                    onChanged: (value) {
+                                      setState(() {
+                                        isFormValid = formKey.currentState!.validate();
+                                      });
+                                    },
+                                  ),
+                                ),
+                              ),
+                              const Text(
+                                "  :  ",
+                                style: TextStyle(
+                                  fontSize: 25,
+                                  fontWeight: FontWeight.w500,
+                                )
+                              ),
+                              Card(
+                                child: SizedBox(
+                                  width: 70,
+                                  child: TextFormField(
+                                    controller: minuteController,
+                                    autofocus: true,
+                                    inputFormatters: [
+                                      FilteringTextInputFormatter.digitsOnly,
+                                      LengthLimitingTextInputFormatter(2),
+                                    ],
+                                    textAlign: TextAlign.center,
+                                    style: const TextStyle(
+                                      fontSize: 25,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                    decoration: InputDecoration(
+                                      errorStyle: const TextStyle(
+                                        height: 0,
+                                      ),
+                                      contentPadding: const EdgeInsets.all(16),
+                                      errorBorder: OutlineInputBorder(
+                                        borderRadius: BorderRadius.circular(12),
+                                        borderSide: const BorderSide(
+                                          color: Colors.red,
+                                          width: 2,
+                                        )
+                                      ),
+                                      focusedErrorBorder: OutlineInputBorder(
+                                        borderRadius: BorderRadius.circular(12),
+                                        borderSide: const BorderSide(
+                                          color: Colors.red,
+                                          width: 2,
+                                        )
+                                      ),
+                                    ),
+                                    autovalidateMode: AutovalidateMode.always,
+                                    validator: (value) {
+                                      try {
+                                        int minute = int.parse(value!);
+                                        if (minute > 59) {
+                                          return "";
+                                        }
+                                        return null;
+                                      } catch (e) {
+                                        return "";
+                                      }
+                                    },
+                                    onChanged: (value) {
+                                      setState(() {
+                                        isFormValid = formKey.currentState!.validate();
+                                        print(isFormValid);
+                                      });
+                                    },
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                          const Row(
+                            children: [
+                              Text("Hour"),
+                              Text("Minute"),
+                            ],
+                          )
+                        ]
+                      ),
+                    ]
+                  ),
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    ElevatedButton(
+                      onPressed: () {
+                        Navigator.pop(context);
+                      }, 
+                      child: const Text("Cancel")
+                    ),
+                    //* TODO: Tho I still want to be able to null the onpressed property
+                    //* when the input is empty.
+                    ElevatedButton(
+                      onPressed: isFormValid ? () {
+                        // validate check before submitting/updating database
+                        if (!formKey.currentState!.validate()) {
+                          // maybe an snackbar something like that to notify the user.
+                          return ;
+                        }
+                        try {
+                          int selectedHour = int.parse(hourController.text);
+                          int selectedMinute = int.parse(minuteController.text);
+            
+                          selectedDate = DateTime(currentDate.year, currentDate.month, currentDate.day, selectedHour, selectedMinute);
+                          Navigator.pop(context, selectedDate);
+                        } catch (e) {
+                          Navigator.pop(context, null);
+                        }
+                      } : null, 
+                      child: const Text("Save")
+                    ),
+                    
+                  ]
+                )
+              ],
+            ),
+          ),
+        ),
+      )
     );
   }
 }
