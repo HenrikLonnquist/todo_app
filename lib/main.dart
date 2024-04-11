@@ -14,7 +14,8 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(
-          seedColor: Colors.deepPurple
+          seedColor: Colors.deepPurple,
+          primary: Colors.black.withOpacity(0.9),
         )
       ),
       home: const NavigationPanel(),

@@ -56,33 +56,42 @@ class _NavigationPanelState extends State<NavigationPanel> {
     }
   }
 
+  final ButtonStyle _buttonStyle = ElevatedButton.styleFrom(
+    backgroundColor: Colors.white,
+    shape: const RoundedRectangleBorder(
+      borderRadius: BorderRadius.zero,
+    )
+  );
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: Row(
         children: [
           SizedBox(
-            // TODO: change it to a fixed width. Just like MS Todo
             width: 220,
-            // width: MediaQuery.of(context).size.width * 0.2,
             height: MediaQuery.of(context).size.height,
             child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                ElevatedButton.icon(
+                TextButton.icon(
+                  style: _buttonStyle,
                   onPressed: () {
                     _changePage(0);
                   },
                   icon: const Icon(Icons.home), 
                   label: const Text("Main Tasks"),
                 ),
-                ElevatedButton.icon(
+                TextButton.icon(
+                  style: _buttonStyle,
                   onPressed: () {
                     _changePage(1);
                   },
                   icon: const Icon(Icons.sunny), 
                   label: const Text("Today"),
                 ),
-                ElevatedButton.icon(
+                TextButton.icon(
+                  style: _buttonStyle,
                   onPressed: () {
                     _changePage(2);
                   },
