@@ -103,7 +103,7 @@
         {
             "name": "testing today page",
             "reminder": "2024-04-14 18:30:00.000",
-            "due_date": "2024-04-11 00:00:00.000",
+            "due_date": "2024-04-12 00:00:00.000",
             "repeat": "Daily",
             "sub_tasks": [
                 {

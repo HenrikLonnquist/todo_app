@@ -56,13 +56,40 @@ class _NavigationPanelState extends State<NavigationPanel> {
     }
   }
 
-  final ButtonStyle _buttonStyle = TextButton.styleFrom(
-    backgroundColor: Colors.white,
-    shape: const RoundedRectangleBorder(
-      borderRadius: BorderRadius.zero,
-    )
-  );
-  
+  TextButton _pageButtons(
+    {
+      required int index, 
+      required Function()? onPressed, 
+      IconData icon = Icons.home,
+      String name = "", 
+      TextStyle? textStyle, 
+    }
+    ) {
+    return TextButton.icon(
+      style: TextButton.styleFrom(
+        backgroundColor: index == _selectedIndex ? Colors.grey : Colors.white,
+        padding: EdgeInsets.zero,
+        alignment: Alignment.centerLeft,
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.zero,
+        )
+      ),
+      onPressed: onPressed,
+      icon: Icon(
+        icon,
+      ), 
+      label: Text(
+        name,
+        style: textStyle,
+      ),
+    );
+  } 
+
+  final Map<int, List<dynamic>> mainPagesName = {
+    0: ["Main Tasks", Icons.home],
+    1: ["Today", Icons.sunny],
+    2: ["Schedule", Icons.calendar_month],
+  };
 
   @override
   Widget build(BuildContext context) {
@@ -75,30 +102,36 @@ class _NavigationPanelState extends State<NavigationPanel> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                TextButton.icon(
-                  style: _buttonStyle,
+
+                for (var i = 0; i < mainPagesName.length; i++)
+                _pageButtons(
+                  index: i,
+                  icon: mainPagesName[i]![1],
+                  name: mainPagesName[i]![0],
                   onPressed: () {
-                    _changePage(0);
+                    setState(() {
+                      _changePage(i);
+                    });
                   },
-                  icon: const Icon(Icons.home), 
-                  label: const Text("Main Tasks"),
                 ),
-                TextButton.icon(
-                  style: _buttonStyle,
-                  onPressed: () {
-                    _changePage(1);
-                  },
-                  icon: const Icon(Icons.sunny), 
-                  label: const Text("Today"),
-                ),
-                TextButton.icon(
-                  style: _buttonStyle,
-                  onPressed: () {
-                    _changePage(2);
-                  },
-                  icon: const Icon(Icons.schedule_rounded), 
-                  label: const Text("Schedule"),
-                ),
+
+                
+                // TextButton.icon(
+                //   style: _buttonStyle,
+                //   onPressed: () {
+                //     _changePage(1);
+                //   },
+                //   icon: const Icon(Icons.sunny), 
+                //   label: const Text("Today"),
+                // ),
+                // TextButton.icon(
+                //   style: _buttonStyle,
+                //   onPressed: () {
+                //     _changePage(2);
+                //   },
+                //   icon: const Icon(Icons.schedule_rounded), 
+                //   label: const Text("Schedule"),
+                // ),
                 const Divider(thickness: 2,),
                 const SizedBox(height: 10),
                 
@@ -107,17 +140,28 @@ class _NavigationPanelState extends State<NavigationPanel> {
                 const SizedBox(height: 10),
 
                 for (var i = 0; i < dataList["user_lists"].length; i++)
-                ElevatedButton.icon(
+                _pageButtons(
+                  index: i + 3, 
+                  icon: Icons.abc_sharp,
+                  name: dataList["user_lists"][i]["user_list_name"],
                   onPressed: () {
                     setState(() {
                       _selectedIndex = 3 + i;
                     });
-                  }, 
-                  icon: const Icon(Icons.abc_outlined),
-                  label: Text(
-                    "${dataList["user_lists"][i]["user_list_name"]}"
-                  ),
+                  },
                 ),
+                // TextButton.icon(
+                //   style: _buttonStyle,
+                //   onPressed: () {
+                //     setState(() {
+                //       _selectedIndex = 3 + i;
+                //     });
+                //   }, 
+                //   icon: const Icon(Icons.abc_outlined),
+                //   label: Text(
+                //     "${dataList["user_lists"][i]["user_list_name"]}"
+                //   ),
+                // ),
 
                 const SizedBox(height: 15),
                 ElevatedButton.icon(
