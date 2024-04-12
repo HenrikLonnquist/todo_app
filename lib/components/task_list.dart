@@ -245,6 +245,20 @@ class _SubTaskListState extends State<SubTaskList> {
                   }).toList(),
                   onChanged: (value) {
                     setState(() {
+                      //! Just add an number to "repeat" in database, which it will be used to
+                      //! .add to the new copied "due_date" when its checked. So the old task is still there,
+                      //! but completed.
+                      //! Checked>copy/clone task+update task as completed(with "design")>
+                      //! change copied task due date with repeat>update database
+                      //* Maybe make this into an switch case statement
+                      if (value == "Custom") {
+                        // pop and push new window
+                        // user chose an repeat option
+                        // pop/return the chosen option
+                        // or null/emptystring on cancel
+                        // update database and selectedDropItem
+                        // return;
+                      }
                       selectedDropItem = value;
                     });
                   },
