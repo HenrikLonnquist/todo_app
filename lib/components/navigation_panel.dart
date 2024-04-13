@@ -115,23 +115,6 @@ class _NavigationPanelState extends State<NavigationPanel> {
                   },
                 ),
 
-                
-                // TextButton.icon(
-                //   style: _buttonStyle,
-                //   onPressed: () {
-                //     _changePage(1);
-                //   },
-                //   icon: const Icon(Icons.sunny), 
-                //   label: const Text("Today"),
-                // ),
-                // TextButton.icon(
-                //   style: _buttonStyle,
-                //   onPressed: () {
-                //     _changePage(2);
-                //   },
-                //   icon: const Icon(Icons.schedule_rounded), 
-                //   label: const Text("Schedule"),
-                // ),
                 const Divider(thickness: 2,),
                 const SizedBox(height: 10),
                 
@@ -150,18 +133,6 @@ class _NavigationPanelState extends State<NavigationPanel> {
                     });
                   },
                 ),
-                // TextButton.icon(
-                //   style: _buttonStyle,
-                //   onPressed: () {
-                //     setState(() {
-                //       _selectedIndex = 3 + i;
-                //     });
-                //   }, 
-                //   icon: const Icon(Icons.abc_outlined),
-                //   label: Text(
-                //     "${dataList["user_lists"][i]["user_list_name"]}"
-                //   ),
-                // ),
 
                 const SizedBox(height: 15),
                 ElevatedButton.icon(
@@ -172,7 +143,8 @@ class _NavigationPanelState extends State<NavigationPanel> {
                       dataList["user_lists"].add(
                         {
                           "user_list_name": "New User List",
-                          "main_tasks": []
+                          "main_tasks": [],
+                          "completed": []
                         }
                       );
 
