@@ -107,6 +107,8 @@ class _TaskListState extends State<TaskList> {
               );
             })
           ),
+          // TODO: make it an settings variable in database.
+          if (showCompleted && !widget.subTask && widget.dataCompletedTasks.isNotEmpty)
           const Divider(thickness: 1,),
           ElevatedButton.icon(
             onPressed: () {
@@ -118,8 +120,6 @@ class _TaskListState extends State<TaskList> {
             icon: const Text("Completed"),
             label: const Icon(Icons.keyboard_arrow_down_rounded),
           ),
-          // TODO: make it an settings variable in database.
-          if (showCompleted && !widget.subTask && widget.dataCompletedTasks.isNotEmpty)
           ListView.builder(
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
@@ -290,13 +290,13 @@ class _SubTaskListState extends State<SubTaskList> {
           //* due dates: date
           ElevatedButton(
             onPressed: () async {
-              DateTime dataDate =  DateTime.parse(widget.mainTask["due_date"]);
+              DateTime dataDate = widget.mainTask["due_date"].isEmpty ? DateTime.now() : DateTime.parse(widget.mainTask["due_date"]);
               // TODO: might switch to calendar date picker 2 package later on.
               DateTime? selectedDate = await showDatePicker(
                 context: context,
                 initialDate: dataDate,
                 firstDate: DateTime.now().subtract(const Duration(days: 365)), 
-                lastDate: DateTime.now().add(const Duration(days: 30)),
+                lastDate: DateTime.now().add(const Duration(days: 365)),
               ); 
                 
               if (selectedDate != null && selectedDate != dataDate) {
