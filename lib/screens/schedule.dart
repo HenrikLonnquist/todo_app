@@ -43,7 +43,7 @@ class _SchedulePageState extends State<SchedulePage> {
           child: Container(
             // duration: const Duration(seconds: 10),
             // curve: Curves.fastEaseInToSlowEaseOut,
-            padding: const EdgeInsets.all(10),
+            padding: const EdgeInsets.all(12),
             color: Colors.blue, 
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -66,60 +66,67 @@ class _SchedulePageState extends State<SchedulePage> {
                   height: 10,
                 ),
                 Expanded(
-                  child: Container(
-                    padding: const EdgeInsets.all(8.0),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      border: Border.all(
-                        color: Colors.black,
-                        width: 1,
+                  child: Column(
+                    // mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Expanded(
+                        child: Container(
+                          padding: const EdgeInsets.all(8.0),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            border: Border.all(
+                              color: Colors.black,
+                              width: 1,
+                            ),
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: Column(
+                            children: [
+                              // TODO: check how it scrolls to current date widget.
+                              // maybe through size and when does it do it.
+                              // EasyDateTimeLine(
+                              //   initialDate: DateTime.now(),
+                              //   onDateChange: (value) {
+                              //   },
+                              // ),
+                              Calendar(
+                                //! TODO: rename property - initial date?
+                                focusDate: DateTime(now.year, now.month, now.day),
+                                database: widget.database,
+                                onPressedTask: (value) {
+                                  setState(() {
+                                    if (isRightPanelOpen && pressedTask != value) {
+                                      pressedTask = value;
+                                      return;
+                                    }
+                                    pressedTask = value;
+                                    isRightPanelOpen = !isRightPanelOpen;
+                                  });
+                                },
+                                onDateChange: (value) {
+                                  setState(() {
+                                    selectedDate = value;
+                                  });
+                                },
+                              ),
+                            ],
+                          )
+                        ),
                       ),
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    child: Column(
-                      children: [
-                        // TODO: check how it scrolls to current date widget.
-                        // maybe through size and when does it do it.
-                        // EasyDateTimeLine(
-                        //   initialDate: DateTime.now(),
-                        //   onDateChange: (value) {
-                        //   },
-                        // ),
-                        Calendar(
-                          //! TODO: rename property - initial date?
-                          focusDate: DateTime(now.year, now.month, now.day),
-                          database: widget.database,
-                          onPressedTask: (value) {
-                            setState(() {
-                              if (isRightPanelOpen && pressedTask != value) {
-                                pressedTask = value;
-                                return;
-                              }
-                              pressedTask = value;
-                              isRightPanelOpen = !isRightPanelOpen;
-                            });
-                          },
-                          onDateChange: (value) {
-                            setState(() {
-                              selectedDate = value;
-                            });
-                          },
-                        ),
-                        CardField(
-                          onSubmitted: (value) {
-                            var template = DataUtils.dataTemplate(
-                              // database: widget.database,
-                              name: value,
-                              dueDate: selectedDate.toString()
-                            );
-                            widget.database["main_tasks"].add(template);
-                            setState(() {
-                              DataUtils.writeJsonFile(widget.database);
-                            });
-                          },
-                        ),
-                      ],
-                    )
+                      CardField(
+                        onSubmitted: (value) {
+                          var template = DataUtils.newTaskTemplate(
+                            // database: widget.database,
+                            name: value,
+                            dueDate: selectedDate.toString()
+                          );
+                          widget.database["main_tasks"].add(template);
+                          setState(() {
+                            DataUtils.writeJsonFile(widget.database);
+                          });
+                        },
+                      ),
+                    ],
                   ),
                 )
               ],
@@ -133,10 +140,10 @@ class _SchedulePageState extends State<SchedulePage> {
             mainTask: dataList[pressedTask], 
             onChanged: (value) {
               if (value.runtimeType == String) {
-                Map templateSub = {
-                  "name": value
-                };
-                dataList[pressedTask]["sub_tasks"].add(templateSub);
+                var newSubTask = DataUtils.subTaskTemplate(
+                  name: value
+                );
+                dataList[pressedTask]["sub_tasks"].add(newSubTask);
               }
               setState(() {
                 DataUtils.writeJsonFile(widget.database);
