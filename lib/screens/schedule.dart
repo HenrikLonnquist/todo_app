@@ -32,7 +32,22 @@ class _SchedulePageState extends State<SchedulePage> {
   
   int pressedTask = 0;
 
-  late List dataList = widget.database["main_tasks"];
+  Map allTasks = {};
+  List dataList = [];
+
+  @override
+  void initState() {
+    dataList.addAll(widget.database["main_page"]["main_tasks"]);
+
+    for (var i in widget.database["user_lists"]) {
+      if (i["main_tasks"].length != 0) {
+        dataList.addAll(i["main_tasks"]);
+      }
+    }
+
+    allTasks["main_tasks"] = dataList;
+    super.initState();
+  }
 
 
   @override
@@ -92,7 +107,40 @@ class _SchedulePageState extends State<SchedulePage> {
                               Calendar(
                                 //! TODO: rename property - initial date?
                                 focusDate: DateTime(now.year, now.month, now.day),
-                                database: widget.database,
+                                database: allTasks,
+                                updateDatabase: (value) {
+
+                                  if (widget.database["id"] == value["list_id"]) {
+                                    for (var i = 0; i < widget.database["main_tasks"].length; i++) {
+                                      var taskList = widget.database["main_tasks"];
+
+                                      if (taskList[i]["task_id"] == value["task_id"]) {
+                                        taskList[i] = value;
+
+                                        setState(() {
+                                          DataUtils.writeJsonFile(widget.database);
+                                        });
+                                        return;
+                                      }
+                                    }
+                                  } else {
+                                    for (var i = 0; i < widget.database["user_lists"].length; i++) {
+                                      // todo: maybe make the second for  loop an function, looks similar to
+                                      // one above(if statement)
+                                      var taskList = widget.database["user_lists"][i];
+                                      for ( var j = 0; j < taskList["main_tasks"].length; j++) {
+                                        if (taskList["main_tasks"][j]["task_id"] == value["task_id"]) {
+                                          taskList["main_tasks"][j] = value;
+
+                                          setState(() {
+                                            DataUtils.writeJsonFile(widget.database);
+                                          });
+                                          return;
+                                        }
+                                      }
+                                    }
+                                  }
+                                },
                                 onPressedTask: (value) {
                                   setState(() {
                                     if (isRightPanelOpen && pressedTask != value) {
@@ -115,15 +163,20 @@ class _SchedulePageState extends State<SchedulePage> {
                       ),
                       CardField(
                         onSubmitted: (value) {
-                          var template = DataUtils.newTaskTemplate(
-                            // database: widget.database,
-                            name: value,
-                            dueDate: selectedDate.toString()
-                          );
-                          widget.database["main_tasks"].add(template);
-                          setState(() {
-                            DataUtils.writeJsonFile(widget.database);
-                          });
+                          // todo: needs further refinement. Like where should the task be put in
+                          // //* workday or week tab?
+                          
+                          // var template = DataUtils.newTaskTemplate(
+                          //   // database: widget.database,
+                          //   name: value,
+                          //   listID: widget.database["id"],
+                          //   taskID: DateTime.now().millisecondsSinceEpoch
+                          //   dueDate: selectedDate.toString()
+                          // );
+                          // widget.database["main_tasks"].add(template);
+                          // setState(() {
+                          //   DataUtils.writeJsonFile(widget.database);
+                          // });
                         },
                       ),
                     ],
@@ -136,14 +189,14 @@ class _SchedulePageState extends State<SchedulePage> {
         RightSidePanel(
           show: isRightPanelOpen,
           child: SubTaskList(
-            title: dataList[pressedTask]["name"],
-            mainTask: dataList[pressedTask], 
+            title: allTasks["main_tasks"][pressedTask]["name"],
+            mainTask: allTasks["main_tasks"][pressedTask], 
             onChanged: (value) {
               if (value.runtimeType == String) {
                 var newSubTask = DataUtils.subTaskTemplate(
                   name: value
                 );
-                dataList[pressedTask]["sub_tasks"].add(newSubTask);
+                allTasks["main_tasks"][pressedTask]["sub_tasks"].add(newSubTask);
               }
               setState(() {
                 DataUtils.writeJsonFile(widget.database);
@@ -162,12 +215,14 @@ class Calendar extends StatefulWidget {
     required this.focusDate,
     required this.onDateChange,
     this.onPressedTask,
+    this.updateDatabase,
     this.database = const {"main_tasks": []},
     this.child,
   });
 
   final Widget? child;
   final Function(int)? onPressedTask;
+  final ValueChanged<Map>? updateDatabase;
   final DateTime focusDate;
   final Map database;
   final Function(DateTime) onDateChange;
@@ -306,9 +361,10 @@ class _CalendarState extends State<Calendar> {
                         onAcceptWithDetails: (details) {
                           DateTime droppedDate = (weekDaysDates.subtract(Duration(days: weekDaysDates.weekday - 1))).add(Duration(days: i));
                           widget.database["main_tasks"][details.data]["due_date"] = droppedDate.toString();
-                          setState(() {
-                            DataUtils.writeJsonFile(widget.database);
-                          });
+                          
+                          // updating the task in the original list
+                          widget.updateDatabase!.call(widget.database["main_tasks"][details.data]);
+                          
                         },
                         builder: (context, accepted, rejected) {
                           return Column(
