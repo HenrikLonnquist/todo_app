@@ -21,6 +21,11 @@ class _NavigationPanelState extends State<NavigationPanel> {
     MainTasksPage(
       title: "Main Tasks",
       dataList: dataList["main_page"],
+      onUserUpdate: (value) {
+        setState(() {
+          DataUtils.writeJsonFile(dataList);
+        });
+      },
     ),
     TodayTasks(
       dataList: dataList,
@@ -30,9 +35,9 @@ class _NavigationPanelState extends State<NavigationPanel> {
     ),
   ];
 
-  void _changePage(int) {
+  void _changePage(int index) {
     setState(() {
-      _selectedIndex = int;
+      _selectedIndex = index;
     });
   }
 
@@ -135,6 +140,8 @@ class _NavigationPanelState extends State<NavigationPanel> {
                 ),
 
                 const SizedBox(height: 15),
+
+                // Adding a new user list
                 ElevatedButton.icon(
                   onPressed: () {
                     setState(() {
@@ -143,12 +150,11 @@ class _NavigationPanelState extends State<NavigationPanel> {
                       dataList["user_lists"].add(
                         {
                           "user_list_name": "New User List",
+                          "id": DateTime.now().millisecondsSinceEpoch,
                           "main_tasks": [],
                           "completed": []
                         }
                       );
-
-                      DataUtils.writeJsonFile(dataList);
 
                       pages.add(MainTasksPage(
                         title: dataList["user_lists"][userListLength]["user_list_name"],
@@ -159,6 +165,9 @@ class _NavigationPanelState extends State<NavigationPanel> {
                           });
                         },
                       ));
+
+                      DataUtils.writeJsonFile(dataList);
+
                     });
                   }, 
                   icon: const Icon(Icons.add),

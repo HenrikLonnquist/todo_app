@@ -25,6 +25,8 @@ class DataUtils {
   static Map newTaskTemplate( 
   {
     required String name,
+    required int listID,
+    required int taskID,
     String reminder = "",
     String dueDate = "", 
     String repeat = "", 
@@ -33,7 +35,8 @@ class DataUtils {
   }) {
     return {
       "name": name,
-      "id": UniqueKey().hashCode, //time?
+      "list_id": listID,
+      "task_id": taskID,
       "reminder": reminder,
       "due_date": dueDate,
       "repeat": repeat,

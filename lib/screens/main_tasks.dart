@@ -94,11 +94,7 @@ class _MainTasksPageState extends State<MainTasksPage> {
                         if (widget.dataList["main_tasks"].isEmpty) {
                           isRightPanelOpen = false;
                         }
-                        if(widget.onUserUpdate != null) {
-                          widget.onUserUpdate!.call(widget.dataList);
-                          return;
-                        }
-                        DataUtils.writeJsonFile(widget.dataList);
+                        widget.onUserUpdate!.call(widget.dataList);
                       });
                     },
                     onTap: (indexTask) {
@@ -120,18 +116,14 @@ class _MainTasksPageState extends State<MainTasksPage> {
                       
                       var newTask = DataUtils.newTaskTemplate(
                         name: value,
+                        listID: widget.dataList["id"],
+                        taskID: DateTime.now().millisecondsSinceEpoch
                       );
                       widget.dataList["main_tasks"].add(newTask);
                       
-                      setState(() {
-                        _newTaskController.text = "";
-                        if(widget.onUserUpdate != null) {
-                          widget.onUserUpdate!.call(widget.dataList);
-                          return;
-                        }
-                        print("${widget.dataList}");
-                        DataUtils.writeJsonFile(widget.dataList);
-                      });
+                      _newTaskController.text = "";
+                      widget.onUserUpdate!.call(widget.dataList);
+
                     },
                   ),
                 )
@@ -154,14 +146,8 @@ class _MainTasksPageState extends State<MainTasksPage> {
                 widget.dataList["main_tasks"][mainTaskIndex]["sub_tasks"].add(DataUtils.subTaskTemplate(name: value));
               }
 
-              setState(() {
-                if (widget.onUserUpdate != null) {
-                  widget.onUserUpdate!.call(widget.dataList);
-                  return;
-                }
+              widget.onUserUpdate!.call(widget.dataList);
               
-                DataUtils.writeJsonFile(widget.dataList);
-              });
             }, 
           ),
         ),

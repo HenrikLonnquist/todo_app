@@ -4,6 +4,8 @@
         "main_tasks": [
             {
                 "name": "this",
+                "list_id": 1649843725150,
+                "task_id": 1000,
                 "reminder": "",
                 "due_date": "2024-03-29 00:00:00.000",
                 "repeat": "",
@@ -14,6 +16,8 @@
             },
             {
                 "name": "Name 1",
+                "list_id": 1649843725150,
+                "task_id": 2000,
                 "reminder": "",
                 "due_date": "2024-03-23 00:00:00.000",
                 "repeat": "",
@@ -29,6 +33,8 @@
             },
             {
                 "name": "try",
+                "list_id": 1649843725150,
+                "task_id": 3000,
                 "reminder": "",
                 "due_date": "2024-03-29 00:00:00.000",
                 "repeat": "",
@@ -39,6 +45,8 @@
             },
             {
                 "name": "Name 2",
+                "list_id": 1649843725150,
+                "task_id": 4000,
                 "reminder": "",
                 "due_date": "2024-03-23 00:00:00.000",
                 "repeat": "",
@@ -49,6 +57,8 @@
             },
             {
                 "name": "Name 3",
+                "list_id": 1649843725150,
+                "task_id": 5000,
                 "reminder": "",
                 "due_date": "",
                 "repeat": "",
@@ -59,6 +69,8 @@
             },
             {
                 "name": "Name 4",
+                "list_id": 1649843725150,
+                "task_id": 6000,
                 "reminder": "",
                 "due_date": "2024-03-30 00:00:00.000",
                 "repeat": "",
@@ -69,6 +81,8 @@
             },
             {
                 "name": "testa",
+                "list_id": 1649843725150,
+                "task_id": 7000,
                 "reminder": "",
                 "due_date": "2024-03-25 00:00:00.000",
                 "repeat": "",
@@ -79,6 +93,8 @@
             },
             {
                 "name": "name 5",
+                "list_id": 1649843725150,
+                "task_id": 8000,
                 "reminder": "",
                 "due_date": "2024-03-25 00:00:00.000",
                 "repeat": "",
@@ -89,6 +105,8 @@
             },
             {
                 "name": "test",
+                "list_id": 1649843725150,
+                "task_id": 9000,
                 "reminder": "",
                 "due_date": "2024-03-28 00:00:00.000",
                 "repeat": "",
@@ -99,6 +117,8 @@
             },
             {
                 "name": "test",
+                "list_id": 1649843725150,
+                "task_id": 10000,
                 "reminder": "",
                 "due_date": "2024-04-06 00:00:00.000",
                 "repeat": "",
@@ -109,6 +129,8 @@
             },
             {
                 "name": "test",
+                "list_id": 1649843725150,
+                "task_id": 11000,
                 "reminder": "",
                 "due_date": "2024-04-01 00:00:00.000",
                 "repeat": "",
@@ -120,6 +142,8 @@
             },
             {
                 "name": "or not",
+                "list_id": 1649843725150,
+                "task_id": 12000,
                 "reminder": "",
                 "due_date": "2024-03-28 00:00:00.000",
                 "repeat": "",
@@ -130,42 +154,9 @@
                 "restore_index": ""
             },
             {
-                "name": "testing today page",
-                "reminder": "2024-04-14 18:30:00.000",
-                "due_date": "2024-04-13 00:00:00.000",
-                "repeat": "Daily",
-                "sub_tasks": [
-                    {
-                        "name": "test",
-                        "checked": true
-                    },
-                    {
-                        "name": "test 1",
-                        "checked": false
-                    },
-                    {
-                        "name": "test 3",
-                        "checked": false
-                    },
-                    {
-                        "name": "test 4",
-                        "checked": false
-                    },
-                    {
-                        "name": "test 5",
-                        "checked": false
-                    },
-                    {
-                        "name": "1",
-                        "checked": false
-                    }
-                ],
-                "notes": "testing\nmultiline\nhere",
-                "checked": true,
-                "restore_index": "0"
-            },
-            {
                 "name": "another",
+                "list_id": 1649843725150,
+                "task_id": 14000,
                 "reminder": "",
                 "due_date": "2024-04-06 00:00:00.000",
                 "repeat": "",
@@ -176,14 +167,11 @@
                 "restore_index": ""
             }
         ],
-        "completed": []
-    },
-    "today": {
-        "dateToday": "2024-04-13 00:00:00.000",
-        "main_tasks": [],
         "completed": [
             {
                 "name": "testing today page",
+                "list_id": 1649843725150,
+                "task_id": 13000,
                 "reminder": "2024-04-14 18:30:00.000",
                 "due_date": "2024-04-13 00:00:00.000",
                 "repeat": "Daily",
@@ -215,6 +203,34 @@
                 ],
                 "notes": "testing\nmultiline\nhere",
                 "checked": true,
+                "restore_index": "12"
+            }
+        ]
+    },
+    "today": {
+        "dateToday": "2024-04-13 00:00:00.000",
+        "main_tasks": [],
+        "completed": [
+            {
+                "name": "this is from the usr list",
+                "list_id": 1649843725123,
+                "task_id": 23000,
+                "reminder": "",
+                "due_date": "2024-04-15 00:00:00.000",
+                "repeat": "",
+                "sub_tasks": [
+                    {
+                        "name": "add a sub task",
+                        "checked": false
+                    },
+                    {
+                        "name": "testing another sub task",
+                        "checked": false
+                    }
+                ],
+                "notes": "",
+                "checked": true,
+                "created": "2024-04-15 18:42:21.248784",
                 "restore_index": "0"
             }
         ]
@@ -223,10 +239,47 @@
         {
             "user_list_name": "tes 1",
             "id": 1649843725123,
-            "main_tasks": [],
+            "main_tasks": [
+                {
+                    "name": "testing",
+                    "list_id": 1649843725123,
+                    "task_id": 25000,
+                    "reminder": "",
+                    "due_date": "",
+                    "repeat": "",
+                    "sub_tasks": [],
+                    "notes": "",
+                    "checked": false,
+                    "created": "2024-04-15 18:41:56.919894"
+                },
+                {
+                    "name": "this is from the usr list",
+                    "list_id": 1649843725123,
+                    "task_id": 23000,
+                    "reminder": "",
+                    "due_date": "2024-04-15 00:00:00.000",
+                    "repeat": "",
+                    "sub_tasks": [
+                        {
+                            "name": "add a sub task",
+                            "checked": false
+                        },
+                        {
+                            "name": "testing another sub task",
+                            "checked": false
+                        }
+                    ],
+                    "notes": "",
+                    "checked": true,
+                    "created": "2024-04-15 18:42:21.248784",
+                    "restore_index": "0"
+                }
+            ],
             "completed": [
                 {
                     "name": "test",
+                    "list_id": 1649843725123,
+                    "task_id": 16000,
                     "reminder": "",
                     "due_date": "",
                     "repeat": "",
