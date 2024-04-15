@@ -1,9 +1,7 @@
 // ignore_for_file: avoid_print
 import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter/widgets.dart';
 import 'package:intl/intl.dart';
 import 'package:todo_app/components/card_field.dart';
 import 'package:todo_app/components/title_field.dart';
@@ -12,12 +10,15 @@ class TaskList extends StatefulWidget {
   const TaskList({
     super.key,
     required this.dataList,
+    this.dataCompletedTasks = const [],
     required this.subTask, 
     this.onChanged, 
     this.onTap,
   });
   
   final bool subTask;
+
+  final List dataCompletedTasks;
 
   final Function(int)? onTap;
   
@@ -30,59 +31,140 @@ class TaskList extends StatefulWidget {
 }
 
 class _TaskListState extends State<TaskList> {
+  bool showCompleted = true;
+
   @override
   Widget build(BuildContext context) {
-    return ReorderableListView.builder(
-      shrinkWrap: true,
-      physics: widget.subTask ? const NeverScrollableScrollPhysics() : null,
-      buildDefaultDragHandles: false,
-      onReorder: ((oldIndex, newIndex) {
-        setState(() {
-          if (oldIndex < newIndex) {
-            newIndex -= 1;
-          }
-          final Map item = widget.dataList.removeAt(oldIndex);
-          widget.dataList.insert(newIndex, item);
-
-          // TODO: Need a better way to send data between components and files.
-          // otherwise I need to send the whole "dataList" to every file that needs
-          // to write to the file(data.json).
-          // Look up skeleton flutter  create. I think it had what I wanted or at least
-          // something similar to it.
-          // maybe do a onchanged and send back the results of the list. Then i would not
-          // write to json here but in home page.
-          // DataUtils().writeJsonFile(widget.dataList);
-          widget.onChanged!.call(widget.dataList);
-        });
-      }),
-      itemCount: widget.dataList.length,
-      itemBuilder: ((context, index) {
-        return Card(
-          key: Key("$index"),
-          child: ReorderableDragStartListener(
-            index: index,
-            child: ListTile(
-              // leading:
-              title: Text("${widget.dataList[index]["name"]}"),
-              trailing: IconButton(
-                icon: const Icon(
-                  Icons.highlight_remove_rounded,
-                  size: 20,
-                  color: Colors.black,
+    return SingleChildScrollView(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          ReorderableListView.builder(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            buildDefaultDragHandles: false,
+            onReorder: ((oldIndex, newIndex) {
+              setState(() {
+                if (oldIndex < newIndex) {
+                  newIndex -= 1;
+                }
+                final Map item = widget.dataList.removeAt(oldIndex);
+                widget.dataList.insert(newIndex, item);
+          
+                // TODO: Need a better way to send data between components and files.
+                // otherwise I need to send the whole "dataList" to every file that needs
+                // to write to the file(data.json).
+                // Look up skeleton flutter  create. I think it had what I wanted or at least
+                // something similar to it.
+                // maybe do a onchanged and send back the results of the list. Then i would not
+                // write to json here but in home page.
+                // DataUtils().writeJsonFile(widget.dataList);
+                widget.onChanged!.call(widget.dataList);
+              });
+            }),
+            itemCount: widget.dataList.length,
+            itemBuilder: ((context, index) {
+              return ReorderableDragStartListener(
+                key: ObjectKey(widget.dataList[index]),
+                index: index,
+                child: Card(
+                  child: ListTile(
+                    leading: Checkbox(
+                      value: widget.dataList[index]["checked"],
+                      onChanged: (value) {
+                        widget.dataList[index]["checked"] = !widget.dataList[index]["checked"];
+                        if (!widget.subTask) {
+                          widget.dataCompletedTasks.insert(0, widget.dataList[index]);
+                          widget.dataCompletedTasks[0]["restore_index"] = "$index"; 
+                          widget.dataList.removeAt(index);
+                        }
+                        widget.onChanged!.call(widget.dataList);
+                      },
+                    ),
+                    title: Text(
+                      "${widget.dataList[index]["name"]}",
+                      style: TextStyle(
+                        decoration: widget.dataList[index]["checked"] ? TextDecoration.lineThrough : null,
+                      )
+                    ),
+                    trailing: IconButton(
+                      icon: const Icon(
+                        Icons.highlight_remove_rounded,
+                        size: 20,
+                        color: Colors.black,
+                      ),
+                      onPressed: () {
+                        // sub task list
+                        widget.dataList.removeAt(index);
+                        widget.onChanged!.call(widget.dataList);
+                      },
+                    ),
+                    onTap: widget.subTask ? null : () {
+                      widget.onTap!.call(index);
+                    },
+                  ),
                 ),
-                onPressed: () {
-                  // sub task list
-                  widget.dataList.removeAt(index);
-                  widget.onChanged!.call(widget.dataList);
-                },
-              ),
-              onTap: widget.subTask ? null : () {
-                widget.onTap!.call(index);
-              },
-            ),
+              );
+            })
           ),
-        );
-      })
+          const Divider(thickness: 1,),
+          ElevatedButton.icon(
+            onPressed: () {
+              setState(() {
+                // show list of completed tasks
+                showCompleted = !showCompleted;
+              });
+            }, 
+            icon: const Text("Completed"),
+            label: const Icon(Icons.keyboard_arrow_down_rounded),
+          ),
+          // TODO: make it an settings variable in database.
+          if (showCompleted && !widget.subTask && widget.dataCompletedTasks.isNotEmpty)
+          ListView.builder(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            itemCount: widget.dataCompletedTasks.length,
+            itemBuilder: ((context, index) {
+              return Card(
+                child: ListTile(
+                  leading: Checkbox(
+                    value: widget.dataCompletedTasks[index]["checked"],
+                    onChanged: (value) {
+                      widget.dataCompletedTasks[index]["checked"] = false;
+                      var restoreIndex = int.parse(widget.dataCompletedTasks[index]["restore_index"]);
+                      widget.dataList.insert(restoreIndex, widget.dataCompletedTasks[index]);
+                      widget.dataCompletedTasks[index]["restore_index"] = "";
+                      widget.dataCompletedTasks.removeAt(index);
+
+                      widget.onChanged!.call(widget.dataList);
+                    },
+                  ),
+                  title: Text(
+                    "${widget.dataCompletedTasks[index]["name"]}",
+                    style: const TextStyle(
+                      decoration: TextDecoration.lineThrough,
+                    ),
+                  ),
+                  trailing: IconButton(
+                    icon: const Icon(
+                      Icons.highlight_remove_rounded,
+                      size: 20,
+                      color: Colors.black,
+                    ),
+                    onPressed: () {
+                      widget.dataCompletedTasks.removeAt(index);
+                      widget.onChanged!.call(widget.dataCompletedTasks);
+                    },
+                  ),
+                  onTap: widget.subTask ? null : () {
+                    widget.onTap!.call(index);
+                  },
+                ),
+              );
+            })
+          ),
+        ],
+      ),
     );
   }
 }

@@ -20,7 +20,7 @@ class _NavigationPanelState extends State<NavigationPanel> {
   late List<Widget> pages = <Widget>[
     MainTasksPage(
       title: "Main Tasks",
-      dataList: dataList,
+      dataList: dataList["main_page"],
     ),
     TodayTasks(
       dataList: dataList,
@@ -47,7 +47,7 @@ class _NavigationPanelState extends State<NavigationPanel> {
         title: dataList["user_lists"][i]["user_list_name"],
         dataList: dataList["user_lists"][i],
         userList: true,
-        onUserUpdate: () {
+        onUserUpdate: (value) {
           setState(() {
             DataUtils.writeJsonFile(dataList);
           });
@@ -153,7 +153,7 @@ class _NavigationPanelState extends State<NavigationPanel> {
                       pages.add(MainTasksPage(
                         title: dataList["user_lists"][userListLength]["user_list_name"],
                         dataList: dataList["user_lists"][userListLength],
-                        onUserUpdate: () {
+                        onUserUpdate: (value) {
                           setState(() {
                             DataUtils.writeJsonFile(dataList);
                           });

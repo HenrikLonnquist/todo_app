@@ -19,7 +19,7 @@ class MainTasksPage extends StatefulWidget {
     this.userList = false,
   });
 
-  final Function()? onUserUpdate;
+  final Function(Map?)? onUserUpdate;
 
   final String title;
 
@@ -77,7 +77,7 @@ class _MainTasksPageState extends State<MainTasksPage> {
                     inputValue: pageTitle,
                     onChange: (value) {
                       widget.dataList["user_list_name"] = value;
-                      widget.onUserUpdate!.call();
+                      widget.onUserUpdate!.call(widget.dataList);
                     },
                   ),
                 ),
@@ -87,11 +87,16 @@ class _MainTasksPageState extends State<MainTasksPage> {
                 Expanded(
                   child: TaskList(
                     dataList: widget.dataList["main_tasks"],
+                    dataCompletedTasks: widget.dataList["completed"],
                     subTask: false,
                     onChanged: (value) {
                       setState(() {
                         if (widget.dataList["main_tasks"].isEmpty) {
                           isRightPanelOpen = false;
+                        }
+                        if(widget.onUserUpdate != null) {
+                          widget.onUserUpdate!.call(widget.dataList);
+                          return;
                         }
                         DataUtils.writeJsonFile(widget.dataList);
                       });
@@ -113,15 +118,15 @@ class _MainTasksPageState extends State<MainTasksPage> {
                   child: CardField(
                     onSubmitted: (value) {
                       
-                      var template = DataUtils.dataTemplate(
+                      var newTask = DataUtils.newTaskTemplate(
                         name: value,
                       );
-                      widget.dataList["main_tasks"].add(template);
+                      widget.dataList["main_tasks"].add(newTask);
                       
                       setState(() {
                         _newTaskController.text = "";
                         if(widget.onUserUpdate != null) {
-                          widget.onUserUpdate!.call();
+                          widget.onUserUpdate!.call(widget.dataList);
                           return;
                         }
                         print("${widget.dataList}");
@@ -146,15 +151,12 @@ class _MainTasksPageState extends State<MainTasksPage> {
             : prevTask["main_tasks"][mainTaskIndex],
             onChanged: (value) {
               if (value.runtimeType == String) {
-                Map templateSub = {
-                  "name": value
-                };
-                widget.dataList["main_tasks"][mainTaskIndex]["sub_tasks"].add(templateSub);
+                widget.dataList["main_tasks"][mainTaskIndex]["sub_tasks"].add(DataUtils.subTaskTemplate(name: value));
               }
 
               setState(() {
                 if (widget.onUserUpdate != null) {
-                  widget.onUserUpdate!.call();
+                  widget.onUserUpdate!.call(widget.dataList);
                   return;
                 }
               

@@ -1,6 +1,8 @@
 // ignore_for_file: avoid_print
 import "dart:convert";
 import 'dart:io';
+import 'package:flutter/material.dart';
+
 
 const String _dataPath = "assets/data.json";
 
@@ -10,8 +12,17 @@ class DataUtils {
 
   // TODO: functions for adding main+subtasks, changing date, renaming
 
-  // NEW MAIN TASK
-  static Map dataTemplate( 
+
+  // New sub task
+  static Map subTaskTemplate({required String name}) {
+    return {
+      "name": name,
+      "checked": false
+    };
+  }
+
+  // New main task
+  static Map newTaskTemplate( 
   {
     required String name,
     String reminder = "",
@@ -22,12 +33,14 @@ class DataUtils {
   }) {
     return {
       "name": name,
-      // "id": int //time?
+      "id": UniqueKey().hashCode, //time?
       "reminder": reminder,
       "due_date": dueDate,
       "repeat": repeat,
       "sub_tasks": subList,
       "notes": notes,
+      "checked": false,
+      "created": DateTime.now().toString(),
     };
   }
 
