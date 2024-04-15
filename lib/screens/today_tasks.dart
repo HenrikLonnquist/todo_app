@@ -18,37 +18,56 @@ class TodayTasks extends StatefulWidget {
 }
 
 class _TodayTasksState extends State<TodayTasks> {
+  List todaysTasks = [];
+  late List dataUserLists = widget.dataList["user_lists"];
+
+  DateTime now = DateTime.now();
+  late DateTime dateNow = DateTime(now.year, now.month, now.day);
+
+  @override
+  initState(){
+
+    if (true){
+    // if (widget.dataList["today"]["dateToday"] != dateNow.toString()){
+      widget.dataList["today"]["main_tasks"].clear();
+      widget.dataList["today"]["completed"].clear();
+      // dataTaskLists.add(widget.dataList["main_page"]);
+
+      //! Try the try-catch statement.
+      // because the "user_lists" value is not a map but a list.
+      for (var i in widget.dataList.values){
+        // print(i["main_tasks"]);
+        // if (i["main_tasks"].length != 0) {
+        //   todaysTasks.add(i);
+        // }
+      }
+
+      // TODO: try to add or incorporate the unique keys from the different lists somewhere in todays
+      // data
+      // Just add the list id to every task for now. Unless I can come up with a better idea/way.
+      for(var taskList in todaysTasks){
+        print(taskList);
+        // for(var task in taskList) {
+        //   String taskDate = task["due_date"];
+        //   if(taskDate != "" && DateTime.parse(taskDate) == dateNow) {
+        //     task["original_listID"] = taskList["id"];
+        //     widget.dataList["today"]["main_tasks"].add(task);
+        //   }
+        // }
+      }
+    }
+    super.initState();
+  }
+  
   @override
   Widget build(BuildContext context) {
-    Map todaysTasks = {"main_tasks": []};  
-    var dataTaskLists = [];
-    var dataUserList = widget.dataList["user_lists"];
-
-    DateTime now = DateTime.now();
-    DateTime dateNow = DateTime(now.year, now.month, now.day);
-
-    dataTaskLists.add(widget.dataList["main_tasks"]);
-
-    for(var i in dataUserList){
-      if(i["main_tasks"].length != 0) {
-        dataTaskLists.add(i["main_tasks"]);
-      }
-    }
-
-    for(var taskList in dataTaskLists){
-      for(var task in taskList) {
-        String taskDate = task["due_date"];
-        if(taskDate != "" && DateTime.parse(taskDate) == dateNow) {
-          todaysTasks["main_tasks"].add(task);
-        }
-      }
-    }
-
     return MainTasksPage(
       title: "Today",
-      dataList: todaysTasks,
-      onUserUpdate: () {
+      dataList: widget.dataList["today"],
+      onUserUpdate: (value) {
         setState(() {
+          //! cant delete or set the task to as completed on the original task.
+          // maybe just do an lookup with same value, i guess this is where id good.
           DataUtils.writeJsonFile(widget.dataList);
         });
         
