@@ -36,11 +36,15 @@ class _TodayTasksState extends State<TodayTasks> {
 
     // todo: need notify this class when its a new day. 
 
+    // todo: make an function in datautils for updating todays list
+    // maybe the if else statement shoudl be made into a datautils function as well.
+
 
     // todo: adding a due date will automatically add to todays list if the date is today.
     
     //! TODO: BUG: I only want to empty them when its a new day
     if (false){
+    // if (widget.dataList["today"]["dateToday"] != dateNow.toString()){
       widget.dataList["today"]["dateToday"] = dateNow.toString();
       widget.dataList["today"]["completed"].clear();
       widget.dataList["today"]["main_tasks"].clear();
