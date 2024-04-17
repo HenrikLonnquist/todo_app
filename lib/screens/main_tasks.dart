@@ -91,10 +91,17 @@ class _MainTasksPageState extends State<MainTasksPage> {
                     subTask: false,
                     onChanged: (value) {
                       setState(() {
-                        if (widget.dataList["main_tasks"].isEmpty) {
+                        if (widget.dataList["main_tasks"] == null || widget.dataList["main_tasks"].isEmpty) {
                           isRightPanelOpen = false;
+                        } 
+
+                        if (widget.dataList["dateToday"].runtimeType == String) {
+                          widget.onUserUpdate!.call(value);
+                        } else {
+                          widget.onUserUpdate!.call(widget.dataList);
+
                         }
-                        widget.onUserUpdate!.call(widget.dataList);
+                        
                       });
                     },
                     onTap: (indexTask) {
@@ -142,11 +149,13 @@ class _MainTasksPageState extends State<MainTasksPage> {
             ? widget.dataList["main_tasks"][mainTaskIndex]
             : prevTask["main_tasks"][mainTaskIndex],
             onChanged: (value) {
-              if (value.runtimeType == String) {
-                widget.dataList["main_tasks"][mainTaskIndex]["sub_tasks"].add(DataUtils.subTaskTemplate(name: value));
-              }
+              setState(() {
+                if (value.runtimeType == String) {
+                  widget.dataList["main_tasks"][mainTaskIndex]["sub_tasks"].add(DataUtils.subTaskTemplate(name: value));
+                }
 
-              widget.onUserUpdate!.call(widget.dataList);
+                widget.onUserUpdate!.call(widget.dataList);
+              });
               
             }, 
           ),

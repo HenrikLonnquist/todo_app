@@ -42,7 +42,6 @@ class DataUtils {
       "repeat": repeat,
       "sub_tasks": subList,
       "notes": notes,
-      "checked": false,
       "created": DateTime.now().toString(),
     };
   }

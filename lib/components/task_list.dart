@@ -24,7 +24,7 @@ class TaskList extends StatefulWidget {
   
   final List dataList;
 
-  final ValueChanged<List>? onChanged;
+  final ValueChanged? onChanged;
 
   @override
   State<TaskList> createState() => _TaskListState();
@@ -70,22 +70,24 @@ class _TaskListState extends State<TaskList> {
                 child: Card(
                   child: ListTile(
                     leading: Checkbox(
-                      value: widget.dataList[index]["checked"],
+                      value: false,
                       onChanged: (value) {
-                        widget.dataList[index]["checked"] = !widget.dataList[index]["checked"];
+                        widget.dataList[index]["checked"] = true;
                         if (!widget.subTask) {
                           widget.dataCompletedTasks.insert(0, widget.dataList[index]);
-                          widget.dataCompletedTasks[0]["restore_index"] = "$index"; 
-                          widget.dataList.removeAt(index);
+                          widget.dataCompletedTasks[0]["restore_index"] = "$index";
+
+                          var item = widget.dataList.removeAt(index);
+                          widget.onChanged!.call(item);
+
+                        } else {
+                          widget.onChanged!.call(widget.dataList);
+
                         }
-                        widget.onChanged!.call(widget.dataList);
                       },
                     ),
                     title: Text(
                       "${widget.dataList[index]["name"]}",
-                      style: TextStyle(
-                        decoration: widget.dataList[index]["checked"] ? TextDecoration.lineThrough : null,
-                      )
                     ),
                     trailing: IconButton(
                       icon: const Icon(
@@ -120,6 +122,7 @@ class _TaskListState extends State<TaskList> {
             icon: const Text("Completed"),
             label: const Icon(Icons.keyboard_arrow_down_rounded),
           ),
+          //MARK: COMPLETED
           ListView.builder(
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
@@ -128,15 +131,20 @@ class _TaskListState extends State<TaskList> {
               return Card(
                 child: ListTile(
                   leading: Checkbox(
-                    value: widget.dataCompletedTasks[index]["checked"],
+                    value: true,
                     onChanged: (value) {
                       widget.dataCompletedTasks[index]["checked"] = false;
                       var restoreIndex = int.parse(widget.dataCompletedTasks[index]["restore_index"]);
-                      widget.dataList.insert(restoreIndex, widget.dataCompletedTasks[index]);
+                      try {
+                        widget.dataList.insert(restoreIndex, widget.dataCompletedTasks[index]);
+                        
+                      } catch (e) {
+                        widget.dataList.add(widget.dataCompletedTasks[index]);
+                      }
                       widget.dataCompletedTasks[index]["restore_index"] = "";
-                      widget.dataCompletedTasks.removeAt(index);
+                      var item = widget.dataCompletedTasks.removeAt(index);
 
-                      widget.onChanged!.call(widget.dataList);
+                      widget.onChanged!.call(item);
                     },
                   ),
                   title: Text(
@@ -254,7 +262,7 @@ class _SubTaskListState extends State<SubTaskList> {
             )
           ),
           const Divider(thickness: 2,),
-          //MARK: DUE DATE
+          //MARK: REMINDER
           //* maybe should have used a dropdownbutton for duedate instead or 
           //* or the existing on due date as an option in the dropdownbutton.
           ElevatedButton.icon(
@@ -287,7 +295,8 @@ class _SubTaskListState extends State<SubTaskList> {
             ? const Text("Remind me") 
             : Text(widget.mainTask["reminder"]),
           ),
-          //* due dates: date
+    
+          //MARK: DUE DATE
           ElevatedButton(
             onPressed: () async {
               DateTime dataDate = widget.mainTask["due_date"].isEmpty ? DateTime.now() : DateTime.parse(widget.mainTask["due_date"]);
