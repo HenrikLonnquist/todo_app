@@ -27,21 +27,39 @@ class _NavigationPanelState extends State<NavigationPanel> {
         var todayTaskID = dataList["today"]["main_tasks"].indexWhere((task) => value["task_id"] == task["task_id"]);
         var todayCompletedID = dataList["today"]["completed"].indexWhere((task) => value["task_id"] == task["task_id"]);
 
+
         if (todayTaskID != -1 || todayCompletedID != -1){
+
+          // checks if the dates have not been changed
+          if (value["due_date"] != dataList["today"]["dateToday"]){
+            
+            // Checks where the task is and deletes it
+            if(todayTaskID != -1) {
+              dataList["today"]["main_tasks"].removeAt(index);
+            } else {
+              dataList["today"]["completed"].removeAt(index);
+            }
+
           // move to completed
-          if (value["checked"]) {
+          } else if (value["checked"]) {
             dataList["today"]["main_tasks"].removeAt(index);
             dataList["today"]["completed"].insert(index, value);
           
           // move to main_tasks
           } else {
-          dataList["today"]["main_tasks"].insert(index, value);
-          dataList["today"]["completed"].removeAt(index);
+            dataList["today"]["main_tasks"].insert(index, value);
+            dataList["today"]["completed"].removeAt(index);
 
           }
           
+        } else if (value["due_date"] == dataList["today"]["dateToday"]) {
+          dataList["today"]["main_tasks"].insert(value);
         }
         
+        print("main tasks: ${dataList["today"]["main_tasks"]}");
+        print("completed: ${dataList["today"]["completed"]}");
+        
+
         setState(() {
           DataUtils.writeJsonFile(dataList);
         });
@@ -76,34 +94,59 @@ class _NavigationPanelState extends State<NavigationPanel> {
         onUserUpdate: (value) {
 
           int index = value!["index"];
+
           var todayTaskID = dataList["today"]["main_tasks"].indexWhere((task) => value["task_id"] == task["task_id"]);
           var todayCompletedID = dataList["today"]["completed"].indexWhere((task) => value["task_id"] == task["task_id"]);
-          
 
-          // todo: need to check for date change as well in today page(onuserupdate)
-          if (value["due_date"] == dataList["today"]["dateToday"]) {
 
-            if (todayTaskID != -1 || todayCompletedID != -1){
-              if (value["checked"]) {
-                // move to completed
-                dataList["today"]["main_tasks"].removeAt(index);
-                dataList["today"]["completed"].insert(index, value);
+          if (todayTaskID != -1 || todayCompletedID != -1){
+            print("hello1");
+
+            // checks if the dates have not been changed
+            if (value["due_date"] != dataList["today"]["dateToday"]){
+              print("hello2");
               
+              // Checks where the task is and deletes it
+              if(todayTaskID != -1) {
+                dataList["today"]["main_tasks"].removeAt(todayTaskID);
+                print("hello3");
               } else {
-                // move to main_tasks
-                dataList["today"]["main_tasks"].insert(index, value);
-                dataList["today"]["completed"].removeAt(index);
-
+                dataList["today"]["completed"].removeAt(todayCompletedID);
+                print("hello4");
               }
-              
-            }
 
-          } else {
+            // move to completed
+            } else if (value["checked"]) {
+              dataList["today"]["main_tasks"].removeAt(index);
+              dataList["today"]["completed"].insert(index, value);
+              print("hello5");
             
+            // move to main_tasks
+            } else {
+              dataList["today"]["main_tasks"].insert(index, value);
+              dataList["today"]["completed"].removeAt(index);
+              print("hello6");
+
+            }
+            
+            // if task due got changed to todays date then add to todays list
+          } else if (value["due_date"] == dataList["today"]["dateToday"]) {
+            print("hello7");
+            if (value["checked"]) {
+              dataList["today"]["completed"].insert(0, value);
+
+            } else {
+              dataList["today"]["main_tasks"].insert(0, value);
+            }
           }
+          
+          // print(value);
+
+          print("main tasks: ${dataList["today"]["main_tasks"]}");
+          print("completed: ${dataList["today"]["completed"]}");  
 
 
-          print(dataList["today"]["main_tasks"]);
+          
           setState(() {
             DataUtils.writeJsonFile(dataList);
           });
