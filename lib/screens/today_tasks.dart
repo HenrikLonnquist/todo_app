@@ -35,6 +35,7 @@ class _TodayTasksState extends State<TodayTasks> {
   Widget build(BuildContext context) {
 
     // todo: need notify this class when its a new day. 
+    //! and when an task has been updated to then run the build.
 
     // todo: make an function in datautils for updating todays list
     // maybe the if else statement shoudl be made into a datautils function as well.
@@ -68,6 +69,8 @@ class _TodayTasksState extends State<TodayTasks> {
       }
 
     }
+
+    // print(widget.dataList["today"]["main_tasks"]);
 
 
     return MainTasksPage(

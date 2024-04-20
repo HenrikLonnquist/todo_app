@@ -149,7 +149,7 @@ class _MainTasksPageState extends State<MainTasksPage> {
                   widget.dataList["main_tasks"][mainTaskIndex]["sub_tasks"].add(DataUtils.subTaskTemplate(name: value));
                 }
 
-                widget.onUserUpdate!.call(widget.dataList);
+                widget.onUserUpdate!.call(value);
               });
               
             }, 
