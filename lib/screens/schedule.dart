@@ -112,8 +112,8 @@ class _SchedulePageState extends State<SchedulePage> {
 
                                   // Changing the due date of the task in the original list
                                   if (widget.database["main_page"]["id"] == value["list_id"]) {
-                                    for (var i = 0; i < widget.database["main_tasks"].length; i++) {
-                                      var taskList = widget.database["main_tasks"];
+                                    for (var i = 0; i < widget.database["main_page"]["main_tasks"].length; i++) {
+                                      var taskList = widget.database["main_page"]["main_tasks"];
 
                                       if (taskList[i]["task_id"] == value["task_id"]) {
                                         taskList[i] = value;
