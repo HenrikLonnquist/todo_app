@@ -7,7 +7,7 @@
                 "list_id": 1649843725150,
                 "task_id": 1000,
                 "reminder": "",
-                "due_date": "2024-04-16 00:00:00.000",
+                "due_date": "2024-04-20 00:00:00.000",
                 "repeat": "",
                 "sub_tasks": [],
                 "notes": "",
@@ -155,7 +155,9 @@
                 "checked": false,
                 "created": "2024-03-25 00:00:00.000",
                 "restore_index": ""
-            },
+            }
+        ],
+        "completed": [
             {
                 "name": "another",
                 "list_id": 1649843725150,
@@ -165,12 +167,10 @@
                 "repeat": "",
                 "sub_tasks": [],
                 "notes": "",
-                "checked": false,
+                "checked": true,
                 "created": "2024-03-25 00:00:00.000",
-                "restore_index": ""
-            }
-        ],
-        "completed": [
+                "restore_index": "12"
+            },
             {
                 "name": "testing today page",
                 "list_id": 1649843725150,
@@ -218,7 +218,7 @@
                 "list_id": 1649843725150,
                 "task_id": 1000,
                 "reminder": "",
-                "due_date": "2024-04-16 00:00:00.000",
+                "due_date": "2024-04-20 00:00:00.000",
                 "repeat": "",
                 "sub_tasks": [],
                 "notes": "",

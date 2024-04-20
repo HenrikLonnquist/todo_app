@@ -15,16 +15,38 @@ class NavigationPanel extends StatefulWidget {
 
 class _NavigationPanelState extends State<NavigationPanel> {
   Map dataList = {};
-  int _selectedIndex = 1;
+  int _selectedIndex = 0;
 
   late List<Widget> pages = <Widget>[
     MainTasksPage(
       title: "Main Tasks",
       dataList: dataList["main_page"],
       onUserUpdate: (value) {
+        // todo: just copy the inside of todays file - onuserupdate: 
+        int index = value!["index"];
+
+        var todayTaskID = dataList["today"]["main_tasks"].indexWhere((task) => value["task_id"] == task["task_id"]);
+        var todayCompletedID = dataList["today"]["completed"].indexWhere((task) => value["task_id"] == task["task_id"]);
+
+        if (todayTaskID != -1 || todayCompletedID != -1){
+          // move to completed
+          if (value["checked"]) {
+            dataList["today"]["main_tasks"].removeAt(index);
+            dataList["today"]["completed"].insert(index, value);
+          
+          // move to main_tasks
+          } else {
+          dataList["today"]["main_tasks"].insert(index, value);
+          dataList["today"]["completed"].removeAt(index);
+
+          }
+          
+        }
+        
         setState(() {
           DataUtils.writeJsonFile(dataList);
         });
+
       },
     ),
     TodayTasks(
