@@ -109,68 +109,69 @@ class _TaskListState extends State<TaskList> {
               );
             })
           ),
-          // TODO: make it an settings variable in database.
-          if (showCompleted && !widget.subTask && widget.dataCompletedTasks.isNotEmpty)
-          const Divider(thickness: 1,),
-          ElevatedButton.icon(
-            onPressed: () {
-              setState(() {
-                // show list of completed tasks
-                showCompleted = !showCompleted;
-              });
-            }, 
-            icon: const Text("Completed"),
-            label: const Icon(Icons.keyboard_arrow_down_rounded),
-          ),
-          //MARK: COMPLETED
-          ListView.builder(
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            itemCount: widget.dataCompletedTasks.length,
-            itemBuilder: ((context, index) {
-              return Card(
-                child: ListTile(
-                  leading: Checkbox(
-                    value: true,
-                    onChanged: (value) {
-                      widget.dataCompletedTasks[index]["checked"] = false;
-                      var restoreIndex = int.parse(widget.dataCompletedTasks[index]["restore_index"]);
-                      try {
-                        widget.dataList.insert(restoreIndex, widget.dataCompletedTasks[index]);
-                        
-                      } catch (e) {
-                        widget.dataList.add(widget.dataCompletedTasks[index]);
-                      }
-                      widget.dataCompletedTasks[index]["restore_index"] = "";
-                      var item = widget.dataCompletedTasks.removeAt(index);
+          // TODO: make it an settings variable in database. Make what an settings variable?
+          if (showCompleted && !widget.subTask && widget.dataCompletedTasks.isNotEmpty) ... [
+            const Divider(thickness: 1,),
+            ElevatedButton.icon(
+              onPressed: () {
+                setState(() {
+                  // show list of completed tasks
+                  showCompleted = !showCompleted;
+                });
+              }, 
+              label: Text("Completed   ${widget.dataCompletedTasks.length}"),
+              icon: const Icon(Icons.keyboard_arrow_down_rounded),
+            ),
+            //MARK: COMPLETED
+            ListView.builder(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              itemCount: widget.dataCompletedTasks.length,
+              itemBuilder: ((context, index) {
+                return Card(
+                  child: ListTile(
+                    leading: Checkbox(
+                      value: true,
+                      onChanged: (value) {
+                        widget.dataCompletedTasks[index]["checked"] = false;
+                        var restoreIndex = int.parse(widget.dataCompletedTasks[index]["restore_index"]);
+                        try {
+                          widget.dataList.insert(restoreIndex, widget.dataCompletedTasks[index]);
+                          
+                        } catch (e) {
+                          widget.dataList.add(widget.dataCompletedTasks[index]);
+                        }
+                        widget.dataCompletedTasks[index]["restore_index"] = "";
+                        var item = widget.dataCompletedTasks.removeAt(index);
 
-                      widget.onChanged!.call(item);
+                        widget.onChanged!.call(item);
+                      },
+                    ),
+                    title: Text(
+                      "${widget.dataCompletedTasks[index]["name"]}",
+                      style: const TextStyle(
+                        decoration: TextDecoration.lineThrough,
+                      ),
+                    ),
+                    trailing: IconButton(
+                      icon: const Icon(
+                        Icons.highlight_remove_rounded,
+                        size: 20,
+                        color: Colors.black,
+                      ),
+                      onPressed: () {
+                        widget.dataCompletedTasks.removeAt(index);
+                        widget.onChanged!.call(widget.dataCompletedTasks);
+                      },
+                    ),
+                    onTap: widget.subTask ? null : () {
+                      widget.onTap!.call(index);
                     },
                   ),
-                  title: Text(
-                    "${widget.dataCompletedTasks[index]["name"]}",
-                    style: const TextStyle(
-                      decoration: TextDecoration.lineThrough,
-                    ),
-                  ),
-                  trailing: IconButton(
-                    icon: const Icon(
-                      Icons.highlight_remove_rounded,
-                      size: 20,
-                      color: Colors.black,
-                    ),
-                    onPressed: () {
-                      widget.dataCompletedTasks.removeAt(index);
-                      widget.onChanged!.call(widget.dataCompletedTasks);
-                    },
-                  ),
-                  onTap: widget.subTask ? null : () {
-                    widget.onTap!.call(index);
-                  },
-                ),
-              );
-            })
-          ),
+                );
+              })
+            ),
+          ],
         ],
       ),
     );
