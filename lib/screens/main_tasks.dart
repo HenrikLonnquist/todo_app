@@ -95,12 +95,7 @@ class _MainTasksPageState extends State<MainTasksPage> {
                           isRightPanelOpen = false;
                         } 
 
-                        if (widget.dataList["dateToday"].runtimeType == String) {
-                          widget.onUserUpdate!.call(value);
-                        } else {
-                          widget.onUserUpdate!.call(widget.dataList);
-
-                        }
+                        widget.onUserUpdate!.call(value);
                         
                       });
                     },
