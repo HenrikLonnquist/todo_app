@@ -75,9 +75,30 @@ class _NavigationPanelState extends State<NavigationPanel> {
         dataList: dataList["user_lists"][i],
         userList: true,
         onUserUpdate: (value) {
+          int index = value!["index"];
+
+          var todayTaskID = dataList["today"]["main_tasks"].indexWhere((task) => value["task_id"] == task["task_id"]);
+          var todayCompletedID = dataList["today"]["completed"].indexWhere((task) => value["task_id"] == task["task_id"]);
+
+          if (todayTaskID != -1 || todayCompletedID != -1){
+            // move to completed
+            if (value["checked"]) {
+              dataList["today"]["main_tasks"].removeAt(index);
+              dataList["today"]["completed"].insert(index, value);
+            
+            // move to main_tasks
+            } else {
+            dataList["today"]["main_tasks"].insert(index, value);
+            dataList["today"]["completed"].removeAt(index);
+
+            }
+            
+          }
+
           setState(() {
             DataUtils.writeJsonFile(dataList);
           });
+          
         },
       ));
     }
