@@ -74,27 +74,34 @@ class _NavigationPanelState extends State<NavigationPanel> {
         dataList: dataList["user_lists"][i],
         userList: true,
         onUserUpdate: (value) {
+
           int index = value!["index"];
-
-          
-
           var todayTaskID = dataList["today"]["main_tasks"].indexWhere((task) => value["task_id"] == task["task_id"]);
           var todayCompletedID = dataList["today"]["completed"].indexWhere((task) => value["task_id"] == task["task_id"]);
+          
 
-          if (todayTaskID != -1 || todayCompletedID != -1){
-            if (value["checked"]) {
-              // move to completed
-              dataList["today"]["main_tasks"].removeAt(index);
-              dataList["today"]["completed"].insert(index, value);
-            
-            } else {
-              // move to main_tasks
-              dataList["today"]["main_tasks"].insert(index, value);
-              dataList["today"]["completed"].removeAt(index);
+          // todo: need to check for date change as well in today page(onuserupdate)
+          if (value["due_date"] == dataList["today"]["dateToday"]) {
 
+            if (todayTaskID != -1 || todayCompletedID != -1){
+              if (value["checked"]) {
+                // move to completed
+                dataList["today"]["main_tasks"].removeAt(index);
+                dataList["today"]["completed"].insert(index, value);
+              
+              } else {
+                // move to main_tasks
+                dataList["today"]["main_tasks"].insert(index, value);
+                dataList["today"]["completed"].removeAt(index);
+
+              }
+              
             }
+
+          } else {
             
           }
+
 
           print(dataList["today"]["main_tasks"]);
           setState(() {
