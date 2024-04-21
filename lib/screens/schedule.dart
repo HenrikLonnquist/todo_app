@@ -2,7 +2,6 @@
 
 
 import "package:dropdown_button2/dropdown_button2.dart";
-import "package:easy_date_timeline/easy_date_timeline.dart";
 import "package:flutter/material.dart";
 import "package:todo_app/components/card_field.dart";
 import "package:todo_app/components/right_sidepanel.dart";
@@ -97,13 +96,6 @@ class _SchedulePageState extends State<SchedulePage> {
                           ),
                           child: Column(
                             children: [
-                              // TODO: check how it scrolls to current date widget.
-                              // maybe through size and when does it do it.
-                              // EasyDateTimeLine(
-                              //   initialDate: DateTime.now(),
-                              //   onDateChange: (value) {
-                              //   },
-                              // ),
                               Calendar(
                                 //! TODO: rename property - initial date?
                                 focusDate: DateTime(now.year, now.month, now.day),

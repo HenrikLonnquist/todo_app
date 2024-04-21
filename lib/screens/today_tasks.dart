@@ -44,6 +44,8 @@ class _TodayTasksState extends State<TodayTasks> {
     // todo: adding a due date will automatically add to todays list if the date is today.
     
     //! TODO: BUG: I only want to empty them when its a new day
+    //! might now need this code snippet?
+    //! might just update the date in todays list where I will have the timer.periodic running.
     if (false){
     // if (widget.dataList["today"]["dateToday"] != dateNow.toString()){
       widget.dataList["today"]["dateToday"] = dateNow.toString();

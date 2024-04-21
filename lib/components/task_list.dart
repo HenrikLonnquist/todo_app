@@ -109,7 +109,6 @@ class _TaskListState extends State<TaskList> {
               );
             })
           ),
-          // TODO: make it an settings variable in database. Make what an settings variable?
           if (showCompleted && !widget.subTask && widget.dataCompletedTasks.isNotEmpty) ... [
             const Divider(thickness: 1,),
             ElevatedButton.icon(
@@ -318,8 +317,10 @@ class _SubTaskListState extends State<SubTaskList> {
             ? Text(widget.mainTask["due_date"].toString().split(" ")[0]) 
             : const Text("Due Date"),
           ),
-          // TODO: make this into a class.
           const SizedBox(height: 1,),
+
+          // TODO: make this into a class.
+          //MARK: Repeat task
           Row(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -373,6 +374,7 @@ class _SubTaskListState extends State<SubTaskList> {
               ),
             ],
           ),
+          //MARK: NOTES
           // TODO: need a dialog to notify that it has been saved
           // TODO: need to keyboardlistener for escape and shift+enter to save text.
           Card(
@@ -387,7 +389,6 @@ class _SubTaskListState extends State<SubTaskList> {
               ),
             ),
           ),
-          //* TODO: repeat: dates(days)
         ],
       ),
     );
