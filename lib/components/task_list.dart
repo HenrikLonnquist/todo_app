@@ -64,6 +64,7 @@ class _TaskListState extends State<TaskList> {
             }),
             itemCount: widget.dataList.length,
             itemBuilder: ((context, index) {
+              // todo: add left click options for windows or long press for android
               return ReorderableDragStartListener(
                 key: ObjectKey(widget.dataList[index]),
                 index: index,
