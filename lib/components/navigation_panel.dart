@@ -129,7 +129,7 @@ class _NavigationPanelState extends State<NavigationPanel> {
 
             }
             
-            // if task due got changed to todays date then add to todays list
+            // if a task date got changed to todays date then add to todays list
           } else if (value["due_date"] == dataList["today"]["dateToday"]) {
             print("hello7");
             if (value["checked"]) {

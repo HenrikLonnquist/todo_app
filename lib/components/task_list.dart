@@ -337,6 +337,24 @@ class _SubTaskListState extends State<SubTaskList> {
                     );
                   }).toList(),
                   onChanged: (value) {
+
+                    // TODO: make task repeatable
+                    /**
+                     * dropdownmenu on "custom", look in app_blocker project
+                     *  - n days
+                     *  - n weeks
+                     *  - n months
+                     * Daily, Weekly, Monthly
+                     * how does monthly work on 31? <- this will just be last date of the month
+                     * removing due date, will also remove repeat value, but not vice versa
+                     * 
+                     */
+
+                    // no need for switch case statement here,
+                    // only need to do the calculation when the task is completed.
+                    widget.mainTask["repeating_tasks"] = value;
+                        
+
                     setState(() {
                       selectedDropItem = value;
                     });
