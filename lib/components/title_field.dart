@@ -8,11 +8,13 @@ class TitleField extends StatefulWidget {
     this.onChange,
     this.enabled = true,
     this.inputValue = "",
+    this.completed = false,
   });
 
   final bool enabled;
   final Function(String)? onChange;
   final String inputValue;
+  final bool completed;
 
   @override
   State<TitleField> createState() => _TitleFieldState();
@@ -38,10 +40,11 @@ class _TitleFieldState extends State<TitleField> {
           _titleController.text = value;
           widget.onChange!.call(value);
         },
-        style: const TextStyle(
+        style: TextStyle(
           fontSize: 26,
           fontWeight: FontWeight.bold,
           color: Colors.black,
+          decoration: widget.completed ? TextDecoration.lineThrough : null,
           // fontFamily: ,                    
         ),
         cursorColor: Colors.black,

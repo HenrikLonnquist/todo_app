@@ -66,5 +66,13 @@ class DataUtils {
     File(_dataPath).writeAsStringSync(jsonString);
   }
 
+  static void updateTodaysList() {
+
+  }
+
+  static void recurringTaskUpdate() {
+    
+  }
+
   
 }
