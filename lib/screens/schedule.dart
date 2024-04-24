@@ -531,6 +531,7 @@ class _CalendarState extends State<Calendar> {
         children: [
           Row(
             children: [
+              //!BUG TODO: overflow when opening right side panel
               SizedBox(
                 width: 120,
                 child: Padding(
