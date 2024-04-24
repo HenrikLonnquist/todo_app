@@ -68,43 +68,53 @@ class _TaskListState extends State<TaskList> {
               return ReorderableDragStartListener(
                 key: ObjectKey(widget.dataList[index]),
                 index: index,
-                child: Card(
-                  child: ListTile(
-                    leading: Checkbox(
-                      value: false,
-                      onChanged: (value) {
-                        widget.dataList[index]["checked"] = true;
-                        if (!widget.subTask) {
-                          widget.dataCompletedTasks.insert(0, widget.dataList[index]);
-                          widget.dataCompletedTasks[0]["restore_index"] = "$index";
+                child: GestureDetector(
+                  // onTertiaryTapDown: (value) {
+                  //   print(value);
+                  // },
+                  onSecondaryTapDown: (value) {
+                    print(value.globalPosition);
+                    print("calling dropdown options");
 
-                          var item = widget.dataList.removeAt(index);
-                          widget.onChanged!.call(item);
-
-                        } else {
-                          widget.onChanged!.call(widget.dataList);
-
-                        }
-                      },
-                    ),
-                    title: Text(
-                      "${widget.dataList[index]["name"]}",
-                    ),
-                    trailing: IconButton(
-                      icon: const Icon(
-                        Icons.highlight_remove_rounded,
-                        size: 20,
-                        color: Colors.black,
+                  },
+                  child: Card(
+                    child: ListTile(
+                      leading: Checkbox(
+                        value: false,
+                        onChanged: (value) {
+                          widget.dataList[index]["checked"] = true;
+                          if (!widget.subTask) {
+                            widget.dataCompletedTasks.insert(0, widget.dataList[index]);
+                            widget.dataCompletedTasks[0]["restore_index"] = "$index";
+                
+                            var item = widget.dataList.removeAt(index);
+                            widget.onChanged!.call(item);
+                
+                          } else {
+                            widget.onChanged!.call(widget.dataList);
+                
+                          }
+                        },
                       ),
-                      onPressed: () {
-                        // sub task list
-                        widget.dataList.removeAt(index);
-                        widget.onChanged!.call(widget.dataList);
+                      title: Text(
+                        "${widget.dataList[index]["name"]}",
+                      ),
+                      trailing: IconButton(
+                        icon: const Icon(
+                          Icons.highlight_remove_rounded,
+                          size: 20,
+                          color: Colors.black,
+                        ),
+                        onPressed: () {
+                          // sub task list
+                          widget.dataList.removeAt(index);
+                          widget.onChanged!.call(widget.dataList);
+                        },
+                      ),
+                      onTap: widget.subTask ? null : () {
+                        widget.onTap!.call(index);
                       },
                     ),
-                    onTap: widget.subTask ? null : () {
-                      widget.onTap!.call(index);
-                    },
                   ),
                 ),
               );
