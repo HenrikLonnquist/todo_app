@@ -20,7 +20,7 @@ class TaskList extends StatefulWidget {
 
   final List dataCompletedTasks;
 
-  final Function(int)? onTap;
+  final Function(int, String)? onTap;
   
   final List dataList;
 
@@ -86,7 +86,47 @@ class _TaskListState extends State<TaskList> {
                           if (!widget.subTask) {
                             widget.dataCompletedTasks.insert(0, widget.dataList[index]);
                             widget.dataCompletedTasks[0]["restore_index"] = "$index";
-                
+                            /**
+                             * dropdownmenu on "custom", look in app_blocker project
+                             *  - n days
+                             *  - n weeks
+                             *  - n months
+                             * Daily, Weekly, Monthly
+                             * how does monthly work on 31? <- this will just be last date of the month
+                             * removing due date, will also remove repeat value, but not vice versa
+                             * 
+                            */
+                            if (widget.dataList[index]["due_date"] != "" && widget.dataList[index]["repeating_task"] != null) {
+
+                              String newDate = "";
+                              DateTime oldDate = DateTime.parse(widget.dataList[index]["due_date"]);
+                              switch (widget.dataList[index]["repeating_task"]) {
+                                case "Daily":
+                                  print("daily");
+                                  newDate = DateTime(oldDate.year, oldDate.month, oldDate.day + 1).toString();
+                                case "Weekly":
+                                  print("weekly");
+                                  newDate = DateTime(oldDate.year, oldDate.month, oldDate.day + 7).toString();
+                                case "Monthly":
+                                  print("monthly");
+                                  newDate = DateTime(oldDate.year, oldDate.month + 1, oldDate.day).toString();
+                                
+                                // case "Custom": or if case is datetime type
+                                  
+                                  break;
+                                default:
+                                  break;
+                            
+                              }
+                              
+                              // copy old task to a new task and insert to maintask list
+                              // print(widget.dataList);
+                              var newTask = Map.from(widget.dataList[index]);
+                              newTask["due_date"] = newDate;
+                              print(widget.dataList[index]);
+                              print(newTask);
+                            }
+
                             var item = widget.dataList.removeAt(index);
                             widget.onChanged!.call(item);
                 
@@ -94,6 +134,7 @@ class _TaskListState extends State<TaskList> {
                             widget.onChanged!.call(widget.dataList);
                 
                           }
+                          
                         },
                       ),
                       title: Text(
@@ -112,7 +153,7 @@ class _TaskListState extends State<TaskList> {
                         },
                       ),
                       onTap: widget.subTask ? null : () {
-                        widget.onTap!.call(index);
+                        widget.onTap!.call(index, "main_tasks");
                       },
                     ),
                   ),
@@ -151,7 +192,7 @@ class _TaskListState extends State<TaskList> {
                         } catch (e) {
                           widget.dataList.add(widget.dataCompletedTasks[index]);
                         }
-                        widget.dataCompletedTasks[index]["restore_index"] = "";
+                        // widget.dataCompletedTasks[index]["restore_index"] = "";
                         var item = widget.dataCompletedTasks.removeAt(index);
 
                         widget.onChanged!.call(item);
@@ -175,7 +216,7 @@ class _TaskListState extends State<TaskList> {
                       },
                     ),
                     onTap: widget.subTask ? null : () {
-                      widget.onTap!.call(index);
+                      widget.onTap!.call(index, "completed");
                     },
                   ),
                 );
@@ -250,6 +291,7 @@ class _SubTaskListState extends State<SubTaskList> {
           Padding(
             padding: const EdgeInsets.only(left: 8),
             child: TitleField(
+              completed: widget.mainTask["checked"],
               inputValue: widget.title,
               onChange: (value) {
                 widget.mainTask["name"] = value;
@@ -350,24 +392,17 @@ class _SubTaskListState extends State<SubTaskList> {
                   onChanged: (value) {
 
                     // TODO: make task repeatable
-                    /**
-                     * dropdownmenu on "custom", look in app_blocker project
-                     *  - n days
-                     *  - n weeks
-                     *  - n months
-                     * Daily, Weekly, Monthly
-                     * how does monthly work on 31? <- this will just be last date of the month
-                     * removing due date, will also remove repeat value, but not vice versa
-                     * 
-                     */
-
-                    // no need for switch case statement here,
-                    // only need to do the calculation when the task is completed.
-                    widget.mainTask["repeating_tasks"] = value;
-                        
+                    
+                    if (value == "Custom") {
+                      // do some stuff
+                      print("do some stuff");
+                    }
+                                            
 
                     setState(() {
                       selectedDropItem = value;
+                      widget.mainTask["repeating_task"] = value;
+                      widget.onChanged!.call(widget.mainTask);
                     });
                   },
                   buttonStyleData: ButtonStyleData(

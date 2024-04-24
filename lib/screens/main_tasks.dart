@@ -38,9 +38,7 @@ class _MainTasksPageState extends State<MainTasksPage> {
 
   int mainTaskIndex = 0;
 
-  late Map prevTask = widget.dataList;
-
-
+  String currentList = ""; // either completed or maintask list 
 
   @override
   void dispose() {
@@ -56,6 +54,7 @@ class _MainTasksPageState extends State<MainTasksPage> {
     } else {
       pageTitle = widget.title;
     }
+
     return Row(
       children: [
         Expanded(
@@ -88,21 +87,26 @@ class _MainTasksPageState extends State<MainTasksPage> {
                     subTask: false,
                     onChanged: (value) {
                       setState(() {
-                        if (widget.dataList["main_tasks"] == null || widget.dataList["main_tasks"].isEmpty) {
+                        if (widget.dataList[currentList] == null || widget.dataList[currentList].isEmpty) {
                           isRightPanelOpen = false;
-                        } 
+                        }
+
+                        //! BUG TODO: right side panel wont stay open on the correct task, but will switch to another or
+                        //! give rangeError. 
 
                         widget.onUserUpdate!.call(value);
                         
                       });
                     },
-                    onTap: (indexTask) {
+                    onTap: (indexTask, taskList) {
                       setState(() {
                         if (isRightPanelOpen && mainTaskIndex != indexTask) {
                           mainTaskIndex = indexTask;
+                          currentList = taskList;
                           return;
                         } 
                         isRightPanelOpen = !isRightPanelOpen;
+                        currentList = taskList;
                         mainTaskIndex = indexTask;
                       });
                     },
@@ -130,20 +134,21 @@ class _MainTasksPageState extends State<MainTasksPage> {
             ), 
           ),
         ),
-        if(prevTask["main_tasks"].isNotEmpty || widget.dataList["main_tasks"].isNotEmpty)
         RightSidePanel(
           show: isRightPanelOpen,
-          child: SubTaskList(
-            title: widget.dataList["main_tasks"].isNotEmpty 
-            ? widget.dataList["main_tasks"][mainTaskIndex]["name"]
-            : prevTask["main_tasks"][mainTaskIndex]["name"],
-            mainTask: widget.dataList["main_tasks"].isNotEmpty
-            ? widget.dataList["main_tasks"][mainTaskIndex]
-            : prevTask["main_tasks"][mainTaskIndex],
+          child: widget.dataList[currentList] == null ? null : SubTaskList(
+            title: widget.dataList[currentList][mainTaskIndex]["name"],
+            mainTask: widget.dataList[currentList][mainTaskIndex],
+            // title: widget.dataList[currentList].isNotEmpty 
+            // ? widget.dataList[currentList][mainTaskIndex]["name"]
+            // : prevTask[currentList][mainTaskIndex]["name"],
+            // mainTask: widget.dataList[currentList].isNotEmpty
+            // ? widget.dataList[currentList][mainTaskIndex]
+            // : prevTask[currentList][mainTaskIndex],
             onChanged: (value) {
               setState(() {
                 if (value.runtimeType == String) {
-                  widget.dataList["main_tasks"][mainTaskIndex]["sub_tasks"].add(DataUtils.subTaskTemplate(name: value));
+                  widget.dataList[currentList][mainTaskIndex]["sub_tasks"].add(DataUtils.subTaskTemplate(name: value));
                 }
 
                 widget.onUserUpdate!.call(value);
