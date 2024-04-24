@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:todo_app/components/navigation_panel.dart';
+import 'package:todo_app/navigation_panel.dart';
 
 void main() async {
   runApp(const MyApp());
