@@ -91,8 +91,9 @@ class _MainTasksPageState extends State<MainTasksPage> {
                       setState(() {
 
                         //! FIX: TODO: need to handle in case of list reordering.
-                        if ( value.runtimeType == List) {
+                        if (value.runtimeType == List) {
                           widget.onUserUpdate!.call(value);
+                          return;
                         }
 
                         // print("$prevTaskID ${value["task_id"]} ${value["task_id"] == prevTaskID} $isRightPanelOpen");
