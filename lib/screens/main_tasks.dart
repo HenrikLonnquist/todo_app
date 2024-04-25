@@ -40,6 +40,8 @@ class _MainTasksPageState extends State<MainTasksPage> {
 
   String currentList = ""; // either completed or maintask list 
 
+  late int prevTaskID = 0; // rename to prevOpenTaskID
+
   @override
   void dispose() {
     _newTaskController.dispose();
@@ -87,12 +89,48 @@ class _MainTasksPageState extends State<MainTasksPage> {
                     subTask: false,
                     onChanged: (value) {
                       setState(() {
-                        if (widget.dataList[currentList] == null || widget.dataList[currentList].isEmpty) {
-                          isRightPanelOpen = false;
+
+                        //! FIX: TODO: need to handle in case of list reordering.
+                        if ( value.runtimeType == List) {
+                          widget.onUserUpdate!.call(value);
                         }
 
-                        //! BUG TODO: right side panel wont stay open on the correct task, but will switch to another or
-                        //! give rangeError. 
+                        // print("$prevTaskID ${value["task_id"]} ${value["task_id"] == prevTaskID} $isRightPanelOpen");
+                        if (prevTaskID == 0) {
+                          prevTaskID = value["task_id"];
+                        }
+
+
+                        if (isRightPanelOpen && prevTaskID == value["task_id"]) {
+                          if (value["checked"] == false){
+                            print("testing1");
+                            currentList = "main_tasks";
+                            if (widget.dataList[currentList].isEmpty) {
+                              mainTaskIndex = 0;
+
+                            } else {
+                              mainTaskIndex = int.parse(value["restore_index"]);
+
+                            }
+                          } else {
+                            print("testing2");
+                            currentList = "completed";
+                            mainTaskIndex = 0;
+                          }
+                        } else if (isRightPanelOpen && prevTaskID != value["task_id"]){
+                          print("testing3");
+                          var newIndex = widget.dataList[currentList].indexWhere((object) => object["task_id"] == prevTaskID);
+
+                          mainTaskIndex = newIndex;
+
+                        }
+
+                        // maybe use the taskid, save the prev task
+                        // this gets called when the main task list gets update either by
+                        // deletion, completed, undo complete, creation,
+                        // nothing to do with side panel at the moment
+                        //* need to change list depending on value state.
+                        //* I need to know what task is in the right side panel from here.
 
                         widget.onUserUpdate!.call(value);
                         
@@ -100,14 +138,18 @@ class _MainTasksPageState extends State<MainTasksPage> {
                     },
                     onTap: (indexTask, taskList) {
                       setState(() {
-                        if (isRightPanelOpen && mainTaskIndex != indexTask) {
+                        if (isRightPanelOpen && currentList != taskList) {
                           mainTaskIndex = indexTask;
                           currentList = taskList;
+                          prevTaskID = widget.dataList[currentList][mainTaskIndex]["task_id"];
                           return;
-                        } 
-                        isRightPanelOpen = !isRightPanelOpen;
+                        } else if (isRightPanelOpen == false || indexTask == mainTaskIndex){
+                          isRightPanelOpen = !isRightPanelOpen;
+                        }
+
                         currentList = taskList;
                         mainTaskIndex = indexTask;
+                        prevTaskID = widget.dataList[currentList][mainTaskIndex]["task_id"];
                       });
                     },
                   ),

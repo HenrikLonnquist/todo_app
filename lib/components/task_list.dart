@@ -134,7 +134,7 @@ class _TaskListState extends State<TaskList> {
                             widget.onChanged!.call(widget.dataList);
                 
                           }
-                          
+
                         },
                       ),
                       title: Text(
@@ -186,8 +186,8 @@ class _TaskListState extends State<TaskList> {
                         value: true,
                         onChanged: (value) {
                           widget.dataCompletedTasks[index]["checked"] = false;
-                          var restoreIndex = int.parse(widget.dataCompletedTasks[index]["restore_index"]);
                           try {
+                            int restoreIndex = int.parse(widget.dataCompletedTasks[index]["restore_index"]);
                             widget.dataList.insert(restoreIndex, widget.dataCompletedTasks[index]);
                             
                           } catch (e) {

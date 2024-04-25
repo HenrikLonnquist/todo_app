@@ -234,8 +234,20 @@
         {
             "user_list_name": "tes 1",
             "id": 1649843725123,
-            "main_tasks": [],
-            "completed": [
+            "main_tasks": [
+                {
+                    "name": "test",
+                    "list_id": 1649843725123,
+                    "task_id": 16000,
+                    "reminder": "",
+                    "due_date": "",
+                    "repeat": "",
+                    "sub_tasks": [],
+                    "notes": "",
+                    "checked": false,
+                    "created": "2024-03-25 00:00:00.000",
+                    "restore_index": "0"
+                },
                 {
                     "name": "testing",
                     "list_id": 1649843725123,
@@ -245,7 +257,7 @@
                     "repeat": "",
                     "sub_tasks": [],
                     "notes": "",
-                    "checked": true,
+                    "checked": false,
                     "created": "2024-04-15 18:41:56.919894",
                     "restore_index": "0"
                 },
@@ -267,24 +279,13 @@
                         }
                     ],
                     "notes": "",
-                    "checked": true,
+                    "checked": false,
                     "created": "2024-04-15 18:42:21.248784",
-                    "restore_index": "0",
+                    "restore_index": "2",
                     "index": 1
-                },
-                {
-                    "name": "test",
-                    "list_id": 1649843725123,
-                    "task_id": 16000,
-                    "reminder": "",
-                    "due_date": "",
-                    "repeat": "",
-                    "sub_tasks": [],
-                    "notes": "",
-                    "checked": true,
-                    "created": "2024-03-25 00:00:00.000"
                 }
-            ]
+            ],
+            "completed": []
         },
         {
             "user_list_name": "test 2",
