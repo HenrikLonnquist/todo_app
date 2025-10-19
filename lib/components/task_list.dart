@@ -316,6 +316,11 @@ class _SubTaskListState extends State<SubTaskList> {
               },
             )
           ),
+          //MARK: Add today
+          ElevatedButton.icon(
+            onPressed: () {},
+            label: Text("Add to My Day"),
+          ),
           const Divider(thickness: 2,),
           //MARK: REMINDER
           //* maybe should have used a dropdownbutton for duedate instead or 

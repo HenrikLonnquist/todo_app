@@ -240,7 +240,7 @@
                     "list_id": 1649843725123,
                     "task_id": 16000,
                     "reminder": "",
-                    "due_date": "",
+                    "due_date": "2025-10-16 00:00:00.000",
                     "repeat": "",
                     "sub_tasks": [],
                     "notes": "",
@@ -266,7 +266,7 @@
                     "list_id": 1649843725123,
                     "task_id": 23000,
                     "reminder": "",
-                    "due_date": "2024-04-19 00:00:00.000",
+                    "due_date": "2025-10-16 00:00:00.000",
                     "repeat": "",
                     "sub_tasks": [
                         {
@@ -296,6 +296,12 @@
         {
             "user_list_name": "New User List",
             "id": 1649843722323,
+            "main_tasks": [],
+            "completed": []
+        },
+        {
+            "user_list_name": "New User List",
+            "id": 1760805488240,
             "main_tasks": [],
             "completed": []
         }

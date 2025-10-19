@@ -64,7 +64,7 @@ class _MainTasksPageState extends State<MainTasksPage> {
             // duration: const Duration(seconds: 10),
             // curve: Curves.fastEaseInToSlowEaseOut,
             padding: const EdgeInsets.all(10),
-            color: Colors.blue, 
+            color: Colors.grey.shade700, 
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -179,6 +179,30 @@ class _MainTasksPageState extends State<MainTasksPage> {
         ),
         RightSidePanel(
           show: isRightPanelOpen,
+          bottomChild: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              ElevatedButton.icon(
+                onPressed: (){
+                  setState(() {
+                    isRightPanelOpen = false;
+                  });
+                }, 
+                label: Text("hide")
+              ),
+              ElevatedButton.icon(
+                onPressed: (){
+                  //TODO: how to call the database and remove shit
+                  print(widget.dataList[currentList][mainTaskIndex]);
+                  print(widget.dataList[currentList]);
+                  //! Shit, my database is so messy and my code.
+                  // widget.dataList.removeAt(index);
+                  // widget.onChanged!.call(widget.dataList);
+                }, 
+                label: Text("delete")
+              ),
+            ],
+          ),
           child: widget.dataList[currentList] == null ? null : SubTaskList(
             title: widget.dataList[currentList][mainTaskIndex]["name"],
             mainTask: widget.dataList[currentList][mainTaskIndex],

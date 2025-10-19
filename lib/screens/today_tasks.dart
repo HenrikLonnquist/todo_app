@@ -36,6 +36,7 @@ class _TodayTasksState extends State<TodayTasks> {
 
     // todo: need notify this class when its a new day. 
     //! and when an task has been updated to then run the build.
+    //! maybe not, just add all tasks with due dates equal to todays date.
 
     // todo: make an function in datautils for updating todays list
     // maybe the if else statement shoudl be made into a datautils function as well.
