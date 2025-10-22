@@ -87,7 +87,7 @@
                 "list_id": 1649843725150,
                 "task_id": 7000,
                 "reminder": "",
-                "due_date": "2024-03-25 00:00:00.000",
+                "due_date": "2024-06-25 00:00:00.000",
                 "repeat": "",
                 "sub_tasks": [],
                 "notes": "",
@@ -234,8 +234,7 @@
         {
             "user_list_name": "tes 1",
             "id": 1649843725123,
-            "main_tasks": [],
-            "completed": [
+            "main_tasks": [
                 {
                     "name": "testing",
                     "list_id": 1649843725123,
@@ -245,10 +244,12 @@
                     "repeat": "",
                     "sub_tasks": [],
                     "notes": "",
-                    "checked": true,
+                    "checked": false,
                     "created": "2024-04-15 18:41:56.919894",
                     "restore_index": "0"
-                },
+                }
+            ],
+            "completed": [
                 {
                     "name": "this is from the usr list",
                     "list_id": 1649843725123,

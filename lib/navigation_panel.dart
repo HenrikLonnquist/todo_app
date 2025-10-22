@@ -93,9 +93,6 @@ class _NavigationPanelState extends State<NavigationPanel> {
         userList: true,
         onUserUpdate: (value) {
 
-          // print(dataList["user_lists"][i]);
-
-
           var todayTaskID = dataList["today"]["main_tasks"].indexWhere((task) => value!["task_id"] == task["task_id"]);
           var todayCompletedID = dataList["today"]["completed"].indexWhere((task) => value!["task_id"] == task["task_id"]);
 
