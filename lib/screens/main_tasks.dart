@@ -40,6 +40,8 @@ class _MainTasksPageState extends State<MainTasksPage> {
 
   String currentList = ""; // either completed or maintask list 
 
+  late int prevTaskID = 0; // rename to prevOpenTaskID
+
   @override
   void dispose() {
     _newTaskController.dispose();
@@ -62,7 +64,7 @@ class _MainTasksPageState extends State<MainTasksPage> {
             // duration: const Duration(seconds: 10),
             // curve: Curves.fastEaseInToSlowEaseOut,
             padding: const EdgeInsets.all(10),
-            color: Colors.blue, 
+            color: Colors.grey.shade700, 
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -87,12 +89,51 @@ class _MainTasksPageState extends State<MainTasksPage> {
                     subTask: false,
                     onChanged: (value) {
                       setState(() {
-                        if (widget.dataList[currentList] == null || widget.dataList[currentList].isEmpty) {
-                          isRightPanelOpen = false;
+
+                        //! FIX: TODO: need to handle in case of list reordering.
+                        if (value.runtimeType == List) {
+                          widget.onUserUpdate!.call(value);
+                          return;
+                        }
+
+                        // print("$prevTaskID ${value["task_id"]} ${value["task_id"] == prevTaskID} $isRightPanelOpen");
+                        if (prevTaskID == 0) {
+                          prevTaskID = value["task_id"];
+                        }
+
+
+                        if (isRightPanelOpen && prevTaskID == value["task_id"]) {
+                          if (value["checked"] == false){
+                            print("testing1");
+                            currentList = "main_tasks";
+                            if (widget.dataList[currentList].isEmpty) {
+                              mainTaskIndex = 0;
+
+                            } else {
+                              mainTaskIndex = int.parse(value["restore_index"]);
+
+                            }
+                          } else {
+                            print("testing2");
+                            currentList = "completed";
+                            mainTaskIndex = 0;
+                          }
+                        } else if (isRightPanelOpen && prevTaskID != value["task_id"]){
+                          print("testing3");
+                          var newIndex = widget.dataList[currentList].indexWhere((object) => object["task_id"] == prevTaskID);
+
+                          mainTaskIndex = newIndex;
+
                         }
 
                         //! BUG TODO: right side panel wont stay open on the correct task, but will switch to another or
                         //! give rangeError. 
+                        // maybe use the taskid, save the prev task
+                        // this gets called when the main task list gets update either by
+                        // deletion, completed, undo complete, creation,
+                        // nothing to do with side panel at the moment
+                        //* need to change list depending on value state.
+                        //* I need to know what task is in the right side panel from here.
                                                 
 
                         widget.onUserUpdate!.call(value);
@@ -105,11 +146,15 @@ class _MainTasksPageState extends State<MainTasksPage> {
                         if (isRightPanelOpen && taskList != currentList || mainTaskIndex != indexTask) {
                           mainTaskIndex = indexTask;
                           currentList = taskList;
+                          prevTaskID = widget.dataList[currentList][mainTaskIndex]["task_id"];
                           return;
-                        } 
-                        isRightPanelOpen = !isRightPanelOpen;
+                        } else if (isRightPanelOpen == false || indexTask == mainTaskIndex){
+                          isRightPanelOpen = !isRightPanelOpen;
+                        }
+
                         currentList = taskList;
                         mainTaskIndex = indexTask;
+                        prevTaskID = widget.dataList[currentList][mainTaskIndex]["task_id"];
                       });
                     },
                   ),
@@ -138,7 +183,31 @@ class _MainTasksPageState extends State<MainTasksPage> {
         ),
         RightSidePanel(
           show: isRightPanelOpen,
-          child: widget.dataList[currentList] == null || widget.dataList[currentList].length == 0 ? null : SubTaskList(
+          bottomChild: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              ElevatedButton.icon(
+                onPressed: (){
+                  setState(() {
+                    isRightPanelOpen = false;
+                  });
+                }, 
+                label: Text("hide")
+              ),
+              ElevatedButton.icon(
+                onPressed: (){
+                  //TODO: how to call the database and remove shit
+                  print(widget.dataList[currentList][mainTaskIndex]);
+                  print(widget.dataList[currentList]);
+                  //! Shit, my database is so messy and my code.
+                  // widget.dataList.removeAt(index);
+                  // widget.onChanged!.call(widget.dataList);
+                }, 
+                label: Text("delete")
+              ),
+            ],
+          ),
+          child: widget.dataList[currentList] == null ? null : SubTaskList(
             title: widget.dataList[currentList][mainTaskIndex]["name"],
             mainTask: widget.dataList[currentList][mainTaskIndex],
             // title: widget.dataList[currentList].isNotEmpty 

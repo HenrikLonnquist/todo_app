@@ -234,7 +234,8 @@
         {
             "user_list_name": "tes 1",
             "id": 1649843725123,
-            "main_tasks": [
+            "main_tasks": [],
+            "completed": [
                 {
                     "name": "testing",
                     "list_id": 1649843725123,
@@ -255,7 +256,7 @@
                     "list_id": 1649843725123,
                     "task_id": 23000,
                     "reminder": "",
-                    "due_date": "2024-04-19 00:00:00.000",
+                    "due_date": "2025-10-16 00:00:00.000",
                     "repeat": "",
                     "sub_tasks": [
                         {
@@ -268,24 +269,13 @@
                         }
                     ],
                     "notes": "",
-                    "checked": true,
+                    "checked": false,
                     "created": "2024-04-15 18:42:21.248784",
-                    "restore_index": "0",
+                    "restore_index": "2",
                     "index": 1
-                },
-                {
-                    "name": "test",
-                    "list_id": 1649843725123,
-                    "task_id": 16000,
-                    "reminder": "",
-                    "due_date": "",
-                    "repeat": "",
-                    "sub_tasks": [],
-                    "notes": "",
-                    "checked": true,
-                    "created": "2024-03-25 00:00:00.000"
                 }
-            ]
+            ],
+            "completed": []
         },
         {
             "user_list_name": "test 2",
@@ -296,6 +286,12 @@
         {
             "user_list_name": "New User List",
             "id": 1649843722323,
+            "main_tasks": [],
+            "completed": []
+        },
+        {
+            "user_list_name": "New User List",
+            "id": 1760805488240,
             "main_tasks": [],
             "completed": []
         }

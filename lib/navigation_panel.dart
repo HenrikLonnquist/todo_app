@@ -47,8 +47,11 @@ class _NavigationPanelState extends State<NavigationPanel> {
           
           // move to main_tasks
           } else {
-            dataList["today"]["main_tasks"].insert(index, value);
-            dataList["today"]["completed"].removeAt(index);
+            
+            if(index != 0) {
+              dataList["today"]["main_tasks"].insert(index, value);
+              dataList["today"]["completed"].removeAt(index);
+             }
 
           }
           

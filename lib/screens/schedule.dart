@@ -58,7 +58,7 @@ class _SchedulePageState extends State<SchedulePage> {
             // duration: const Duration(seconds: 10),
             // curve: Curves.fastEaseInToSlowEaseOut,
             padding: const EdgeInsets.all(12),
-            color: Colors.blue, 
+            color: Colors.grey.shade700, 
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
@@ -87,7 +87,7 @@ class _SchedulePageState extends State<SchedulePage> {
                         child: Container(
                           padding: const EdgeInsets.all(8.0),
                           decoration: BoxDecoration(
-                            color: Colors.white,
+                            color: Colors.grey,
                             border: Border.all(
                               color: Colors.black,
                               width: 1,
