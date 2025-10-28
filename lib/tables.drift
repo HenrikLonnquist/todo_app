@@ -17,4 +17,11 @@ CREATE TABLE tasks(
     notes TEXT
 ) as task;
 
+CREATE TABLE task_history(
+    id INT NOT NULL PRIMARY AUTOINCREMENT,
+    tasks_id INT REFERENCES tasks(id),
+    
+)
+
 todosInCategory: SELECT * FROM todos WHERE category = ?;
+
