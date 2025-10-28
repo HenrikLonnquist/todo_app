@@ -126,20 +126,24 @@ class _MainTasksPageState extends State<MainTasksPage> {
 
                         }
 
+                        //! BUG TODO: right side panel wont stay open on the correct task, but will switch to another or
+                        //! give rangeError. 
                         // maybe use the taskid, save the prev task
                         // this gets called when the main task list gets update either by
                         // deletion, completed, undo complete, creation,
                         // nothing to do with side panel at the moment
                         //* need to change list depending on value state.
                         //* I need to know what task is in the right side panel from here.
+                                                
 
                         widget.onUserUpdate!.call(value);
                         
                       });
                     },
                     onTap: (indexTask, taskList) {
+                      print("hello");
                       setState(() {
-                        if (isRightPanelOpen && currentList != taskList) {
+                        if (isRightPanelOpen && taskList != currentList || mainTaskIndex != indexTask) {
                           mainTaskIndex = indexTask;
                           currentList = taskList;
                           prevTaskID = widget.dataList[currentList][mainTaskIndex]["task_id"];
