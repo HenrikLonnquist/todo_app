@@ -194,7 +194,7 @@ class _MainTasksPageState extends State<MainTasksPage> {
                 onPressed: (){
                   //TODO: how to call the database and remove shit
                   print(widget.dataList[currentList][mainTaskIndex]);
-                  print(widget.dataList[currentList]);
+                  // print(widget.dataList[currentList]);
                   //! Shit, my database is so messy and my code.
                   // widget.dataList.removeAt(index);
                   // widget.onChanged!.call(widget.dataList);

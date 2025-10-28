@@ -3,6 +3,7 @@ import 'package:todo_app/navigation_panel.dart';
 
 
 // TODO: need to make it faster when switching between lists/tabs. Probably because of the loading everytime.
+//TODO: why does the tasks in the database need to have a list id?
 
 void main() async {
   runApp(const MyApp());

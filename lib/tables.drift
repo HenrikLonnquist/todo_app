@@ -1,0 +1,20 @@
+
+
+CREATE TABLE lists (
+    id INT NOT NULL PRIMARY KEY AUTOINCREMENT,
+    name TEXT,
+);
+
+
+CREATE TABLE tasks(
+    id INT NOT NULL PRIMARY AUTOINCREMENT,
+    lists_id INT REFERENCES lists(id) ON DELETE SET NULL,
+    parent_id INT REFERENCES tasks(id) ON DELETE CASCADE,
+    title TEXT NOT NULL,
+    reminder DATETIME,
+    due_date DATETIME,
+    repeat TEXT, 
+    notes TEXT
+) as task;
+
+todosInCategory: SELECT * FROM todos WHERE category = ?;
