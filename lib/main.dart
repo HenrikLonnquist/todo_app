@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:todo_app/database.dart';
 import 'package:todo_app/navigation_panel.dart';
 
 
@@ -6,11 +7,17 @@ import 'package:todo_app/navigation_panel.dart';
 //TODO: why does the tasks in the database need to have a list id?
 
 void main() async {
-  runApp(const MyApp());
+  final db = AppDb();
+  runApp(MyApp(db: db));
+  
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  final AppDb db;
+
+  const MyApp({super.key, required this.db});
+
+  
 
   @override
   Widget build(BuildContext context) {
@@ -19,7 +26,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(
           seedColor: Colors.deepPurple,
-          primary: Colors.black.withOpacity(0.9),
+          primary: Colors.black.withValues(alpha: 0.9),
           surface: Colors.grey.shade600,
         )
       ),
