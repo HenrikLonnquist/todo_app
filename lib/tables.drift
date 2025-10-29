@@ -1,27 +1,31 @@
 
 
-CREATE TABLE lists (
+CREATE TABLE todo_lists (
     id INT NOT NULL PRIMARY KEY AUTOINCREMENT,
-    name TEXT,
+    name TEXT
 );
 
 
 CREATE TABLE tasks(
-    id INT NOT NULL PRIMARY AUTOINCREMENT,
-    lists_id INT REFERENCES lists(id) ON DELETE SET NULL,
+    id INT NOT NULL PRIMARY KEY AUTOINCREMENT,
+    lists_id INT REFERENCES todo_lists(id) ON DELETE SET NULL,
     parent_id INT REFERENCES tasks(id) ON DELETE CASCADE,
     title TEXT NOT NULL,
+    is_done BOOLEAN DEFAULT 0,
     reminder DATETIME,
     due_date DATETIME,
-    repeat TEXT, 
-    notes TEXT
-) as task;
+    repeat TEXT CHECK(repeat IN('daily', 'weekly', 'monthly')), 
+    notes TEXT,
+    position INT, --sorting within list
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+) as Task;
 
 CREATE TABLE task_history(
-    id INT NOT NULL PRIMARY AUTOINCREMENT,
-    tasks_id INT REFERENCES tasks(id),
+    id INT NOT NULL PRIMARY KEY AUTOINCREMENT,
+    tasks_id INT REFERENCES tasks(id) ON DELETE CASCADE
     
-)
+);
 
-todosInCategory: SELECT * FROM todos WHERE category = ?;
+-- todosInCategory: SELECT * FROM todos WHERE category = ?;
 
