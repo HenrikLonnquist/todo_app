@@ -154,7 +154,7 @@ class _SchedulePageState extends State<SchedulePage> {
                           )
                         ),
                       ),
-                      CardField(
+                      AddTask(
                         onSubmitted: (value) {
                           // todo: needs further refinement. Like where should the task be put in
                           // //* workday or week tab?

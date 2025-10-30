@@ -310,7 +310,7 @@ class _SubTaskListState extends State<SubTaskList> {
           ),
           Align(
             alignment: Alignment.bottomCenter,
-            child: CardField(
+            child: AddTask(
               onSubmitted: (stringValue) {
                 widget.onChanged!.call(stringValue);
               },

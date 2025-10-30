@@ -161,7 +161,7 @@ class _MainTasksPageState extends State<MainTasksPage> {
                 ),
                 Padding(
                   padding: const EdgeInsets.all(2.0),
-                  child: CardField(
+                  child: AddTask(
                     onSubmitted: (value) {
                       
                       var newTask = DataUtils.newTaskTemplate(

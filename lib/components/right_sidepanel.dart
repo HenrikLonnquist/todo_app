@@ -42,3 +42,19 @@ class RightSidePanel extends StatelessWidget {
 }
 
 
+class TaskInfo extends StatefulWidget {
+  const TaskInfo({super.key});
+
+  @override
+  State<TaskInfo> createState() => _TaskInfoState();
+}
+
+class _TaskInfoState extends State<TaskInfo> {
+  @override
+  Widget build(BuildContext context) {
+    return RightSidePanel(
+      show: false,
+      child: const Placeholder()
+    );
+  }
+}

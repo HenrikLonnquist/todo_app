@@ -2,8 +2,8 @@
 
 import 'package:flutter/material.dart';
 
-class CardField extends StatefulWidget {
-  const CardField({
+class AddTask extends StatefulWidget {
+  const AddTask({
     super.key,
     this.onSubmitted,
   });
@@ -11,10 +11,10 @@ class CardField extends StatefulWidget {
   final Function? onSubmitted;
 
   @override
-  State<CardField> createState() => _CardFieldState();
+  State<AddTask> createState() => _AddTaskState();
 }
 
-class _CardFieldState extends State<CardField> {
+class _AddTaskState extends State<AddTask> {
   
   final TextEditingController _newTaskController = TextEditingController();
 
