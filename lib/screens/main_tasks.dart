@@ -183,52 +183,43 @@ class _MainTasksPageState extends State<MainTasksPage> {
         ),
         RightSidePanel(
           show: isRightPanelOpen,
-          bottomChild: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              ElevatedButton.icon(
-                icon: const Icon(Icons.delete), 
-                onPressed: (){
-                  setState(() {
-                    isRightPanelOpen = false;
-                  });
-                }, 
-                label: const Text("hide")
-              ),
-              ElevatedButton.icon(
-                icon: const Icon(Icons.hide_source),
-                onPressed: (){
-                  //TODO: how to call the database and remove shit
-                  print(widget.dataList[currentList][mainTaskIndex]);
-                  print(widget.dataList[currentList]);
-                  //! Shit, my database is so messy and my code.
-                  // widget.dataList.removeAt(index);
-                  // widget.onChanged!.call(widget.dataList);
-                }, 
-                label: const Text("delete")
-              ),
-            ],
-          ),
-          child: widget.dataList[currentList] == null ? null : SubTaskList(
-            title: widget.dataList[currentList][mainTaskIndex]["name"],
-            mainTask: widget.dataList[currentList][mainTaskIndex],
-            // title: widget.dataList[currentList].isNotEmpty 
-            // ? widget.dataList[currentList][mainTaskIndex]["name"]
-            // : prevTask[currentList][mainTaskIndex]["name"],
-            // mainTask: widget.dataList[currentList].isNotEmpty
-            // ? widget.dataList[currentList][mainTaskIndex]
-            // : prevTask[currentList][mainTaskIndex],
-            onChanged: (value) {
+          bottomBar: PanelBottomBar(
+            hidePanel: (){
               setState(() {
-                if (value.runtimeType == String) {
-                  widget.dataList[currentList][mainTaskIndex]["sub_tasks"].add(DataUtils.subTaskTemplate(name: value));
-                }
-
-                widget.onUserUpdate!.call(value);
+                isRightPanelOpen = false;
               });
-              
-            }, 
+            },
+            deleteTask: (){
+              //TODO: how to call the database and remove shit
+              // print(widget.dataList[currentList][mainTaskIndex]);
+              // print(widget.dataList[currentList]);
+              //! Shit, my database is so messy and my code.
+              // widget.dataList.removeAt(index);
+              // widget.onChanged!.call(widget.dataList);
+            },
           ),
+          child:TaskInfo(
+          ),
+          // child: widget.dataList[currentList] == null ? null : SubTaskList(
+          //   title: widget.dataList[currentList][mainTaskIndex]["name"],
+          //   mainTask: widget.dataList[currentList][mainTaskIndex],
+          //   // title: widget.dataList[currentList].isNotEmpty 
+          //   // ? widget.dataList[currentList][mainTaskIndex]["name"]
+          //   // : prevTask[currentList][mainTaskIndex]["name"],
+          //   // mainTask: widget.dataList[currentList].isNotEmpty
+          //   // ? widget.dataList[currentList][mainTaskIndex]
+          //   // : prevTask[currentList][mainTaskIndex],
+          //   onChanged: (value) {
+          //     setState(() {
+          //       if (value.runtimeType == String) {
+          //         widget.dataList[currentList][mainTaskIndex]["sub_tasks"].add(DataUtils.subTaskTemplate(name: value));
+          //       }
+
+          //       widget.onUserUpdate!.call(value);
+          //     });
+              
+          //   }, 
+          // ),
         ),
       ],
     );
