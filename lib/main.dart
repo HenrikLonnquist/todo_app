@@ -4,18 +4,19 @@ import 'package:todo_app/navigation_panel.dart';
 
 
 // TODO: need to make it faster when switching between lists/tabs. Probably because of the loading everytime.
-//TODO: why does the tasks in the database need to have a list id?
+// TODO: why does the tasks in the database need to have a list id?
+// TODO: switch to riverpod later - manually passing to everywidget > riverpod
 
 void main() async {
   final db = AppDb();
-  runApp(MyApp(db: db));
+  runApp(MyApp(database: db));
   
 }
 
 class MyApp extends StatelessWidget {
-  final AppDb db;
+  final AppDb database;
 
-  const MyApp({super.key, required this.db});
+  const MyApp({super.key, required this.database});
 
   
 
@@ -30,7 +31,7 @@ class MyApp extends StatelessWidget {
           surface: Colors.grey.shade600,
         )
       ),
-      home: const NavigationPanel(),
+      home: NavigationPanel(database: database),
     );
   }
 }

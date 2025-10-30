@@ -1,13 +1,19 @@
 // ignore_for_file: avoid_print
 
 import 'package:flutter/material.dart';
+import 'package:todo_app/database.dart';
 import 'package:todo_app/screens/main_tasks.dart';
 import 'package:todo_app/screens/schedule.dart';
 import 'package:todo_app/screens/today_tasks.dart';
 import 'package:todo_app/utils/data_utils.dart';
 
 class NavigationPanel extends StatefulWidget {
-  const NavigationPanel({super.key});
+  const NavigationPanel({
+    super.key,
+    required this.database,
+  });
+
+  final AppDb database;
 
   @override
   State<NavigationPanel> createState() => _NavigationPanelState();
@@ -23,7 +29,6 @@ class _NavigationPanelState extends State<NavigationPanel> {
       dataList: dataList["main_page"],
       onUserUpdate: (value) {
         int index = value!["index"];
-
         var todayTaskID = dataList["today"]["main_tasks"].indexWhere((task) => value["task_id"] == task["task_id"]);
         var todayCompletedID = dataList["today"]["completed"].indexWhere((task) => value["task_id"] == task["task_id"]);
 
