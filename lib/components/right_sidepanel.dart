@@ -17,6 +17,8 @@ class RightSidePanel extends StatelessWidget {
     this.show = false,
     this.sidePanelWidth = 340,
     required this.database,
+    this.padding,
+    this.bottomPadding,
   });
 
   final bool show;
@@ -25,6 +27,8 @@ class RightSidePanel extends StatelessWidget {
   final Widget? topBar;
   final double sidePanelWidth;
   final AppDB database;
+  final EdgeInsetsGeometry? padding;
+  final EdgeInsetsGeometry? bottomPadding;
 
 
   @override
@@ -42,7 +46,7 @@ class RightSidePanel extends StatelessWidget {
             width: sidePanelWidth,
             // width: MediaQuery.of(context).size.width * 0.3,
             color: bgColorPanel,
-            padding: const EdgeInsets.all(10),
+            padding: padding != null ? const EdgeInsets.all(10) : padding,
             child: child,
           ),
         ),
@@ -50,7 +54,7 @@ class RightSidePanel extends StatelessWidget {
           // height: MediaQuery.of(context).size.height * 0.05,
           width: sidePanelWidth,
           color: bgColorPanel,
-          padding: const EdgeInsets.fromLTRB(10, 0, 10, 0),
+          padding: bottomPadding != null ?  EdgeInsets.fromLTRB(10, 0, 10, 0) : bottomPadding,
           child: bottomBar,
     
         ) : SizedBox(width: 0, height:0)

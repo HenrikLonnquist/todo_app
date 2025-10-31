@@ -38,6 +38,7 @@ class MyApp extends StatelessWidget {
           selectedTileColor: Colors.grey.shade700.withValues(alpha: 0.5),
           selectedColor: Colors.white,
           textColor: Colors.white,
+          
         )
       ),
       // home: NavigationPanel(database: database),
@@ -95,17 +96,29 @@ class _NavigationPanel2State extends State<NavigationPanel2> {
       database: widget.database,
       show: true,
       sidePanelWidth: 220,
+      padding: null,
+      bottomBar: Material(
+        type: MaterialType.transparency,
+        child: ListTile(
+          title: Text("New list +"),
+          hoverColor: Colors.grey.shade800,
+          onTap: () {
+            //TODO: Create a new user list and add to database
+          },
+        ),
+      ),
       child: SingleChildScrollView(
-        child: Column(
-          children: [
-            Material(
-              type: MaterialType.transparency,
-              child: ListView.builder(
+        child: Material(
+          type: MaterialType.transparency,
+          child: Column(
+            children: [
+              ListView.builder(
                 shrinkWrap: true,
                 physics: const NeverScrollableScrollPhysics(),
                 itemCount: 3,
                 itemBuilder: (context, index) {
                   return ListTile(
+                    hoverColor: Colors.grey.shade800,
                     // selected: ,  // show the correct page corresponding to the id/index in the database
                     selected: index == _selectedIndex,
                     splashColor: Colors.transparent,
@@ -120,20 +133,18 @@ class _NavigationPanel2State extends State<NavigationPanel2> {
                   );
                 },
               ),
-            ),
-            Divider(),
-            //MARK: User Lists
-            Material(
-              type: MaterialType.transparency,
-              child: ListView.builder(
+              Divider(),
+              //MARK: User Lists
+              ListView.builder(
                 shrinkWrap: true,
                 physics: NeverScrollableScrollPhysics(),
-                itemCount: 3 + 3,
+                itemCount: 20 + 3,
                 itemBuilder: (context, index) {
                   final userIndex = 3 + index;
-
+                        
                   return ListTile(
                     // selected: ,  // show the correct page corresponding to the id/index in the database
+                    hoverColor: Colors.grey.shade800,
                     selected: userIndex == _selectedIndex,
                     splashColor: Colors.transparent,
                     title: Text(
@@ -147,8 +158,8 @@ class _NavigationPanel2State extends State<NavigationPanel2> {
                   ); 
                 },
               ),
-            )
-          ]
+            ]
+          ),
         ),
       ),
     );
