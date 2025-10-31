@@ -76,6 +76,13 @@ class _TaskInfoState extends State<TaskInfo> {
             const Text(
               "Hello",
             )
+            //TODO:
+            // subtasks
+            // button for adding to 'My Day' list
+            // reminder
+            // Due date
+            // repeat rule
+            // notes
           ]
         ),
       ],
