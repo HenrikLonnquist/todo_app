@@ -41,7 +41,7 @@ class RightSidePanel extends StatelessWidget {
             // height: MediaQuery.of(context).size.height * 0.95,
             width: sidePanelWidth,
             // width: MediaQuery.of(context).size.width * 0.3,
-            // color: bgColorPanel,
+            color: bgColorPanel,
             padding: const EdgeInsets.all(10),
             child: child,
           ),
