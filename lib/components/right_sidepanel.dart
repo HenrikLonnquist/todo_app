@@ -52,8 +52,13 @@ class RightSidePanel extends StatelessWidget {
         ),
         bottomBar != null ? Container(
           // height: MediaQuery.of(context).size.height * 0.05,
+          decoration: BoxDecoration(
+            color: bgColorPanel,
+            border: Border(
+              top: BorderSide(color: Colors.grey.shade500, width: 0.5),
+            ),
+          ),
           width: sidePanelWidth,
-          color: bgColorPanel,
           padding: bottomPadding != null ?  EdgeInsets.fromLTRB(10, 0, 10, 0) : bottomPadding,
           child: bottomBar,
     
@@ -76,35 +81,106 @@ class TaskInfo extends StatefulWidget {
 
 class _TaskInfoState extends State<TaskInfo> {
 
+  final TextEditingController _newTaskController = TextEditingController();
   bool isChecked = false;
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Row(
+    return SingleChildScrollView(
+      child: Material(
+        type: MaterialType.transparency,
+        child: Column(
           children: [
-            Checkbox(
-              value: isChecked,
-              onChanged: (value){
-                setState(() {
-                  isChecked = !isChecked;
-                });
+            //TODO:
+                // subtasks
+                // button for adding to 'My Day' list
+                // reminder
+                // Due date
+                // repeat rule
+                // notes
+            ListTile(
+              splashColor: Colors.transparent,
+              tileColor: Colors.grey.shade800.withValues(alpha: 0.2),
+              // hoverColor: Colors.grey.shade800,
+              leading: Checkbox(
+                value: isChecked,
+                //TODO: Change color of the checkbox, to white
+                onChanged: (value){
+                  setState(() {
+                    isChecked = !isChecked;
+                  });
+                },
+              ),
+              title: TitleField(
+                fontWeight: FontWeight.bold,
+                completed: false,
+                inputValue: "Test",
+                onChange: (value) {
+                  //TODO: update database
+                },
+              ),
+            ),
+            //TODO: is there any sub tasks > populate
+            // db.subtask > 0 ? : 
+            ListView.builder(
+              shrinkWrap: true,
+              physics: NeverScrollableScrollPhysics(),
+              itemCount: 1,
+              itemBuilder: (context, index) {
+                return ListTile(
+                  title: Text("tesing"),
+                );
               },
             ),
-            const Text(
-              "Hello",
-            )
-            //TODO:
-            // subtasks
-            // button for adding to 'My Day' list
-            // reminder
-            // Due date
-            // repeat rule
-            // notes
+            ListTile(
+              splashColor: Colors.transparent,
+              tileColor: Colors.grey.shade800.withValues(alpha: 0.2),
+              // hoverColor: Colors.grey.shade800,
+              leading: Checkbox(
+                value: isChecked,
+                onChanged: (value){
+                  setState(() {
+                    isChecked = !isChecked;
+                  });
+                },
+              ),
+              title: TitleField(
+                textSize: 20,
+                //TODO: Change color of the checkbox, to white
+                labelText: "Add step",
+                completed: false, // TODO: needs to be"connected" with isChecked variable
+                inputValue: "subtest", //If no subtask >
+                onChange: (value) {
+                  //TODO: update database and update listview.builder above - itemcount
+                },
+              ),
+            ),
+            SizedBox(height: 10),
+            ListTile(
+              title:Text("Add to My Day"),
+              tileColor: Colors.grey.shade800.withValues(alpha: 0.2),
+            ),
+            SizedBox(height: 10),
+            ListTile(
+              title:Text("Remind Me"),
+              tileColor: Colors.grey.shade800.withValues(alpha: 0.2),
+            ),
+            ListTile(
+              title:Text("Due Date"),
+              tileColor: Colors.grey.shade800.withValues(alpha: 0.2),
+            ),
+            ListTile(
+              title:Text("Repeat"),
+              tileColor: Colors.grey.shade800.withValues(alpha: 0.2),
+            ),
+            SizedBox(height: 10,),
+            ListTile(
+              title:Text("Notes"),
+              tileColor: Colors.grey.shade800.withValues(alpha: 0.2),
+            ),
           ]
         ),
-      ],
+      ),
     );
   }
 }

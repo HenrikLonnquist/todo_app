@@ -9,12 +9,18 @@ class TitleField extends StatefulWidget {
     this.enabled = true,
     this.inputValue = "",
     this.completed = false,
+    this.textSize = 26,
+    this.labelText,
+    this.fontWeight,
   });
 
   final bool enabled;
   final Function(String)? onChange;
   final String inputValue;
   final bool completed;
+  final double textSize;
+  final String? labelText;
+  final FontWeight? fontWeight;
 
   @override
   State<TitleField> createState() => _TitleFieldState();
@@ -41,16 +47,18 @@ class _TitleFieldState extends State<TitleField> {
           widget.onChange!.call(value);
         },
         style: TextStyle(
-          fontSize: 26,
-          fontWeight: FontWeight.bold,
-          color: Colors.black,
+          fontSize: widget.textSize,
+          fontWeight: widget.fontWeight,
+          color: Colors.white,
           decoration: widget.completed ? TextDecoration.lineThrough : null,
           // fontFamily: ,                    
         ),
-        cursorColor: Colors.black,
-        decoration: const InputDecoration(
+        cursorColor: Colors.white,
+        decoration: InputDecoration(
           border: InputBorder.none,
           isDense: true,
+          labelText: widget.inputValue == "" ? widget.labelText : null,
+          floatingLabelBehavior: FloatingLabelBehavior.never,
         ),
       ),
     );

@@ -119,7 +119,6 @@ class _NavigationPanel2State extends State<NavigationPanel2> {
                 itemBuilder: (context, index) {
                   return ListTile(
                     hoverColor: Colors.grey.shade800,
-                    // selected: ,  // show the correct page corresponding to the id/index in the database
                     selected: index == _selectedIndex,
                     splashColor: Colors.transparent,
                     title: Text(
@@ -143,7 +142,6 @@ class _NavigationPanel2State extends State<NavigationPanel2> {
                   final userIndex = 3 + index;
                         
                   return ListTile(
-                    // selected: ,  // show the correct page corresponding to the id/index in the database
                     hoverColor: Colors.grey.shade800,
                     selected: userIndex == _selectedIndex,
                     splashColor: Colors.transparent,
