@@ -108,6 +108,7 @@ class _NavigationPanel2State extends State<NavigationPanel2> {
                   return ListTile(
                     // selected: ,  // show the correct page corresponding to the id/index in the database
                     selected: index == _selectedIndex,
+                    splashColor: Colors.transparent,
                     title: Text(
                       "test$index",
                     ),
@@ -134,6 +135,7 @@ class _NavigationPanel2State extends State<NavigationPanel2> {
                   return ListTile(
                     // selected: ,  // show the correct page corresponding to the id/index in the database
                     selected: userIndex == _selectedIndex,
+                    splashColor: Colors.transparent,
                     title: Text(
                       "test$userIndex",
                     ),
