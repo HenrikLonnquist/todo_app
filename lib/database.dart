@@ -14,8 +14,8 @@ part 'database.g.dart';
 @DriftDatabase(
   include: {'tables.drift'}
 )
-class AppDb extends _$AppDb{
-  AppDb() : super(_openConnection());
+class AppDB extends _$AppDb{
+  AppDB() : super(_openConnection());
 
   @override
   int get schemaVersion => 1;

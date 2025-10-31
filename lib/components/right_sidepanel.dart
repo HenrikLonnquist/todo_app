@@ -3,45 +3,60 @@
 import 'package:flutter/material.dart';
 import 'package:todo_app/components/task_list.dart';
 import 'package:todo_app/components/title_field.dart';
+import 'package:todo_app/database.dart';
+
+//TODO: Move it/place somewhere else, have to restart(ctrl+shift+f10) debug session instead of hot reload to an effect.
+Color bgColorPanel = Colors.grey.shade900;
 
 class RightSidePanel extends StatelessWidget {
   const RightSidePanel({
     super.key,
+    this.topBar,
     this.bottomBar,
     this.child, 
     this.show = false,
+    this.sidePanelWidth = 340,
+    required this.database,
   });
 
   final bool show;
   final Widget? child;
   final Widget? bottomBar;
+  final Widget? topBar;
+  final double sidePanelWidth;
+  final AppDB database;
+
 
   @override
   Widget build(BuildContext context) {
     return show 
     ? Column(
       children: [
-        Flexible(
+        topBar != null ? Container(
+          width: sidePanelWidth,
+          child: const Placeholder(),
+        ) : SizedBox(width: 0, height: 0),
+        Expanded(
           child: Container(
             // height: MediaQuery.of(context).size.height * 0.95,
-            width: 380,
+            width: sidePanelWidth,
             // width: MediaQuery.of(context).size.width * 0.3,
-            color: Colors.grey,
+            // color: bgColorPanel,
             padding: const EdgeInsets.all(10),
             child: child,
           ),
         ),
-        Container(
+        bottomBar != null ? Container(
           // height: MediaQuery.of(context).size.height * 0.05,
-          width: 380,
-          color: Colors.grey.shade800,
+          width: sidePanelWidth,
+          color: bgColorPanel,
           padding: const EdgeInsets.fromLTRB(10, 0, 10, 0),
           child: bottomBar,
-
-        )
+    
+        ) : SizedBox(width: 0, height:0)
       ],
     )
-    : const SizedBox(height: 0);
+    : const SizedBox(width: 0, height: 0);
   }
 }
 
@@ -106,12 +121,16 @@ class PanelBottomBar extends StatelessWidget {
           onPressed: hidePanel,
           child: const Icon(Icons.arrow_forward_ios), 
         ),
-        Text(
-          // TODO: GET info from Database
-          "Created on Wed. 19 Jun 2025",
-          style: TextStyle(
-            color: Colors.white,
-          )
+        Expanded(
+          child: Text(
+            // TODO: GET info from Database
+            "Created on Wed. 19 Jun 2025, hahahahaaah",
+            overflow: TextOverflow.ellipsis,
+            maxLines: 1,
+            style: TextStyle(
+              color: Colors.white,
+            )
+          ),
         ),
         ElevatedButton(
           onPressed: deleteTask,

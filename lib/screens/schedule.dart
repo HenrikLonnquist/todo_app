@@ -179,24 +179,24 @@ class _SchedulePageState extends State<SchedulePage> {
             ), 
           ),
         ),
-        RightSidePanel(
-          show: isRightPanelOpen,
-          child: SubTaskList(
-            title: allTasks["main_tasks"][pressedTask]["name"],
-            mainTask: allTasks["main_tasks"][pressedTask], 
-            onChanged: (value) {
-              if (value.runtimeType == String) {
-                var newSubTask = DataUtils.subTaskTemplate(
-                  name: value
-                );
-                allTasks["main_tasks"][pressedTask]["sub_tasks"].add(newSubTask);
-              }
-              setState(() {
-                DataUtils.writeJsonFile(widget.database);
-              });
-            }, 
-          ),
-        ),              
+        // RightSidePanel(
+        //   show: isRightPanelOpen,
+        //   child: SubTaskList(
+        //     title: allTasks["main_tasks"][pressedTask]["name"],
+        //     mainTask: allTasks["main_tasks"][pressedTask], 
+        //     onChanged: (value) {
+        //       if (value.runtimeType == String) {
+        //         var newSubTask = DataUtils.subTaskTemplate(
+        //           name: value
+        //         );
+        //         allTasks["main_tasks"][pressedTask]["sub_tasks"].add(newSubTask);
+        //       }
+        //       setState(() {
+        //         DataUtils.writeJsonFile(widget.database);
+        //       });
+        //     }, 
+        //   ),
+        // ),              
       ],
     );
   }

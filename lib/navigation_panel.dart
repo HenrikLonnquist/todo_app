@@ -13,7 +13,7 @@ class NavigationPanel extends StatefulWidget {
     required this.database,
   });
 
-  final AppDb database;
+  final AppDB database;
 
   @override
   State<NavigationPanel> createState() => _NavigationPanelState();
