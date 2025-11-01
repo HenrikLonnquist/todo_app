@@ -27,6 +27,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(
@@ -110,53 +111,59 @@ class _NavigationPanel2State extends State<NavigationPanel2> {
       child: SingleChildScrollView(
         child: Material(
           type: MaterialType.transparency,
-          child: Column(
-            children: [
-              ListView.builder(
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                itemCount: 3,
-                itemBuilder: (context, index) {
-                  return ListTile(
-                    hoverColor: Colors.grey.shade800,
-                    selected: index == _selectedIndex,
-                    splashColor: Colors.transparent,
-                    title: Text(
-                      "test$index",
-                    ),
-                    onTap: (){
-                      setState(() {
-                        _selectedIndex = index;
-                      });
+          //TODO: initialize database - try to get the database
+          child: StreamBuilder<Object>(
+            stream: null,
+            builder: (context, snapshot) {
+              return Column(
+                children: [
+                  ListView.builder(
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    itemCount: 3,
+                    itemBuilder: (context, index) {
+                      return ListTile(
+                        hoverColor: Colors.grey.shade800,
+                        selected: index == _selectedIndex,
+                        splashColor: Colors.transparent,
+                        title: Text(
+                          "test$index",
+                        ),
+                        onTap: (){
+                          setState(() {
+                            _selectedIndex = index;
+                          });
+                        },
+                      );
                     },
-                  );
-                },
-              ),
-              Divider(),
-              //MARK: User Lists
-              ListView.builder(
-                shrinkWrap: true,
-                physics: NeverScrollableScrollPhysics(),
-                itemCount: 20 + 3,
-                itemBuilder: (context, index) {
-                  final userIndex = 3 + index;
-                        
-                  return ListTile(
-                    hoverColor: Colors.grey.shade800,
-                    selected: userIndex == _selectedIndex,
-                    splashColor: Colors.transparent,
-                    title: Text(
-                      "test$userIndex",
-                    ),
-                    onTap: (){
-                      setState(() {
-                        _selectedIndex = userIndex;
-                      });
+                  ),
+                  Divider(),
+                  //MARK: User Lists
+                  ListView.builder(
+                    shrinkWrap: true,
+                    physics: NeverScrollableScrollPhysics(),
+                    itemCount: 20 + 3,
+                    itemBuilder: (context, index) {
+                      final userIndex = 3 + index;
+                            
+                      return ListTile(
+                        hoverColor: Colors.grey.shade800,
+                        selected: userIndex == _selectedIndex,
+                        splashColor: Colors.transparent,
+                        title: Text(
+                          "test$userIndex",
+                        ),
+                        onTap: (){
+                          setState(() {
+                            _selectedIndex = userIndex;
+                          });
+                        },
+                      ); 
                     },
-                  ); 
-                },
-              ),
-            ]
+                  ),
+                ]
+              );
+            }
           ),
         ),
       ),
