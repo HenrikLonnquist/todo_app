@@ -5,8 +5,8 @@ import 'package:todo_app/components/task_list.dart';
 import 'package:todo_app/components/title_field.dart';
 import 'package:todo_app/database.dart';
 
-//TODO: Move it/place somewhere else, have to restart(ctrl+shift+f10) debug session instead of hot reload to an effect.
-Color bgColorPanel = Colors.grey.shade900;
+//TODO: Move it/place somewhere else, have to restart(ctrl+shift+f10) debug session instead of hot reload to get an effect.
+
 
 class RightSidePanel extends StatelessWidget {
   const RightSidePanel({
@@ -19,6 +19,8 @@ class RightSidePanel extends StatelessWidget {
     required this.database,
     this.padding,
     this.bottomPadding,
+    this.topBarColor = const Color(0xffffffff),
+    this.bgColorPanel = const Color(0xFF212121),
   });
 
   final bool show;
@@ -29,6 +31,8 @@ class RightSidePanel extends StatelessWidget {
   final AppDB database;
   final EdgeInsetsGeometry? padding;
   final EdgeInsetsGeometry? bottomPadding;
+  final Color topBarColor;
+  final Color bgColorPanel;
 
 
   @override
@@ -37,8 +41,9 @@ class RightSidePanel extends StatelessWidget {
     ? Column(
       children: [
         topBar != null ? Container(
+          color: topBarColor,
           width: sidePanelWidth,
-          child: const Placeholder(),
+          child: topBar,
         ) : SizedBox(width: 0, height: 0),
         Expanded(
           child: Container(
