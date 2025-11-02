@@ -43,7 +43,7 @@ class RightSidePanel extends StatelessWidget {
     ? Column(
       children: [
         topBar != null ? Container(
-          color: topBarColor ?? Colors.red,
+          color: topBarColor ?? Colors.grey,
           width: sidePanelWidth ?? double.infinity,
           child: topBar,
         ) : SizedBox(width: 0, height: 0),

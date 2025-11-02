@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:todo_app/components/add_task_field.dart';
 import 'package:todo_app/components/right_sidepanel.dart';
 import 'package:todo_app/database.dart';
 import 'package:todo_app/navigation_panel.dart';
@@ -173,7 +174,7 @@ class _NavigationPanel2State extends State<NavigationPanel2> {
 }
 
 //MARK: Main Page
-//TODO maybe rename to something else, main panel?
+//TODO maybe rename to something else, main panel? Task panel/list?
 class MainPage extends StatefulWidget {
   const MainPage({
     super.key,
@@ -194,16 +195,23 @@ class _MainPageState extends State<MainPage> {
         database: widget.database,
         bgColorPanel: Colors.black,
         sidePanelWidth: null,
-        topBar: const Placeholder(),
-        // topBar: Row(
-        //   children: [
-        //     ListTile(
-        //       title: Text("testing"),
-        //       onTap: () {
-        //       },
-        //     ),
-        //   ],
-        // ),
+        topBar: Column(
+          children: [
+            Row(
+              children: [
+                Icon(Icons.home),
+                Text("Main Page"),
+                Spacer(),
+                Icon(Icons.swap_vert),
+                Icon(Icons.lightbulb)
+              ],
+            ),
+            // Text("Current Date"), //TODO: If it's 'My Day' tab. show this
+          ],
+        ),
+        bottomBar: AddTask(
+          // TODO: Add task to database
+        ),
         child: SingleChildScrollView(
           child: Column(
             children: [
