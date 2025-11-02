@@ -14,13 +14,15 @@ class RightSidePanel extends StatelessWidget {
     this.topBar,
     this.bottomBar,
     this.child, 
-    this.show = false,
+    this.show = true,
     this.sidePanelWidth = 340,
     required this.database,
     this.padding,
     this.bottomPadding,
-    this.topBarColor = const Color(0xffffffff),
-    this.bgColorPanel = const Color(0xFF212121),
+    // this.topBarColor = const Color(0xffffffff),
+    this.topBarColor,
+    // this.bgColorPanel = const Color(0xFF212121),
+    this.bgColorPanel,
   });
 
   final bool show;
@@ -31,8 +33,8 @@ class RightSidePanel extends StatelessWidget {
   final AppDB database;
   final EdgeInsetsGeometry? padding;
   final EdgeInsetsGeometry? bottomPadding;
-  final Color topBarColor;
-  final Color bgColorPanel;
+  final Color? topBarColor;
+  final Color? bgColorPanel;
 
 
   @override
@@ -41,16 +43,16 @@ class RightSidePanel extends StatelessWidget {
     ? Column(
       children: [
         topBar != null ? Container(
-          color: topBarColor,
-          width: sidePanelWidth,
+          color: topBarColor ?? Colors.red,
+          width: sidePanelWidth ?? double.infinity,
           child: topBar,
         ) : SizedBox(width: 0, height: 0),
         Expanded(
           child: Container(
             // height: MediaQuery.of(context).size.height * 0.95,
-            width: sidePanelWidth,
+            width: sidePanelWidth ?? double.infinity,
             // width: MediaQuery.of(context).size.width * 0.3,
-            color: bgColorPanel,
+            color: bgColorPanel ?? Colors.grey.shade900,
             padding: padding != null ? const EdgeInsets.all(10) : padding,
             child: child,
           ),
@@ -58,15 +60,15 @@ class RightSidePanel extends StatelessWidget {
         bottomBar != null ? Container(
           // height: MediaQuery.of(context).size.height * 0.05,
           decoration: BoxDecoration(
-            color: bgColorPanel,
+            color: bgColorPanel ?? Colors.grey.shade900,
             border: Border(
               top: BorderSide(color: Colors.grey.shade500, width: 0.5),
             ),
           ),
-          width: sidePanelWidth,
+          width: sidePanelWidth ?? double.infinity,
           padding: bottomPadding != null ?  EdgeInsets.fromLTRB(10, 0, 10, 0) : bottomPadding,
           child: bottomBar,
-    
+            
         ) : SizedBox(width: 0, height:0)
       ],
     )

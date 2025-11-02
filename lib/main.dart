@@ -33,7 +33,7 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(
           seedColor: Colors.deepPurple,
           primary: Colors.black,
-          surface: Colors.black,
+          surface: Colors.white,
         ),
         listTileTheme: ListTileThemeData(
           selectedTileColor: Colors.grey.shade700.withValues(alpha: 0.5),
@@ -46,13 +46,13 @@ class MyApp extends StatelessWidget {
       // home: NavigationPanel2(database: database),
       home: Scaffold(
         body: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          // mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             NavigationPanel2(database: database),
             MainPage(database: database),
             RightSidePanel(
               database: database,
-              show: true,
+              show: true, // TODO: have a button if you want to hide/show the panel
               sidePanelWidth: 340,
               bottomBar: PanelBottomBar(
                 hidePanel: () {
@@ -74,6 +74,7 @@ class MyApp extends StatelessWidget {
 }
 
 
+//MARK: Nav Panel
 class NavigationPanel2 extends StatefulWidget {
   const NavigationPanel2({
     super.key,
@@ -95,7 +96,7 @@ class _NavigationPanel2State extends State<NavigationPanel2> {
   Widget build(BuildContext context) {
     return RightSidePanel(
       database: widget.database,
-      show: true,
+      show: true, // TODO: have a button if you want to hide/show the panel
       sidePanelWidth: 220,
       padding: null,
       bottomBar: Material(
@@ -171,7 +172,8 @@ class _NavigationPanel2State extends State<NavigationPanel2> {
   }
 }
 
-
+//MARK: Main Page
+//TODO maybe rename to something else, main panel?
 class MainPage extends StatefulWidget {
   const MainPage({
     super.key,
@@ -187,22 +189,29 @@ class MainPage extends StatefulWidget {
 class _MainPageState extends State<MainPage> {  
   @override
   Widget build(BuildContext context) {
-    return RightSidePanel(
-      database: widget.database,
-      sidePanelWidth: null,
-      topBar: Material(
-        type: MaterialType.transparency,
-        child: Center(
-          child: Row(
+    return Expanded(
+      child: RightSidePanel(
+        database: widget.database,
+        bgColorPanel: Colors.black,
+        sidePanelWidth: null,
+        topBar: const Placeholder(),
+        // topBar: Row(
+        //   children: [
+        //     ListTile(
+        //       title: Text("testing"),
+        //       onTap: () {
+        //       },
+        //     ),
+        //   ],
+        // ),
+        child: SingleChildScrollView(
+          child: Column(
             children: [
-              ListTile(
-                title: Text("testing"),
-                onTap: () {
-                },
-              ),
+              Text("testing"),
+              Text("testing", style: TextStyle(color: Colors.white)),
             ],
-          ),
-        ),
+          )
+        )
       ),
     );
   }
