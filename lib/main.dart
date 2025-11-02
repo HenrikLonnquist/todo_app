@@ -187,12 +187,23 @@ class MainPage extends StatefulWidget {
 class _MainPageState extends State<MainPage> {  
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Container(
-          child: const Text("hello"),
+    return RightSidePanel(
+      database: widget.database,
+      sidePanelWidth: null,
+      topBar: Material(
+        type: MaterialType.transparency,
+        child: Center(
+          child: Row(
+            children: [
+              ListTile(
+                title: Text("testing"),
+                onTap: () {
+                },
+              ),
+            ],
+          ),
         ),
-      ],
+      ),
     );
   }
 }

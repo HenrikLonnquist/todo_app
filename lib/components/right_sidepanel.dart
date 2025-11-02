@@ -25,7 +25,7 @@ class RightSidePanel extends StatelessWidget {
   final Widget? child;
   final Widget? bottomBar;
   final Widget? topBar;
-  final double sidePanelWidth;
+  final double? sidePanelWidth;
   final AppDB database;
   final EdgeInsetsGeometry? padding;
   final EdgeInsetsGeometry? bottomPadding;
