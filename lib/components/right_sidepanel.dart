@@ -43,7 +43,7 @@ class RightSidePanel extends StatelessWidget {
         topBar != null ? Container(
           color: topBarColor,
           width: sidePanelWidth,
-          child: const Placeholder(),
+          child: topBar,
         ) : SizedBox(width: 0, height: 0),
         Expanded(
           child: Container(
