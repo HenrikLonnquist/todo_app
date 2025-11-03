@@ -59,7 +59,8 @@ class MyApp extends StatelessWidget {
   }
 }
 
-class RightSidePanel2 extends StatelessWidget {
+//MARK: true right sidepanel
+class RightSidePanel2 extends StatefulWidget {
   const RightSidePanel2({
     super.key,
     required this.database,
@@ -68,14 +69,24 @@ class RightSidePanel2 extends StatelessWidget {
   final AppDB database;
 
   @override
+  State<RightSidePanel2> createState() => _RightSidePanel2State();
+}
+
+class _RightSidePanel2State extends State<RightSidePanel2> {
+  bool showPanel = true;
+
+  @override
   Widget build(BuildContext context) {
     return RightSidePanel(
-      database: database,
-      show: true, // TODO: have a button if you want to hide/show the panel
+      database: widget.database,
+      show: showPanel, // TODO: have a button if you want to hide/show the panel
       sidePanelWidth: 340,
       bottomBar: PanelBottomBar(
         hidePanel: () {
           // TODO: need to make this an stateful but to use setstate.
+          setState(() {
+            showPanel = false;
+          });
         },
         deleteTask: () {
     
