@@ -179,9 +179,11 @@ class MainPage extends StatefulWidget {
   const MainPage({
     super.key,
     required this.database,
+    this.onTap,
   });
 
   final AppDB database;
+  final Function()? onTap;
 
   @override
   State<MainPage> createState() => _MainPageState();
@@ -212,14 +214,34 @@ class _MainPageState extends State<MainPage> {
         bottomBar: AddTask(
           // TODO: Add task to database
         ),
-        child: SingleChildScrollView(
-          child: Column(
-            children: [
-              Text("testing"),
-              Text("testing", style: TextStyle(color: Colors.white)),
-            ],
-          )
-        )
+        child: Material(
+          type: MaterialType.transparency,
+          child: ListView.separated(
+            itemCount: 20,
+            itemBuilder: (context, index) {
+              return ListTile(
+                tileColor: Colors.grey.shade900,
+                hoverColor: Colors.grey.shade800,
+                splashColor: Colors.transparent,
+                title: Text("Task $index"),
+                onTap: () {
+                  // TODO: open the right sidepanel>taskinfo
+                },
+              );
+            },
+            separatorBuilder: (context, index) {
+              return SizedBox(height: 8,);
+            },
+          ),
+        ),
+        // child: SingleChildScrollView(
+        //   child: Column(
+        //     children: [
+        //       Text("testing"),
+        //       Text("testing", style: TextStyle(color: Colors.white)),
+        //     ],
+        //   )
+        // )
       ),
     );
   }
