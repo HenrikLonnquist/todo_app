@@ -51,8 +51,6 @@ class MyApp extends StatelessWidget {
           children: [
             NavigationPanel2(database: database),
             MainPage(database: database),
-            RightSidePanel2(database: database),
-
           ]
         )
       ),
@@ -65,19 +63,20 @@ class RightSidePanel2 extends StatefulWidget {
   const RightSidePanel2({
     super.key,
     required this.database,
+    this.showPanel = false,
   });
 
   final AppDB database;
+  final bool showPanel;
 
   @override
   State<RightSidePanel2> createState() => _RightSidePanel2State();
 }
 
 class _RightSidePanel2State extends State<RightSidePanel2> {
-  bool showPanel = true;
-
   @override
   Widget build(BuildContext context) {
+    bool showPanel = widget.showPanel;
     return RightSidePanel(
       database: widget.database,
       show: showPanel, // TODO: have a button if you want to hide/show the panel
@@ -215,58 +214,66 @@ class MainPage extends StatefulWidget {
 }
 
 class _MainPageState extends State<MainPage> {  
+
+  bool showPanel = false;
+
   @override
   Widget build(BuildContext context) {
     return Expanded(
-      child: RightSidePanel(
-        database: widget.database,
-        bgColorPanel: Colors.black,
-        sidePanelWidth: null,
-        topBar: Column(
-          children: [
-            Row(
-              children: [
-                Icon(Icons.home),
-                Text("Main Page"),
-                Spacer(),
-                Icon(Icons.swap_vert),
-                Icon(Icons.lightbulb)
-              ],
+      child: Row(
+        children: [
+          Expanded(
+            child: RightSidePanel(
+              database: widget.database,
+              bgColorPanel: Colors.black,
+              sidePanelWidth: null,
+              topBar: Column(
+                children: [
+                  Row(
+                    children: [
+                      Icon(Icons.home),
+                      Text("Main Page"),
+                      Spacer(),
+                      Icon(Icons.swap_vert),
+                      Icon(Icons.lightbulb)
+                    ],
+                  ),
+                  // Text("Current Date"), //TODO: If it's 'My Day' tab. show this
+                ],
+              ),
+              bottomBar: AddTask(
+                // TODO: Add task to database
+              ),
+              child: Material(
+                type: MaterialType.transparency,
+                child: ListView.separated(
+                  itemCount: 20,
+                  itemBuilder: (context, index) {
+                    return ListTile(
+                      tileColor: Colors.grey.shade900,
+                      hoverColor: Colors.grey.shade800,
+                      splashColor: Colors.transparent,
+                      title: Text("Task $index"),
+                      onTap: () {
+                        setState(() {
+                          // TODO: if showpanel true and tap again > close showpanel else if different task tap change taskinfo
+                          // if (showPanel == true && index == )
+                          print(index);
+                          showPanel = !showPanel;
+                        });
+                      },
+                    );
+                  },
+                  separatorBuilder: (context, index) {
+                    return SizedBox(height: 8,);
+                  },
+                ),
+              ),
             ),
-            // Text("Current Date"), //TODO: If it's 'My Day' tab. show this
-          ],
-        ),
-        bottomBar: AddTask(
-          // TODO: Add task to database
-        ),
-        child: Material(
-          type: MaterialType.transparency,
-          child: ListView.separated(
-            itemCount: 20,
-            itemBuilder: (context, index) {
-              return ListTile(
-                tileColor: Colors.grey.shade900,
-                hoverColor: Colors.grey.shade800,
-                splashColor: Colors.transparent,
-                title: Text("Task $index"),
-                onTap: () {
-                  // TODO: open the right sidepanel>taskinfo
-                },
-              );
-            },
-            separatorBuilder: (context, index) {
-              return SizedBox(height: 8,);
-            },
           ),
-        ),
-        // child: SingleChildScrollView(
-        //   child: Column(
-        //     children: [
-        //       Text("testing"),
-        //       Text("testing", style: TextStyle(color: Colors.white)),
-        //     ],
-        //   )
-        // )
+          
+          RightSidePanel2(database: widget.database, showPanel: showPanel)
+        ],
       ),
     );
   }
