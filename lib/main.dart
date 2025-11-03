@@ -44,31 +44,45 @@ class MyApp extends StatelessWidget {
         )
       ),
       // home: NavigationPanel(database: database),
-      // home: NavigationPanel2(database: database),
+      //MARK: MAIN?
       home: Scaffold(
         body: Row(
           // mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             NavigationPanel2(database: database),
             MainPage(database: database),
-            RightSidePanel(
-              database: database,
-              show: true, // TODO: have a button if you want to hide/show the panel
-              sidePanelWidth: 340,
-              bottomBar: PanelBottomBar(
-                hidePanel: () {
-                  // TODO: need to make this an stateful but to use setstate.
-                },
-                deleteTask: () {
-
-                }
-              ),
-              child: TaskInfo(
-              ),
-            ),
+            RightSidePanel2(database: database),
 
           ]
         )
+      ),
+    );
+  }
+}
+
+class RightSidePanel2 extends StatelessWidget {
+  const RightSidePanel2({
+    super.key,
+    required this.database,
+  });
+
+  final AppDB database;
+
+  @override
+  Widget build(BuildContext context) {
+    return RightSidePanel(
+      database: database,
+      show: true, // TODO: have a button if you want to hide/show the panel
+      sidePanelWidth: 340,
+      bottomBar: PanelBottomBar(
+        hidePanel: () {
+          // TODO: need to make this an stateful but to use setstate.
+        },
+        deleteTask: () {
+    
+        }
+      ),
+      child: TaskInfo(
       ),
     );
   }

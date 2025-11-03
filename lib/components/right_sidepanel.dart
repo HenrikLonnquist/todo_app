@@ -88,7 +88,6 @@ class TaskInfo extends StatefulWidget {
 
 class _TaskInfoState extends State<TaskInfo> {
 
-  final TextEditingController _newTaskController = TextEditingController();
   bool isChecked = false;
 
   @override
