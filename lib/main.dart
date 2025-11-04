@@ -79,12 +79,14 @@ class _ParentPageState extends State<ParentPage> {
           NavigationPanel2(
             database: widget.database,
             currentIndex: (index) {
-              selectedIndex = index;
+              setState(() {
+                selectedIndex = index;
+              });
             },
           ),
           MainPage(
             database: widget.database,
-            // selectedIndex: selectedIndex,
+            selectedIndex: selectedIndex,
           ),
           RightSidePanel2(database: widget.database),
 
@@ -223,6 +225,7 @@ class _NavigationPanel2State extends State<NavigationPanel2> {
                         onTap: (){
                           setState(() {
                             _selectedIndex = userIndex;
+                            widget.currentIndex(userIndex);
                           });
                         },
                       ); 
@@ -245,10 +248,12 @@ class MainPage extends StatefulWidget {
     super.key,
     required this.database,
     this.onTap,
+    required this.selectedIndex,
   });
 
   final AppDB database;
   final Function()? onTap;
+  final int selectedIndex;
 
   @override
   State<MainPage> createState() => _MainPageState();
@@ -260,6 +265,7 @@ class _MainPageState extends State<MainPage> {
 
   @override
   Widget build(BuildContext context) {
+    print("nothing? or something: ${widget.selectedIndex}");
     return Expanded(
       child: Row(
         children: [
@@ -273,7 +279,7 @@ class _MainPageState extends State<MainPage> {
                   Row(
                     children: [
                       Icon(Icons.home),
-                      Text("Main Page"),
+                      Text("Main Page ${widget.selectedIndex}"),
                       Spacer(),
                       Icon(Icons.swap_vert),
                       Icon(Icons.lightbulb)
