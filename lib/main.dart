@@ -65,7 +65,6 @@ class ParentPage extends StatefulWidget {
 
 class _ParentPageState extends State<ParentPage> {
 
-  final bool showRightPanel = false;
   final bool showLeftPanel = true;
   int selectedIndex = 0;
 
@@ -115,16 +114,15 @@ class RightSidePanel2 extends StatefulWidget {
 class _RightSidePanel2State extends State<RightSidePanel2> {
   @override
   Widget build(BuildContext context) {
-    bool showPanel = widget.showPanel;
     return RightSidePanel(
       database: widget.database,
-      show: showPanel, // TODO: have a button if you want to hide/show the panel
+      show: widget.showPanel,
       sidePanelWidth: 340,
-      bottomBar: PanelBottomBar( //! Do I need this to be separate widget?
+      bottomBar: PanelBottomBar( //! Do I need this to be a separate widget? 
         hidePanel: () {
-          // TODO: need to make this an stateful but to use setstate.
           setState(() {
-            showPanel = false;
+            //TODO: this doesnt work because its controlled by the parent widget(MainPage).
+            // widget.showPanel = false;
           });
         },
         deleteTask: () {
@@ -265,7 +263,6 @@ class _MainPageState extends State<MainPage> {
 
   @override
   Widget build(BuildContext context) {
-    print("nothing? or something: ${widget.selectedIndex}");
     return Expanded(
       child: Row(
         children: [
