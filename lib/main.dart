@@ -21,8 +21,7 @@ class MyApp extends StatelessWidget {
 
   const MyApp({super.key, required this.database});
 
-  final bool showRightPanel = false;
-  final bool showLeftPanel = true;
+
 
   @override
   Widget build(BuildContext context) {
@@ -44,20 +43,56 @@ class MyApp extends StatelessWidget {
       ),
       // home: NavigationPanel(database: database),
       //MARK: MAIN?
-      home: Scaffold(
-        body: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            NavigationPanel2(database: database),
-            MainPage(database: database),
-            RightSidePanel2(database: database),
-
-          ]
-        )
+      home: ParentPage(
+        database: database,
       ),
     );
   }
 }
+
+class ParentPage extends StatefulWidget {
+  const ParentPage({
+    super.key,
+    required this.database,
+  });
+
+  final AppDB database;
+
+  @override
+  State<ParentPage> createState() => _ParentPageState();
+}
+
+class _ParentPageState extends State<ParentPage> {
+
+  final bool showRightPanel = false;
+  final bool showLeftPanel = true;
+  int selectedIndex = 0;
+
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          NavigationPanel2(
+            database: widget.database,
+            currentIndex: (index) {
+              selectedIndex = index;
+            },
+          ),
+          MainPage(
+            database: widget.database,
+            // selectedIndex: selectedIndex,
+          ),
+          RightSidePanel2(database: widget.database),
+
+        ]
+      )
+    );
+  }
+}
+
 
 //MARK: true right sidepanel
 class RightSidePanel2 extends StatefulWidget {
@@ -81,7 +116,7 @@ class _RightSidePanel2State extends State<RightSidePanel2> {
       database: widget.database,
       show: showPanel, // TODO: have a button if you want to hide/show the panel
       sidePanelWidth: 340,
-      bottomBar: PanelBottomBar(
+      bottomBar: PanelBottomBar( //! Do I need this to be separate widget?
         hidePanel: () {
           // TODO: need to make this an stateful but to use setstate.
           setState(() {
@@ -103,7 +138,10 @@ class NavigationPanel2 extends StatefulWidget {
   const NavigationPanel2({
     super.key,
     required this.database,
+    required this.currentIndex,
   });
+
+  final Function(int) currentIndex;
 
   final AppDB database;
 
@@ -114,7 +152,6 @@ class NavigationPanel2 extends StatefulWidget {
 class _NavigationPanel2State extends State<NavigationPanel2> {
 
   int _selectedIndex = 0;
-  int currentIndex = 0;
 
   @override
   Widget build(BuildContext context) {
@@ -157,6 +194,8 @@ class _NavigationPanel2State extends State<NavigationPanel2> {
                         onTap: (){
                           setState(() {
                             _selectedIndex = index;
+                            widget.currentIndex(index);
+                            
                           });
                         },
                       );
