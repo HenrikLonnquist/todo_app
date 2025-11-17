@@ -267,6 +267,8 @@ class _MainPageState extends State<MainPage> {
 
   bool showPanel = false;
 
+  int _taskList = 5; //TODO: grap from database/navpanel? Change name as well?
+
   @override
   Widget build(BuildContext context) {
     return Expanded(
@@ -292,12 +294,17 @@ class _MainPageState extends State<MainPage> {
                 ],
               ),
               bottomBar: AddTask(
-                // TODO: Add task to database
+                onSubmitted: (value) {
+                  setState(() {
+                    _taskList += 1;
+                    //TODO: Make UI changes then update database or update database then change ui.
+                  });
+                },
               ),
               child: Material(
                 type: MaterialType.transparency,
                 child: ListView.separated(
-                  itemCount: 20,
+                  itemCount: _taskList,
                   itemBuilder: (context, index) {
                     return ListTile(
                       tileColor: Colors.grey.shade900,
@@ -308,7 +315,6 @@ class _MainPageState extends State<MainPage> {
                         setState(() {
                           // TODO: if showpanel true and tap again > close showpanel else if different task tap change taskinfo
                           // if (showPanel == true && index == )
-                          print(index);
                           showPanel = !showPanel;
                         });
                       },
