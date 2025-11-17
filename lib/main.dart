@@ -156,6 +156,8 @@ class _NavigationPanel2State extends State<NavigationPanel2> {
 
   int _selectedIndex = 0;
 
+  int _userListCount = 5; //TODO: grap from database
+
   @override
   Widget build(BuildContext context) {
     return RightSidePanel(
@@ -170,6 +172,10 @@ class _NavigationPanel2State extends State<NavigationPanel2> {
           hoverColor: Colors.grey.shade800,
           onTap: () {
             //TODO: Create a new user list and add to database
+            setState(() {
+              _userListCount += 1;
+              //TODO: add to database
+            });
           },
         ),
       ),
@@ -209,7 +215,7 @@ class _NavigationPanel2State extends State<NavigationPanel2> {
                   ListView.builder(
                     shrinkWrap: true,
                     physics: NeverScrollableScrollPhysics(),
-                    itemCount: 20 + 3,
+                    itemCount: _userListCount + 3,
                     itemBuilder: (context, index) {
                       final userIndex = 3 + index;
                             
