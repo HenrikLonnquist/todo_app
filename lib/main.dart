@@ -102,10 +102,12 @@ class RightSidePanel2 extends StatefulWidget {
     super.key,
     required this.database,
     this.showPanel = false,
+    this.btnHidePanel,
   });
 
   final AppDB database;
   final bool showPanel;
+  final VoidCallback? btnHidePanel;
 
   @override
   State<RightSidePanel2> createState() => _RightSidePanel2State();
@@ -120,11 +122,7 @@ class _RightSidePanel2State extends State<RightSidePanel2> {
       sidePanelWidth: 340,
       bottomBar: PanelBottomBar( //! Do I need this to be a separate widget? Probably not
         hidePanel: () {
-          setState(() {
-            //TODO: this doesnt work because its controlled by the parent widget(MainPage).
-            // widget.showPanel = false;
-            // print(widget.showPanel);
-          });
+            widget.btnHidePanel!.call();
         },
         deleteTask: () {
     
@@ -329,7 +327,15 @@ class _MainPageState extends State<MainPage> {
             ),
           ),
           
-          RightSidePanel2(database: widget.database, showPanel: showPanel)
+          RightSidePanel2(
+            database: widget.database, 
+            showPanel: showPanel,
+            btnHidePanel: () {
+              setState(() {
+                showPanel = false;
+              });
+            },
+          ),
         ],
       ),
     );
