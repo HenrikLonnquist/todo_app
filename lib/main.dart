@@ -118,11 +118,12 @@ class _RightSidePanel2State extends State<RightSidePanel2> {
       database: widget.database,
       show: widget.showPanel,
       sidePanelWidth: 340,
-      bottomBar: PanelBottomBar( //! Do I need this to be a separate widget? 
+      bottomBar: PanelBottomBar( //! Do I need this to be a separate widget? Probably not
         hidePanel: () {
           setState(() {
             //TODO: this doesnt work because its controlled by the parent widget(MainPage).
             // widget.showPanel = false;
+            // print(widget.showPanel);
           });
         },
         deleteTask: () {
