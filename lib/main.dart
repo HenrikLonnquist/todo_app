@@ -1,3 +1,4 @@
+import 'package:drift/drift.dart' hide Column;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -103,11 +104,13 @@ class RightSidePanel2 extends StatefulWidget {
     required this.database,
     this.showPanel = false,
     this.btnHidePanel,
+    this.deleteTask,
   });
 
   final AppDB database;
   final bool showPanel;
   final VoidCallback? btnHidePanel;
+  final VoidCallback? deleteTask;
 
   @override
   State<RightSidePanel2> createState() => _RightSidePanel2State();
@@ -123,9 +126,14 @@ class _RightSidePanel2State extends State<RightSidePanel2> {
       bottomBar: PanelBottomBar( //! Do I need this to be a separate widget? Probably not
         hidePanel: () {
             widget.btnHidePanel!.call();
+
+            //! THIS WORKS (Below)
+            // widget.database.into(widget.database.todoLists).insert(TodoListsCompanion.insert(name: Value("userTestList2")));
+            
         },
-        deleteTask: () {
-    
+        deleteTask: () { 
+          //! Maybe remove this and just do this inside the file/widget, no need for a parameter.
+          widget.deleteTask!.call();
         }
       ),
       child: TaskInfo(
@@ -331,6 +339,11 @@ class _MainPageState extends State<MainPage> {
             database: widget.database, 
             showPanel: showPanel,
             btnHidePanel: () {
+              setState(() {
+                showPanel = false;
+              });
+            },
+            deleteTask: () {
               setState(() {
                 showPanel = false;
               });
