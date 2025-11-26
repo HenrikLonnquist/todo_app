@@ -20,6 +20,21 @@ class AppDB extends _$AppDb{
   @override
   int get schemaVersion => 1;
 
+  @override
+  MigrationStrategy get migration {
+    return MigrationStrategy(
+      onCreate: (m) async {
+        await m.createAll();
+
+        await batch((b) {
+          b.insertAll(todoLists, [
+            TodoListsCompanion.insert(name: Value("Tasks")),
+          ]);
+        });
+      }
+    );
+  }
+
 }
 
 LazyDatabase _openConnection() {
