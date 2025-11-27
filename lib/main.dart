@@ -213,70 +213,70 @@ class _NavigationPanel2State extends State<NavigationPanel2> {
         child: Material(
           type: MaterialType.transparency,
           //TODO: initialize database - try to get the database
-          child: StreamBuilder<Object>(
-            stream: null, 
-            builder: (context, snapshot) {
-              return Column(
-                children: [
-                  ListTile(
-                    hoverColor: Colors.grey.shade800,
-                    selected: 0 == _selectedIndex,
-                    splashColor: Colors.transparent,
-                    title: Text(
-                      "My Day",
-                    ),
-                    onTap: (){
-                      setState(() {
-                        _selectedIndex = 0;
-                        // widget.currentIndex(index);
-                        
-                      });
-                    },
-                  ),
-                  ListTile(
-                    hoverColor: Colors.grey.shade800,
-                    selected: 1 == _selectedIndex,
-                    splashColor: Colors.transparent,
-                    title: Text(
-                      "Important",
-                    ),
-                    onTap: (){
-                      setState(() {
-                        _selectedIndex = 1;
-                        // widget.currentIndex(index);
-                        
-                      });
-                    },
-                  ),
-                  ListTile(
-                    hoverColor: Colors.grey.shade800,
-                    selected: 2 == _selectedIndex,
-                    splashColor: Colors.transparent,
-                    title: Text(
-                      "Tasks",
-                    ),
-                    onTap: (){
-                      setState(() {
-                        _selectedIndex = 2;
-                        // widget.currentIndex(index);
-                        
-                      });
-                    },
-                  ),
-                  Divider(),
-                  //MARK: User Lists
-                  //TODO: Change to a StreamBuilder
-                  //! Loading too fast? Need to wait for the get_lists function to grap first before loading.
-                  //TODO: If !snapshot.hasData > progress indicator else.
-                  if (!snapshot.hasData) RefreshProgressIndicator(), //! Works but needs a stream to track.
-                  ListView.builder(
+          child: Column(
+            children: [
+              ListTile(
+                hoverColor: Colors.grey.shade800,
+                selected: 0 == _selectedIndex,
+                splashColor: Colors.transparent,
+                title: Text(
+                  "My Day",
+                ),
+                onTap: (){
+                  setState(() {
+                    _selectedIndex = 0;
+                    // widget.currentIndex(index);
+                    
+                  });
+                },
+              ),
+              ListTile(
+                hoverColor: Colors.grey.shade800,
+                selected: 1 == _selectedIndex,
+                splashColor: Colors.transparent,
+                title: Text(
+                  "Important",
+                ),
+                onTap: (){
+                  setState(() {
+                    _selectedIndex = 1;
+                    // widget.currentIndex(index);
+                    
+                  });
+                },
+              ),
+              ListTile(
+                hoverColor: Colors.grey.shade800,
+                selected: 2 == _selectedIndex,
+                splashColor: Colors.transparent,
+                title: Text(
+                  "Tasks",
+                ),
+                onTap: (){
+                  setState(() {
+                    _selectedIndex = 2;
+                    // widget.currentIndex(index);
+                    
+                  });
+                },
+              ),
+              Divider(),
+              //MARK: User Lists
+              //TODO: Change to a StreamBuilder
+              //! Loading too fast? Need to wait for the get_lists function to grap first before loading.
+              //TODO: If !snapshot.hasData > progress indicator else.
+              // if (snapshot.hasData) CircularProgressIndicator(color: Colors.white), //! Works but needs a stream to track.
+              StreamBuilder(
+                stream: null,
+                builder: (context, asyncSnapshot) {
+                  return ListView.builder(
                     shrinkWrap: true,
                     physics: NeverScrollableScrollPhysics(),
                     itemCount: _userListCount, 
                     itemBuilder: (context, index) {
-
+                            
                       final userIndex = 3 + index; // 3 = default lists(MyDay, Important, Tasks)
-
+                            
                       return ListTile(
                         hoverColor: Colors.grey.shade800,
                         selected: userIndex == _selectedIndex,
@@ -292,10 +292,10 @@ class _NavigationPanel2State extends State<NavigationPanel2> {
                         },
                       ); 
                     },
-                  ),
-                ]
-              );
-            }
+                  );
+                }
+              ),
+            ]
           ),
         ),
       ),
