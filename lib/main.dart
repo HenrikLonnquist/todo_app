@@ -176,8 +176,7 @@ class _NavigationPanel2State extends State<NavigationPanel2> {
 
     final query = await db.select(db.todoLists).get();
 
-    //! INSERT, UPDATE, DELETE ---> Use 'custom'/raw sql | but when SELECT(returning values/graping) use .select drift
-
+    //! INSERT, UPDATE, DELETE ---> Use 'custom...'/raw sql | but when SELECT(returning values/graping) use .select drift
     // db.customStatement("DELETE FROM todo_lists WHERE id = ?", [7]);
 
     _userListCount = (query.length - 1).abs() ;
@@ -215,20 +214,20 @@ class _NavigationPanel2State extends State<NavigationPanel2> {
           type: MaterialType.transparency,
           //TODO: initialize database - try to get the database
           child: StreamBuilder<Object>(
-            stream: null,
+            stream: null, 
             builder: (context, snapshot) {
               return Column(
                 children: [
                   ListTile(
                     hoverColor: Colors.grey.shade800,
-                    // selected: index == _selectedIndex,
+                    selected: 0 == _selectedIndex,
                     splashColor: Colors.transparent,
                     title: Text(
                       "My Day",
                     ),
                     onTap: (){
                       setState(() {
-                        // _selectedIndex = index;
+                        _selectedIndex = 0;
                         // widget.currentIndex(index);
                         
                       });
@@ -236,14 +235,14 @@ class _NavigationPanel2State extends State<NavigationPanel2> {
                   ),
                   ListTile(
                     hoverColor: Colors.grey.shade800,
-                    // selected: index == _selectedIndex,
+                    selected: 1 == _selectedIndex,
                     splashColor: Colors.transparent,
                     title: Text(
                       "Important",
                     ),
                     onTap: (){
                       setState(() {
-                        // _selectedIndex = index;
+                        _selectedIndex = 1;
                         // widget.currentIndex(index);
                         
                       });
@@ -251,14 +250,14 @@ class _NavigationPanel2State extends State<NavigationPanel2> {
                   ),
                   ListTile(
                     hoverColor: Colors.grey.shade800,
-                    // selected: index == _selectedIndex,
+                    selected: 2 == _selectedIndex,
                     splashColor: Colors.transparent,
                     title: Text(
                       "Tasks",
                     ),
                     onTap: (){
                       setState(() {
-                        // _selectedIndex = index;
+                        _selectedIndex = 2;
                         // widget.currentIndex(index);
                         
                       });
@@ -268,12 +267,15 @@ class _NavigationPanel2State extends State<NavigationPanel2> {
                   //MARK: User Lists
                   //TODO: Change to a StreamBuilder
                   //! Loading too fast? Need to wait for the get_lists function to grap first before loading.
+                  //TODO: If !snapshot.hasData > progress indicator else.
+                  if (!snapshot.hasData) RefreshProgressIndicator(), //! Works but needs a stream to track.
                   ListView.builder(
                     shrinkWrap: true,
                     physics: NeverScrollableScrollPhysics(),
                     itemCount: _userListCount, 
                     itemBuilder: (context, index) {
-                      final userIndex = 1 + index;
+
+                      final userIndex = 3 + index; // 3 = default lists(MyDay, Important, Tasks)
 
                       return ListTile(
                         hoverColor: Colors.grey.shade800,
