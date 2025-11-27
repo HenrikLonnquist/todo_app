@@ -1,4 +1,7 @@
+import 'dart:ffi';
+
 import 'package:drift/drift.dart' hide Column;
+import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -128,7 +131,7 @@ class _RightSidePanel2State extends State<RightSidePanel2> {
             widget.btnHidePanel!.call();
 
             //! THIS WORKS (Below)
-            // widget.database.into(widget.database.todoLists).insert(TodoListsCompanion.insert(name: Value("userTestList2")));
+            widget.database.into(widget.database.todoLists).insert(TodoListsCompanion.insert(name: Value("userTestList3")));
             
         },
         deleteTask: () { 
@@ -163,10 +166,32 @@ class _NavigationPanel2State extends State<NavigationPanel2> {
 
   int _selectedIndex = 0;
 
-  int _userListCount = 5; //TODO: grap from database
+  // List _userList = []; //TODO: Dont forget to change.
+  int _userListCount = 0;
+
+
+  //TODO: grap database todoLists
+  AppDB get db => widget.database;
+  void get_Lists() async {
+
+    final query = await db.select(db.todoLists).get();
+
+    //! INSERT, UPDATE, DELETE ---> Use 'custom'/raw sql | but when SELECT(returning values/graping) use .select drift
+
+    // db.customStatement("DELETE FROM todo_lists WHERE id = ?", [7]);
+
+    _userListCount = (query.length - 1).abs() ;
+    print(_userListCount);
+
+    for (final row in query) {
+      print("Has row $row");
+    }
+
+  }  
 
   @override
   Widget build(BuildContext context) {
+    get_Lists();
     return RightSidePanel(
       database: widget.database,
       show: true, // TODO: have a button if you want to hide/show the panel
@@ -180,8 +205,7 @@ class _NavigationPanel2State extends State<NavigationPanel2> {
           onTap: () {
             //TODO: Create a new user list and add to database
             setState(() {
-              _userListCount += 1;
-              //TODO: add to database
+              db.into(db.todoLists).insert(TodoListsCompanion.insert(name: Value("Untitled list")));
             });
           },
         ),
@@ -195,43 +219,68 @@ class _NavigationPanel2State extends State<NavigationPanel2> {
             builder: (context, snapshot) {
               return Column(
                 children: [
-                  ListView.builder(
-                    shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
-                    itemCount: 3,
-                    itemBuilder: (context, index) {
-                      return ListTile(
-                        hoverColor: Colors.grey.shade800,
-                        selected: index == _selectedIndex,
-                        splashColor: Colors.transparent,
-                        title: Text(
-                          "test$index",
-                        ),
-                        onTap: (){
-                          setState(() {
-                            _selectedIndex = index;
-                            widget.currentIndex(index);
-                            
-                          });
-                        },
-                      );
+                  ListTile(
+                    hoverColor: Colors.grey.shade800,
+                    // selected: index == _selectedIndex,
+                    splashColor: Colors.transparent,
+                    title: Text(
+                      "My Day",
+                    ),
+                    onTap: (){
+                      setState(() {
+                        // _selectedIndex = index;
+                        // widget.currentIndex(index);
+                        
+                      });
+                    },
+                  ),
+                  ListTile(
+                    hoverColor: Colors.grey.shade800,
+                    // selected: index == _selectedIndex,
+                    splashColor: Colors.transparent,
+                    title: Text(
+                      "Important",
+                    ),
+                    onTap: (){
+                      setState(() {
+                        // _selectedIndex = index;
+                        // widget.currentIndex(index);
+                        
+                      });
+                    },
+                  ),
+                  ListTile(
+                    hoverColor: Colors.grey.shade800,
+                    // selected: index == _selectedIndex,
+                    splashColor: Colors.transparent,
+                    title: Text(
+                      "Tasks",
+                    ),
+                    onTap: (){
+                      setState(() {
+                        // _selectedIndex = index;
+                        // widget.currentIndex(index);
+                        
+                      });
                     },
                   ),
                   Divider(),
                   //MARK: User Lists
+                  //TODO: Change to a StreamBuilder
+                  //! Loading too fast? Need to wait for the get_lists function to grap first before loading.
                   ListView.builder(
                     shrinkWrap: true,
                     physics: NeverScrollableScrollPhysics(),
-                    itemCount: _userListCount + 3,
+                    itemCount: _userListCount, 
                     itemBuilder: (context, index) {
-                      final userIndex = 3 + index;
-                            
+                      final userIndex = 1 + index;
+
                       return ListTile(
                         hoverColor: Colors.grey.shade800,
                         selected: userIndex == _selectedIndex,
                         splashColor: Colors.transparent,
                         title: Text(
-                          "test$userIndex",
+                          "test$index",
                         ),
                         onTap: (){
                           setState(() {
@@ -270,7 +319,7 @@ class MainPage extends StatefulWidget {
   State<MainPage> createState() => _MainPageState();
 }
 
-class _MainPageState extends State<MainPage> {  
+class _MainPageState extends State<MainPage> {
 
   bool showPanel = false;
 
@@ -294,7 +343,31 @@ class _MainPageState extends State<MainPage> {
                       Text("Main Page ${widget.selectedIndex}"),
                       Spacer(),
                       Icon(Icons.swap_vert),
-                      Icon(Icons.lightbulb)
+                      Icon(Icons.lightbulb),
+                      DropdownButton2(
+                        customButton: const Icon(
+                          Icons.more_vert
+                          ),
+                        onChanged: (value) {
+                          
+                        },
+                        items: [
+                          DropdownMenuItem(
+                            onTap: () {
+                              setState(() {
+                                //TODO: find current todoList id
+                                //TODO: DELETE list from database + update ui
+                                // widget.database.delete();
+                              });
+                            },
+                            child: Text("Delete List"),
+                          )
+                        ],
+                        //TODO: Finish the styling
+                        dropdownStyleData: DropdownStyleData(
+                          width: 160,
+                        ),
+                      )
                     ],
                   ),
                   // Text("Current Date"), //TODO: If it's 'My Day' tab. show this
@@ -344,9 +417,8 @@ class _MainPageState extends State<MainPage> {
               });
             },
             deleteTask: () {
-              setState(() {
-                showPanel = false;
-              });
+              // widget.database.into(widget.database.tasks);
+
             },
           ),
         ],
