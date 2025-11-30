@@ -344,106 +344,139 @@ class _MainPageState extends State<MainPage> {
 
   bool showPanel = false;
 
-  int _taskList = 5; //TODO: grap from database/navpanel? Change name as well?
+  int get _taskList => widget.selectedIndex; //TODO: grap from database/navpanel? Change name as well?
+  AppDB get db => widget.database;
+  // SimpleSelectStatement<Tasks, Task> get currentTabTasks => db.select(db.tasks)..where((tbl) => tbl.id.equals(widget.selectedIndex));
+  Future<List<QueryRow>> get currentTabTasks => db.customSelect("SELECT * FROM tasks WHERE id = ?", variables: [Variable.withInt(widget.selectedIndex)], readsFrom: {db.tasks}).get();
+
 
   @override
   Widget build(BuildContext context) {
-    return Expanded(
-      child: Row(
-        children: [
-          Expanded(
-            child: RightSidePanel(
-              database: widget.database,
-              bgColorPanel: Colors.black,
-              sidePanelWidth: null,
-              topBar: Column(
-                children: [
-                  Row(
+    return FutureBuilder(
+      future: currentTabTasks,
+      builder: (context, snapshot) {
+
+        if (!snapshot.hasData) {
+          return Expanded(
+            child: Container(
+            color: Colors.black,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Center(
+                  child: SizedBox(
+                    width: 30,
+                    height: 30,
+                    child: CircularProgressIndicator(
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+                    ),
+          );
+        }
+
+        return Expanded(
+          child: Row(
+            children: [
+              Expanded(
+                child: RightSidePanel(
+                  database: widget.database,
+                  bgColorPanel: Colors.black,
+                  sidePanelWidth: null,
+                  topBar: Column(
                     children: [
-                      Icon(Icons.home),
-                      Text("Main Page ${widget.selectedIndex}"),
-                      Spacer(),
-                      Icon(Icons.swap_vert),
-                      Icon(Icons.lightbulb),
-                      DropdownButton2(
-                        customButton: const Icon(
-                          Icons.more_vert
-                          ),
-                        onChanged: (value) {
-                          
-                        },
-                        items: [
-                          DropdownMenuItem(
-                            onTap: () {
-                              setState(() {
-                                //TODO: find current todoList id
-                                //TODO: DELETE list from database + update ui
-                                // widget.database.delete();
-                              });
+                      Row(
+                        children: [
+                          Icon(Icons.home),
+                          Text("Main Page ${widget.selectedIndex}"),
+                          Spacer(),
+                          Icon(Icons.swap_vert),
+                          Icon(Icons.lightbulb),
+                          DropdownButton2(
+                            customButton: const Icon(
+                              Icons.more_vert
+                              ),
+                            onChanged: (value) {
+                              
                             },
-                            child: Text("Delete List"),
+                            items: [
+                              DropdownMenuItem(
+                                onTap: () {
+                                  setState(() {
+                                    //TODO: find current todoList id
+                                    //TODO: DELETE list from database + update ui
+                                    // widget.database.delete();
+                                  });
+                                },
+                                child: Text("Delete List"),
+                              )
+                            ],
+                            //TODO: Finish the styling
+                            dropdownStyleData: DropdownStyleData(
+                              width: 160,
+                            ),
                           )
                         ],
-                        //TODO: Finish the styling
-                        dropdownStyleData: DropdownStyleData(
-                          width: 160,
-                        ),
-                      )
+                      ),
+                      // Text("Current Date"), //TODO: If it's 'My Day' tab. show this
                     ],
                   ),
-                  // Text("Current Date"), //TODO: If it's 'My Day' tab. show this
-                ],
-              ),
-              bottomBar: AddTask(
-                onSubmitted: (value) {
-                  setState(() {
-                    _taskList += 1;
-                    //TODO: Make UI changes then update database or update database then change ui.
-                  });
-                },
-              ),
-              child: Material(
-                type: MaterialType.transparency,
-                child: ListView.separated(
-                  itemCount: _taskList,
-                  itemBuilder: (context, index) {
-                    return ListTile(
-                      tileColor: Colors.grey.shade900,
-                      hoverColor: Colors.grey.shade800,
-                      splashColor: Colors.transparent,
-                      title: Text("Task $index"),
-                      onTap: () {
-                        setState(() {
-                          // TODO: if showpanel true and tap again > close showpanel else if different task tap change taskinfo
-                          // if (showPanel == true && index == )
-                          showPanel = !showPanel;
-                        });
+                  bottomBar: AddTask(
+                    onSubmitted: (value) {
+                      setState(() {
+                        // _taskList += 1;
+                        //TODO: Make UI changes then update database or update database then change ui.
+                      });
+                    },
+                  ),
+                  child: Material(
+                    type: MaterialType.transparency,
+                    child: ListView.separated(
+                      itemCount: 0,
+                      itemBuilder: (context, index) {
+                        return ListTile(
+                          tileColor: Colors.grey.shade900,
+                          hoverColor: Colors.grey.shade800,
+                          splashColor: Colors.transparent,
+                          title: Text("Task $index"),
+                          onTap: () {
+                            setState(() {
+                              // TODO: if showpanel true and tap again > close showpanel else if different task tap change taskinfo
+                              // if (showPanel == true && index == )
+                              showPanel = !showPanel;
+                            });
+                          },
+                        );
                       },
-                    );
-                  },
-                  separatorBuilder: (context, index) {
-                    return SizedBox(height: 8,);
-                  },
+                      separatorBuilder: (context, index) {
+                        return SizedBox(height: 8,);
+                      },
+                    ),
+                  ),
                 ),
               ),
-            ),
+              
+              RightSidePanel2(
+                database: widget.database, 
+                showPanel: showPanel,
+                btnHidePanel: () {
+                  setState(() {
+                    showPanel = false;
+                  });
+                },
+                deleteTask: () {
+                  // widget.database.into(widget.database.tasks);
+        
+                },
+              ),
+            ],
           ),
-          
-          RightSidePanel2(
-            database: widget.database, 
-            showPanel: showPanel,
-            btnHidePanel: () {
-              setState(() {
-                showPanel = false;
-              });
-            },
-            deleteTask: () {
-              // widget.database.into(widget.database.tasks);
-
-            },
-          ),
-        ],
-      ),
+        );
+      }
     );
   }
 }
