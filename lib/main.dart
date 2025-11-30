@@ -72,6 +72,8 @@ class _ParentPageState extends State<ParentPage> {
   final bool showLeftPanel = true;
   int selectedIndex = 0;
 
+  AppDB get db => widget.database;
+
 
   @override
   Widget build(BuildContext context) {
@@ -80,19 +82,30 @@ class _ParentPageState extends State<ParentPage> {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           NavigationPanel2(
+            //! Better to handle the updates and changes here, no need to send widget.database to it.
             database: widget.database,
+            handleTabTap: (tabId) {
+              //TODo: what tap was pressed and then send the info to mainpage
+
+              // db.select().get();
+
+
+            },
             currentIndex: (index) {
+              // 0 = Myday
+              // 1 = Important
+              // 2 = Tasks
+              // db.      
+
               setState(() {
                 selectedIndex = index;
               });
             },
           ),
           MainPage(
-            database: widget.database,
+            database: widget.database, //TODO: replace/change to the current selected NavPanel(list > Myday,Tasks..) 
             selectedIndex: selectedIndex,
           ),
-          RightSidePanel2(database: widget.database),
-
         ]
       )
     );
@@ -151,7 +164,7 @@ class NavigationPanel2 extends StatefulWidget {
   const NavigationPanel2({
     super.key,
     required this.database,
-    required this.currentIndex,
+    required this.currentIndex, required Null Function(int) handleTabTap,
   });
 
   final Function(int) currentIndex;
@@ -164,7 +177,7 @@ class NavigationPanel2 extends StatefulWidget {
 
 class _NavigationPanel2State extends State<NavigationPanel2> {
 
-  int _selectedIndex = 0;
+  int _selectedIndex = 2;
 
   // List _userList = []; //TODO: Dont forget to change.
   int _userListCount = 0;
@@ -190,7 +203,7 @@ class _NavigationPanel2State extends State<NavigationPanel2> {
 
   @override
   Widget build(BuildContext context) {
-    get_Lists();
+    // get_Lists();
     return RightSidePanel(
       database: widget.database,
       show: true, // TODO: have a button if you want to hide/show the panel
@@ -202,10 +215,11 @@ class _NavigationPanel2State extends State<NavigationPanel2> {
           title: Text("New list +"),
           hoverColor: Colors.grey.shade800,
           onTap: () {
+            //TODO: Have the parent handle this. Or where its called/used.
             //TODO: Create a new user list and add to database
-            setState(() {
+            
               db.into(db.todoLists).insert(TodoListsCompanion.insert(name: Value("Untitled list")));
-            });
+            
           },
         ),
       ),
@@ -225,7 +239,7 @@ class _NavigationPanel2State extends State<NavigationPanel2> {
                 onTap: (){
                   setState(() {
                     _selectedIndex = 0;
-                    // widget.currentIndex(index);
+                    widget.currentIndex(0);
                     
                   });
                 },
@@ -240,7 +254,7 @@ class _NavigationPanel2State extends State<NavigationPanel2> {
                 onTap: (){
                   setState(() {
                     _selectedIndex = 1;
-                    // widget.currentIndex(index);
+                    widget.currentIndex(1);
                     
                   });
                 },
@@ -255,7 +269,7 @@ class _NavigationPanel2State extends State<NavigationPanel2> {
                 onTap: (){
                   setState(() {
                     _selectedIndex = 2;
-                    // widget.currentIndex(index);
+                    widget.currentIndex(2);
                     
                   });
                 },
@@ -267,8 +281,13 @@ class _NavigationPanel2State extends State<NavigationPanel2> {
               //TODO: If !snapshot.hasData > progress indicator else.
               // if (snapshot.hasData) CircularProgressIndicator(color: Colors.white), //! Works but needs a stream to track.
               StreamBuilder(
+                // stream: db.select(db.todoLists).watch(),
                 stream: null,
-                builder: (context, asyncSnapshot) {
+                builder: (context, snapshot) {
+
+                  print(snapshot.data);
+                                    
+
                   return ListView.builder(
                     shrinkWrap: true,
                     physics: NeverScrollableScrollPhysics(),
@@ -276,7 +295,7 @@ class _NavigationPanel2State extends State<NavigationPanel2> {
                     itemBuilder: (context, index) {
                             
                       final userIndex = 3 + index; // 3 = default lists(MyDay, Important, Tasks)
-                            
+
                       return ListTile(
                         hoverColor: Colors.grey.shade800,
                         selected: userIndex == _selectedIndex,
