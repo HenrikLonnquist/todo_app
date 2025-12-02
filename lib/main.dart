@@ -1,5 +1,3 @@
-import 'dart:ffi';
-
 import 'package:drift/drift.dart' hide Column;
 import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:flutter/foundation.dart';
@@ -346,8 +344,11 @@ class _MainPageState extends State<MainPage> {
 
   int get _taskList => widget.selectedIndex; //TODO: grap from database/navpanel? Change name as well?
   AppDB get db => widget.database;
-  // SimpleSelectStatement<Tasks, Task> get currentTabTasks => db.select(db.tasks)..where((tbl) => tbl.id.equals(widget.selectedIndex));
-  Future<List<QueryRow>> get currentTabTasks => db.customSelect("SELECT * FROM tasks WHERE id = ?", variables: [Variable.withInt(widget.selectedIndex)], readsFrom: {db.tasks}).get();
+  // SimpleSelectStatement<Tasks, Task> get currentTabTasks => db.select(db.tasks)..where((tbl) => tbl.listsId.equals(widget.selectedIndex));
+  Future<List<QueryRow>> get currentTabTasks => db.customSelect("SELECT * FROM tasks WHERE lists_id = ?", variables: [Variable.withInt(widget.selectedIndex)], readsFrom: {db.tasks}).get();
+
+   // Loading
+
 
 
   @override
@@ -355,27 +356,29 @@ class _MainPageState extends State<MainPage> {
     return FutureBuilder(
       future: currentTabTasks,
       builder: (context, snapshot) {
+        
+        // print("future builder: ${snapshot.data?[0]}");
 
         if (!snapshot.hasData) {
           return Expanded(
             child: Container(
             color: Colors.black,
             child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Center(
-                  child: SizedBox(
-                    width: 30,
-                    height: 30,
-                    child: CircularProgressIndicator(
-                      color: Colors.white,
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Center(
+                    child: SizedBox(
+                      width: 30,
+                      height: 30,
+                      child: CircularProgressIndicator(
+                        color: Colors.white,
+                      ),
                     ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
-                    ),
           );
         }
 
@@ -429,6 +432,14 @@ class _MainPageState extends State<MainPage> {
                     onSubmitted: (value) {
                       setState(() {
                         // _taskList += 1;
+                        
+                        db.customInsert("INSERT INTO tasks(lists_id, title, position) VALUES (?, ?, ?)", 
+                        variables: [
+                          Variable.withInt(widget.selectedIndex), 
+                          Variable.withString(value), 
+                          Variable.withInt(0)
+                        ]);
+        
                         //TODO: Make UI changes then update database or update database then change ui.
                       });
                     },
@@ -436,13 +447,20 @@ class _MainPageState extends State<MainPage> {
                   child: Material(
                     type: MaterialType.transparency,
                     child: ListView.separated(
-                      itemCount: 0,
+                      itemCount: snapshot.data?.length ?? 0,
                       itemBuilder: (context, index) {
+
+                        final task = snapshot.data![index].data;
+                        final taskTitle = task["title"];
+                        print(task);
+                        print(taskTitle);
+
                         return ListTile(
                           tileColor: Colors.grey.shade900,
                           hoverColor: Colors.grey.shade800,
                           splashColor: Colors.transparent,
-                          title: Text("Task $index"),
+                          // title: Text("Task $index"),
+                          title: Text(taskTitle),
                           onTap: () {
                             setState(() {
                               // TODO: if showpanel true and tap again > close showpanel else if different task tap change taskinfo
@@ -459,7 +477,7 @@ class _MainPageState extends State<MainPage> {
                   ),
                 ),
               ),
-              
+              //TODO: Maybe move this to parent Widget(MAIN). WHy? Because I need to hide this when I open a new "Tab"/List
               RightSidePanel2(
                 database: widget.database, 
                 showPanel: showPanel,
@@ -473,6 +491,8 @@ class _MainPageState extends State<MainPage> {
         
                 },
               ),
+              //MARK: Suggestion Panel
+              //TODO: Suggetsion Panel -- Move to parent widget(MAIN)?
             ],
           ),
         );
