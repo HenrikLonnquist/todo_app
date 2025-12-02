@@ -37,8 +37,11 @@ class _AddTaskState extends State<AddTask> {
           ),
           controller: _newTaskController,
           onSubmitted: (value) {
-            widget.onSubmitted?.call(value);
+            if (value.trim().isNotEmpty) {
+              widget.onSubmitted?.call(value.trim());
+            }
             _newTaskController.text = "";
+            
           },
         )
       )
