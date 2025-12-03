@@ -68,7 +68,7 @@ class ParentPage extends StatefulWidget {
 class _ParentPageState extends State<ParentPage> {
 
   final bool showLeftPanel = true;
-  int selectedIndex = 0;
+  int selectedIndex = 0; // TODO: Fix default tab, here and at 'Main Page'. Because we are still sending 0 as current index to 'Main Page' when it should be 2.
 
   AppDB get db => widget.database;
 
@@ -112,16 +112,18 @@ class _ParentPageState extends State<ParentPage> {
 
 
 //MARK: true right sidepanel
+//! Why did I do this?
+//TODO: Can I remove or refactor
 class RightSidePanel2 extends StatefulWidget {
   const RightSidePanel2({
     super.key,
-    required this.database,
+    required this.task,
     this.showPanel = false,
     this.btnHidePanel,
     this.deleteTask,
   });
 
-  final AppDB database;
+  final Map task;
   final bool showPanel;
   final VoidCallback? btnHidePanel;
   final VoidCallback? deleteTask;
@@ -134,15 +136,14 @@ class _RightSidePanel2State extends State<RightSidePanel2> {
   @override
   Widget build(BuildContext context) {
     return RightSidePanel(
-      database: widget.database,
       show: widget.showPanel,
       sidePanelWidth: 340,
       bottomBar: PanelBottomBar( //! Do I need this to be a separate widget? Probably not
         hidePanel: () {
             widget.btnHidePanel!.call();
 
-            //! THIS WORKS (Below)
-            widget.database.into(widget.database.todoLists).insert(TodoListsCompanion.insert(name: Value("userTestList3")));
+              
+            widget.task;
             
         },
         deleteTask: () { 
@@ -151,6 +152,7 @@ class _RightSidePanel2State extends State<RightSidePanel2> {
         }
       ),
       child: TaskInfo(
+        task: widget.task,
       ),
     );
   }
@@ -283,7 +285,7 @@ class _NavigationPanel2State extends State<NavigationPanel2> {
                 stream: null,
                 builder: (context, snapshot) {
 
-                  print(snapshot.data);
+                  // print(snapshot.data);
                                     
 
                   return ListView.builder(
@@ -346,9 +348,8 @@ class _MainPageState extends State<MainPage> {
   AppDB get db => widget.database;
   // SimpleSelectStatement<Tasks, Task> get currentTabTasks => db.select(db.tasks)..where((tbl) => tbl.listsId.equals(widget.selectedIndex));
   Future<List<QueryRow>> get currentTabTasks => db.customSelect("SELECT * FROM tasks WHERE lists_id = ?", variables: [Variable.withInt(widget.selectedIndex)], readsFrom: {db.tasks}).get();
-
-   // Loading
-
+  
+  Map currentTask = {};
 
 
   @override
@@ -358,6 +359,7 @@ class _MainPageState extends State<MainPage> {
       builder: (context, snapshot) {
         
         // print("future builder: ${snapshot.data?[0]}");
+        // print("myday: ${widget.selectedIndex}"); //! should be 2 on "restart"/default
 
         if (!snapshot.hasData) {
           return Expanded(
@@ -452,8 +454,8 @@ class _MainPageState extends State<MainPage> {
 
                         final task = snapshot.data![index].data;
                         final taskTitle = task["title"];
-                        print(task);
-                        print(taskTitle);
+                        // print(task);
+                        // print(taskTitle);
 
                         return ListTile(
                           tileColor: Colors.grey.shade900,
@@ -465,6 +467,7 @@ class _MainPageState extends State<MainPage> {
                             setState(() {
                               // TODO: if showpanel true and tap again > close showpanel else if different task tap change taskinfo
                               // if (showPanel == true && index == )
+                              currentTask = task;
                               showPanel = !showPanel;
                             });
                           },
@@ -479,7 +482,7 @@ class _MainPageState extends State<MainPage> {
               ),
               //TODO: Maybe move this to parent Widget(MAIN). WHy? Because I need to hide this when I open a new "Tab"/List
               RightSidePanel2(
-                database: widget.database, 
+                task: currentTask, 
                 showPanel: showPanel,
                 btnHidePanel: () {
                   setState(() {

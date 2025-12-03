@@ -7,7 +7,7 @@ import 'package:todo_app/database.dart';
 
 //TODO: Move it/place somewhere else, have to restart(ctrl+shift+f10) debug session instead of hot reload to get an effect.
 
-
+//MARK: Panel
 class RightSidePanel extends StatelessWidget {
   const RightSidePanel({
     super.key,
@@ -16,7 +16,7 @@ class RightSidePanel extends StatelessWidget {
     this.child, 
     this.show = true,
     this.sidePanelWidth = 340,
-    required this.database,
+    this.database,
     this.padding,
     this.bottomPadding,
     // this.topBarColor = const Color(0xffffffff),
@@ -30,7 +30,7 @@ class RightSidePanel extends StatelessWidget {
   final Widget? bottomBar;
   final Widget? topBar;
   final double? sidePanelWidth;
-  final AppDB database;
+  final AppDB? database;
   final EdgeInsetsGeometry? padding;
   final EdgeInsetsGeometry? bottomPadding;
   final Color? topBarColor;
@@ -76,11 +76,14 @@ class RightSidePanel extends StatelessWidget {
   }
 }
 
-
+//MARK: Task Info
 class TaskInfo extends StatefulWidget {
   const TaskInfo({
-    super.key,
-    });
+    super.key, 
+    required this.task,
+  });
+
+  final Map task;
 
   @override
   State<TaskInfo> createState() => _TaskInfoState();
@@ -92,6 +95,7 @@ class _TaskInfoState extends State<TaskInfo> {
 
   @override
   Widget build(BuildContext context) {
+    print(widget.task);
     return SingleChildScrollView(
       child: Material(
         type: MaterialType.transparency,
@@ -192,7 +196,7 @@ class _TaskInfoState extends State<TaskInfo> {
 }
 
 
-
+// MARK: BottomBar
 class PanelBottomBar extends StatelessWidget {
 
   const PanelBottomBar({
