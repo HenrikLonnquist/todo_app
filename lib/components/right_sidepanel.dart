@@ -91,11 +91,18 @@ class TaskInfo extends StatefulWidget {
 
 class _TaskInfoState extends State<TaskInfo> {
 
-  bool isChecked = false;
+  Map get task => widget.task;
+
+  bool get isChecked => task["is_done"] == 0 ? false : true;
 
   @override
   Widget build(BuildContext context) {
-    print(widget.task);
+
+    //TODO: Need to send over subtasks aswell if there is any.
+    
+    // print("same: $task"); //! Seems to be printing twice for some reason. Look into it.
+
+
     return SingleChildScrollView(
       child: Material(
         type: MaterialType.transparency,
@@ -117,14 +124,16 @@ class _TaskInfoState extends State<TaskInfo> {
                 //TODO: Change color of the checkbox, to white
                 onChanged: (value){
                   setState(() {
-                    isChecked = !isChecked;
+                    //TODO: update database
+                    // Maybe need to use stream here or something similar. Otherwise I need to call the database either way.
+                    // isChecked = !isChecked;
                   });
                 },
               ),
               title: TitleField(
                 fontWeight: FontWeight.bold,
                 completed: false,
-                inputValue: "Test",
+                inputValue: task["title"] ?? "Failed to grap",
                 onChange: (value) {
                   //TODO: update database
                 },
@@ -132,6 +141,7 @@ class _TaskInfoState extends State<TaskInfo> {
             ),
             //TODO: is there any sub tasks > populate
             // db.subtask > 0 ? : 
+            // !What is this? Is it to populate the subtask ui after?
             ListView.builder(
               shrinkWrap: true,
               physics: NeverScrollableScrollPhysics(),
@@ -150,7 +160,7 @@ class _TaskInfoState extends State<TaskInfo> {
                 value: isChecked,
                 onChanged: (value){
                   setState(() {
-                    isChecked = !isChecked;
+                    // isChecked = !isChecked;
                   });
                 },
               ),
