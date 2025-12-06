@@ -28,6 +28,8 @@ class AppDB extends _$AppDb{
 
         await batch((b) {
           b.insertAll(todoLists, [
+            TodoListsCompanion.insert(name: Value("Myday")),
+            TodoListsCompanion.insert(name: Value("Important")),
             TodoListsCompanion.insert(name: Value("Tasks")),
           ]);
         });
