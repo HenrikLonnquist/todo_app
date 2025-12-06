@@ -82,6 +82,7 @@ class _ParentPageState extends State<ParentPage> {
           NavigationPanel2(
             //! Better to handle the updates and changes here, no need to send widget.database to it.
             database: widget.database,
+            selectedIndex: selectedIndex,
             handleTabTap: (tabId) {
               //TODo: what tap was pressed and then send the info to mainpage
 
@@ -169,9 +170,12 @@ class NavigationPanel2 extends StatefulWidget {
   const NavigationPanel2({
     super.key,
     required this.database,
-    required this.currentIndex, required Null Function(int) handleTabTap,
+    required this.currentIndex, 
+    required Null Function(int) handleTabTap,
+    required this.selectedIndex,
   });
 
+  final int selectedIndex;
   final Function(int) currentIndex;
 
   final AppDB database;
@@ -182,7 +186,7 @@ class NavigationPanel2 extends StatefulWidget {
 
 class _NavigationPanel2State extends State<NavigationPanel2> {
 
-  int _selectedIndex = 2;
+  int get _selectedIndex => widget.selectedIndex;
 
   // List _userList = []; //TODO: Dont forget to change.
   int _userListCount = 0;
@@ -245,7 +249,7 @@ class _NavigationPanel2State extends State<NavigationPanel2> {
                 ),
                 onTap: (){
                   setState(() {
-                    _selectedIndex = 0;
+                    // _selectedIndex = 0;
                     widget.currentIndex(0);
                     
                   });
@@ -260,7 +264,7 @@ class _NavigationPanel2State extends State<NavigationPanel2> {
                 ),
                 onTap: (){
                   setState(() {
-                    _selectedIndex = 1;
+                    // _selectedIndex = 1;
                     widget.currentIndex(1);
                     
                   });
@@ -275,7 +279,7 @@ class _NavigationPanel2State extends State<NavigationPanel2> {
                 ),
                 onTap: (){
                   setState(() {
-                    _selectedIndex = 2;
+                    // _selectedIndex = 2;
                     widget.currentIndex(2);
                     
                   });
@@ -297,7 +301,7 @@ class _NavigationPanel2State extends State<NavigationPanel2> {
                     physics: NeverScrollableScrollPhysics(),
                     itemCount: _userListCount, 
                     itemBuilder: (context, index) {
-                            
+                      
                       final userIndex = 3 + index; // 3 = default lists(MyDay, Important, Tasks)
 
                       return ListTile(
@@ -309,7 +313,7 @@ class _NavigationPanel2State extends State<NavigationPanel2> {
                         ),
                         onTap: (){
                           setState(() {
-                            _selectedIndex = userIndex;
+                            // _selectedIndex = userIndex;
                             widget.currentIndex(userIndex);
                           });
                         },
