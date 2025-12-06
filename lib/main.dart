@@ -68,7 +68,7 @@ class ParentPage extends StatefulWidget {
 class _ParentPageState extends State<ParentPage> {
 
   final bool showLeftPanel = true;
-  int selectedIndex = 0; // TODO: Fix default tab, here and at 'Main Page'. Because we are still sending 0 as current index to 'Main Page' when it should be 2.
+  int selectedIndex = 2; 
 
   AppDB get db => widget.database;
 
@@ -118,12 +118,14 @@ class RightSidePanel2 extends StatefulWidget {
   const RightSidePanel2({
     super.key,
     required this.task,
+    this.subTask,
     this.showPanel = false,
     this.btnHidePanel,
     this.deleteTask,
   });
 
   final Map task;
+  final List? subTask;
   final bool showPanel;
   final VoidCallback? btnHidePanel;
   final VoidCallback? deleteTask;
@@ -135,13 +137,16 @@ class RightSidePanel2 extends StatefulWidget {
 class _RightSidePanel2State extends State<RightSidePanel2> {
   @override
   Widget build(BuildContext context) {
+
+    // print("right: ${widget.subTask}");
+
+    // TODO: Merge this with TaskInfo Class?
     return RightSidePanel(
       show: widget.showPanel,
       sidePanelWidth: 340,
       bottomBar: PanelBottomBar( //! Do I need this to be a separate widget? Probably not
         hidePanel: () {
             widget.btnHidePanel!.call();
-
               
             widget.task;
             
@@ -203,7 +208,9 @@ class _NavigationPanel2State extends State<NavigationPanel2> {
 
   @override
   Widget build(BuildContext context) {
+
     // get_Lists();
+
     return RightSidePanel(
       database: widget.database,
       show: true, // TODO: have a button if you want to hide/show the panel
@@ -285,9 +292,6 @@ class _NavigationPanel2State extends State<NavigationPanel2> {
                 stream: null,
                 builder: (context, snapshot) {
 
-                  // print(snapshot.data);
-                                    
-
                   return ListView.builder(
                     shrinkWrap: true,
                     physics: NeverScrollableScrollPhysics(),
@@ -347,128 +351,152 @@ class _MainPageState extends State<MainPage> {
   int get _taskList => widget.selectedIndex; //TODO: grap from database/navpanel? Change name as well?
   AppDB get db => widget.database;
   // SimpleSelectStatement<Tasks, Task> get currentTabTasks => db.select(db.tasks)..where((tbl) => tbl.listsId.equals(widget.selectedIndex));
-  Future<List<QueryRow>> get currentTabTasks => db.customSelect("SELECT * FROM tasks WHERE lists_id = ?", variables: [Variable.withInt(widget.selectedIndex)], readsFrom: {db.tasks}).get();
+  Future<List<QueryRow>> get currentTabTask => db.customSelect("SELECT * FROM tasks WHERE lists_id = ? AND parent_id IS null", 
+    variables: [
+      Variable.withInt(widget.selectedIndex),
+    ], 
+    readsFrom: {db.tasks}).get();
+  
   
   Map currentTask = {};
+  var currentSubTask;
 
+
+  Future<List<QueryRow>> getSubTasks(int parentId) {
+
+    return db.customSelect("SELECT * from tasks WHERE parent_id = ?",
+    variables: [
+      Variable.withInt(parentId),
+    ],
+    readsFrom: {db.tasks}).get();
+
+  } 
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder(
-      future: currentTabTasks,
-      builder: (context, snapshot) {
-        
-        // print("future builder: ${snapshot.data?[0]}");
-        // print("myday: ${widget.selectedIndex}"); //! should be 2 on "restart"/default
-
-        if (!snapshot.hasData) {
-          return Expanded(
-            child: Container(
-            color: Colors.black,
-            child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.stretch,
+    return Expanded(
+      child: Row(
+        children: [
+          Expanded(
+            child: RightSidePanel(
+              database: widget.database,
+              bgColorPanel: Colors.black,
+              sidePanelWidth: null,
+              topBar: Column(
                 children: [
-                  Center(
-                    child: SizedBox(
-                      width: 30,
-                      height: 30,
-                      child: CircularProgressIndicator(
-                        color: Colors.white,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          );
-        }
-
-        return Expanded(
-          child: Row(
-            children: [
-              Expanded(
-                child: RightSidePanel(
-                  database: widget.database,
-                  bgColorPanel: Colors.black,
-                  sidePanelWidth: null,
-                  topBar: Column(
+                  Row(
                     children: [
-                      Row(
-                        children: [
-                          Icon(Icons.home),
-                          Text("Main Page ${widget.selectedIndex}"),
-                          Spacer(),
-                          Icon(Icons.swap_vert),
-                          Icon(Icons.lightbulb),
-                          DropdownButton2(
-                            customButton: const Icon(
-                              Icons.more_vert
-                              ),
-                            onChanged: (value) {
-                              
+                      Icon(Icons.home),
+                      Text("Main Page ${widget.selectedIndex}"),
+                      Spacer(),
+                      Icon(Icons.swap_vert),
+                      Icon(Icons.lightbulb),
+                      DropdownButton2(
+                        customButton: const Icon(
+                          Icons.more_vert
+                          ),
+                        onChanged: (value) {
+                          
+                        },
+                        items: [
+                          DropdownMenuItem(
+                            onTap: () {
+                              setState(() {
+                                //TODO: find current todoList id
+                                //TODO: DELETE list from database + update ui
+                                // widget.database.delete();
+                              });
                             },
-                            items: [
-                              DropdownMenuItem(
-                                onTap: () {
-                                  setState(() {
-                                    //TODO: find current todoList id
-                                    //TODO: DELETE list from database + update ui
-                                    // widget.database.delete();
-                                  });
-                                },
-                                child: Text("Delete List"),
-                              )
-                            ],
-                            //TODO: Finish the styling
-                            dropdownStyleData: DropdownStyleData(
-                              width: 160,
-                            ),
+                            child: Text("Delete List"),
                           )
                         ],
-                      ),
-                      // Text("Current Date"), //TODO: If it's 'My Day' tab. show this
+                        //TODO: Finish the styling
+                        dropdownStyleData: DropdownStyleData(
+                          width: 160,
+                        ),
+                      )
                     ],
                   ),
-                  bottomBar: AddTask(
-                    onSubmitted: (value) {
-                      setState(() {
-                        // _taskList += 1;
-                        
-                        db.customInsert("INSERT INTO tasks(lists_id, title, position) VALUES (?, ?, ?)", 
-                        variables: [
-                          Variable.withInt(widget.selectedIndex), 
-                          Variable.withString(value), 
-                          Variable.withInt(0)
-                        ]);
-        
-                        //TODO: Make UI changes then update database or update database then change ui.
-                      });
-                    },
-                  ),
-                  child: Material(
+                  // Text("Current Date"), //TODO: If it's 'My Day' tab. show this
+                ],
+              ),
+              bottomBar: AddTask(
+                onSubmitted: (value) {
+                  setState(() {
+                    // _taskList += 1;
+                    
+                    db.customInsert("INSERT INTO tasks(lists_id, title, position) VALUES (?, ?, ?)", 
+                    variables: [
+                      Variable.withInt(widget.selectedIndex), 
+                      Variable.withString(value), 
+                      Variable.withInt(0)
+                    ]);
+    
+                    //TODO: Make UI changes then update database or update database then change ui.
+                  });
+                },
+              ),
+              child: FutureBuilder(
+                future: currentTabTask,
+                builder: (context, snapshot) {
+                  
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                          return Center(child: CircularProgressIndicator());
+                  }
+
+                  if (snapshot.hasError) {
+                    return Center(
+                      child: Text(
+                        "Error: ${snapshot.error}",
+                        style: TextStyle(
+                          color: Colors.white,
+                        ),
+                        ),
+                    );
+                  }
+
+                  final data = snapshot.data ?? [];
+                  if (data.isEmpty) {
+                    return Center(
+                      child: Text(
+                        "No tasks found. Add tasks to the list!",
+                        style: TextStyle(
+                          color: Colors.white,
+                        ),
+                        ),
+                    );
+                  }
+
+                  return Material(
                     type: MaterialType.transparency,
                     child: ListView.separated(
-                      itemCount: snapshot.data?.length ?? 0,
+                      itemCount: snapshot.data!.length,
                       itemBuilder: (context, index) {
-
+                      
+                        //! Need a if/else statement to filter out subtasks.
                         final task = snapshot.data![index].data;
                         final taskTitle = task["title"];
-                        // print(task);
+                        // print("Listview(TASKS) $task");
                         // print(taskTitle);
+                      
 
+                      
                         return ListTile(
                           tileColor: Colors.grey.shade900,
                           hoverColor: Colors.grey.shade800,
                           splashColor: Colors.transparent,
                           // title: Text("Task $index"),
                           title: Text(taskTitle),
-                          onTap: () {
+                          onTap: () async {
+                      
+                            currentSubTask = await getSubTasks(task["id"]);
+                      
                             setState(() {
                               // TODO: if showpanel true and tap again > close showpanel else if different task tap change taskinfo
                               // if (showPanel == true && index == )
                               currentTask = task;
                               showPanel = !showPanel;
+                      
                             });
                           },
                         );
@@ -477,29 +505,30 @@ class _MainPageState extends State<MainPage> {
                         return SizedBox(height: 8,);
                       },
                     ),
-                  ),
-                ),
+                  );
+                }
               ),
-              //TODO: Maybe move this to parent Widget(MAIN). WHy? Because I need to hide this when I open a new "Tab"/List
-              RightSidePanel2(
-                task: currentTask, 
-                showPanel: showPanel,
-                btnHidePanel: () {
-                  setState(() {
-                    showPanel = false;
-                  });
-                },
-                deleteTask: () {
-                  // widget.database.into(widget.database.tasks);
-        
-                },
-              ),
-              //MARK: Suggestion Panel
-              //TODO: Suggetsion Panel -- Move to parent widget(MAIN)?
-            ],
+            ),
           ),
-        );
-      }
+          //TODO: Maybe move this to parent Widget(MAIN). WHy? Because I need to hide this when I open a new "Tab"/List
+          RightSidePanel2(
+            task: currentTask, 
+            subTask: currentSubTask,
+            showPanel: showPanel,
+            btnHidePanel: () {
+              setState(() {
+                showPanel = false;
+              });
+            },
+            deleteTask: () {
+              // widget.database.into(widget.database.tasks);
+    
+            },
+          ),
+          //MARK: Suggestion Panel
+          //TODO: Suggetsion Panel -- Move to parent widget(MAIN)?
+        ],
+      ),
     );
   }
 }
