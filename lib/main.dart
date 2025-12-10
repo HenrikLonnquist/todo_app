@@ -194,6 +194,7 @@ class _NavigationPanel2State extends State<NavigationPanel2> {
 
   //TODO: grap database todoLists
   AppDB get db => widget.database;
+
   void get_Lists() async {
 
     final query = await db.select(db.todoLists).get();
@@ -287,7 +288,8 @@ class _NavigationPanel2State extends State<NavigationPanel2> {
               ),
               Divider(),
               //MARK: User Lists
-              //TODO: Change to a StreamBuilder
+              //TODO: Change to a StreamBuilder or FutureBuilder(?, same as in Main Page Class)
+              //TODO: Look up how to use StreamBUilder.
               //! Loading too fast? Need to wait for the get_lists function to grap first before loading.
               //TODO: If !snapshot.hasData > progress indicator else.
               // if (snapshot.hasData) CircularProgressIndicator(color: Colors.white), //! Works but needs a stream to track.
@@ -376,6 +378,8 @@ class _MainPageState extends State<MainPage> {
 
   } 
 
+  //TODO: Task-tile is flickers when pressed.
+
   @override
   Widget build(BuildContext context) {
     return Expanded(
@@ -395,6 +399,7 @@ class _MainPageState extends State<MainPage> {
                       Spacer(),
                       Icon(Icons.swap_vert),
                       Icon(Icons.lightbulb),
+                      //! Very slow, how can I fix it?
                       DropdownButton2(
                         customButton: const Icon(
                           Icons.more_vert
@@ -497,9 +502,16 @@ class _MainPageState extends State<MainPage> {
                       
                             setState(() {
                               // TODO: if showpanel true and tap again > close showpanel else if different task tap change taskinfo
-                              // if (showPanel == true && index == )
+                              
+                              if (showPanel == true && currentTask["id"] == task["id"]) {
+                                showPanel = false;
+                              }
+                              else {
+                                showPanel = true;
+                                
+                              }
                               currentTask = task;
-                              showPanel = !showPanel;
+                              
                       
                             });
                           },
