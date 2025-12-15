@@ -159,6 +159,7 @@ class _RightSidePanel2State extends State<RightSidePanel2> {
       ),
       child: TaskInfo(
         task: widget.task,
+        subTask: widget.subTask,
       ),
     );
   }
@@ -365,7 +366,7 @@ class _MainPageState extends State<MainPage> {
   
   
   Map currentTask = {};
-  var currentSubTask;
+  List currentSubTask = [];
 
 
   Future<List<QueryRow>> getSubTasks(int parentId) {
@@ -379,6 +380,8 @@ class _MainPageState extends State<MainPage> {
   } 
 
   //TODO: Task-tile is flickers when pressed.
+  //! could be because of the refreshing the UI from setstate. Which means I might need to 
+  //! separate from them to only refresh that class. Can't be in the same class/widget.
 
   @override
   Widget build(BuildContext context) {
@@ -482,7 +485,7 @@ class _MainPageState extends State<MainPage> {
                       itemCount: snapshot.data!.length,
                       itemBuilder: (context, index) {
                       
-                        //! Need a if/else statement to filter out subtasks.
+                        // TODO: Need a if/else statement to filter out subtasks.
                         final task = snapshot.data![index].data;
                         final taskTitle = task["title"];
                         // print("Listview(TASKS) $task");
@@ -494,11 +497,10 @@ class _MainPageState extends State<MainPage> {
                           tileColor: Colors.grey.shade900,
                           hoverColor: Colors.grey.shade800,
                           splashColor: Colors.transparent,
-                          // title: Text("Task $index"),
                           title: Text(taskTitle),
                           onTap: () async {
                       
-                            currentSubTask = await getSubTasks(task["id"]);
+                            currentSubTask = await getSubTasks(task["id"]); //! Is this bad? Why is it bad?
                       
                             setState(() {
                               // TODO: if showpanel true and tap again > close showpanel else if different task tap change taskinfo
