@@ -81,9 +81,11 @@ class TaskInfo extends StatefulWidget {
   const TaskInfo({
     super.key, 
     required this.task,
+    this.subTask,
   });
 
   final Map task;
+  final List? subTask;
 
   @override
   State<TaskInfo> createState() => _TaskInfoState();
@@ -93,7 +95,11 @@ class _TaskInfoState extends State<TaskInfo> {
 
   Map get task => widget.task;
 
+  List? get subTask => widget.subTask;
+
   bool get isChecked => task["is_done"] == 0 ? false : true;
+
+  TextStyle subTaskTextStyle = TextStyle(color: Colors.white.withValues(alpha: 0.5));
 
   @override
   Widget build(BuildContext context) {
@@ -101,7 +107,7 @@ class _TaskInfoState extends State<TaskInfo> {
     //TODO: Need to send over subtasks aswell if there is any.
     
     // print("same: $task"); //! Seems to be printing twice for some reason. Look into it.
-
+    print("subtask: $subTask");
 
     return SingleChildScrollView(
       child: Material(
@@ -142,38 +148,53 @@ class _TaskInfoState extends State<TaskInfo> {
             //TODO: is there any sub tasks > populate
             // db.subtask > 0 ? : 
             // !What is this? Is it to populate the subtask ui after?
+            if (subTask == null) 
             ListView.builder(
               shrinkWrap: true,
               physics: NeverScrollableScrollPhysics(),
               itemCount: 1,
               itemBuilder: (context, index) {
                 return ListTile(
-                  title: Text("tesing"),
+                  splashColor: Colors.transparent,
+                  tileColor: Colors.grey.shade800.withValues(alpha: 0.2),
+                  // hoverColor: Colors.grey.shade800,
+                  leading: Checkbox(
+                    value: isChecked,
+                    onChanged: (value){
+                      setState(() {
+                        // isChecked = !isChecked;
+                      });
+                    },
+                  ),
+                  title: TitleField(
+                    textSize: 20,
+                    //TODO: Change color of the checkbox, to white
+                    labelText: "Add step",
+                    completed: false, // TODO: needs to be"connected" with isChecked variable
+                    inputValue: "subtest", //If no subtask >
+                    onChange: (value) {
+                      //TODO: update database and update listview.builder above - itemcount
+                    },
+                  ),
                 );
               },
             ),
             ListTile(
               splashColor: Colors.transparent,
               tileColor: Colors.grey.shade800.withValues(alpha: 0.2),
-              // hoverColor: Colors.grey.shade800,
-              leading: Checkbox(
-                value: isChecked,
-                onChanged: (value){
-                  setState(() {
-                    // isChecked = !isChecked;
-                  });
-                },
-              ),
-              title: TitleField(
-                textSize: 20,
-                //TODO: Change color of the checkbox, to white
-                labelText: "Add step",
-                completed: false, // TODO: needs to be"connected" with isChecked variable
-                inputValue: "subtest", //If no subtask >
-                onChange: (value) {
-                  //TODO: update database and update listview.builder above - itemcount
-                },
-              ),
+              title: subTask!.isEmpty ? Text("Add step", style: subTaskTextStyle) : Text("Next Step", style: subTaskTextStyle,), //! Titlefield - take from above in listview
+              leading: Icon(Icons.add),
+              onTap: () {
+                setState(() {
+                  //Adding new subtask -> Update ui
+                  //Later(maybe, see first time):Probably a variable change and make it separate(new class) so that I dont change/refresh the entire widget.
+
+                  //  newSubTask = true;
+
+                  
+
+                });
+              },
             ),
             SizedBox(height: 10),
             ListTile(
