@@ -1,5 +1,6 @@
 // ignore_for_file: avoid_print
 
+import 'package:drift/drift.dart' hide Column;
 import 'package:flutter/material.dart';
 import 'package:todo_app/components/task_list.dart';
 import 'package:todo_app/components/title_field.dart';
@@ -99,7 +100,22 @@ class _TaskInfoState extends State<TaskInfo> {
 
   bool get isChecked => task["is_done"] == 0 ? false : true;
 
-  TextStyle subTaskTextStyle = TextStyle(color: Colors.white.withValues(alpha: 0.5));
+  TextStyle subTaskTextStyle = TextStyle(
+    color: Colors.white.withValues(alpha: 0.5), 
+    fontSize: 15
+  );
+
+  bool inputNewSubTask = false;
+
+  TitleField taskTitle = TitleField(
+    textSize: 20,
+    fontWeight: FontWeight.bold,
+    completed: false,
+    // inputValue: subTask ?? "Add step",
+    onChange: (value) {
+      //TODO: update database
+    },
+  );
 
   @override
   Widget build(BuildContext context) {
@@ -158,6 +174,8 @@ class _TaskInfoState extends State<TaskInfo> {
                   splashColor: Colors.transparent,
                   tileColor: Colors.grey.shade800.withValues(alpha: 0.2),
                   // hoverColor: Colors.grey.shade800,
+                  //TODO: Change color of the checkbox, to white
+                  //! might not need this. maybe Do this in titleField.
                   leading: Checkbox(
                     value: isChecked,
                     onChanged: (value){
@@ -168,9 +186,8 @@ class _TaskInfoState extends State<TaskInfo> {
                   ),
                   title: TitleField(
                     textSize: 20,
-                    //TODO: Change color of the checkbox, to white
-                    labelText: "Add step",
-                    completed: false, // TODO: needs to be"connected" with isChecked variable
+                    labelText: "Add step", //TODO: this should be subTask["title"]
+                    completed: false, // TODO: needs to be "connected" with isChecked variable
                     inputValue: "subtest", //If no subtask >
                     onChange: (value) {
                       //TODO: update database and update listview.builder above - itemcount
@@ -182,19 +199,22 @@ class _TaskInfoState extends State<TaskInfo> {
             ListTile(
               splashColor: Colors.transparent,
               tileColor: Colors.grey.shade800.withValues(alpha: 0.2),
-              title: subTask!.isEmpty ? Text("Add step", style: subTaskTextStyle) : Text("Next Step", style: subTaskTextStyle,), //! Titlefield - take from above in listview
-              leading: Icon(Icons.add),
-              onTap: () {
-                setState(() {
-                  //Adding new subtask -> Update ui
-                  //Later(maybe, see first time):Probably a variable change and make it separate(new class) so that I dont change/refresh the entire widget.
-
-                  //  newSubTask = true;
-
-                  
-
-                });
-              },
+              leading: Icon(Icons.add, size: 25), //TODO: Change to a diffrent icon when inputting new task
+              title: TitleField(
+                textSize: 15,
+                // inputValue: subTask["title"],
+                labelText: "Add step",
+                labelStyle: TextStyle(
+                  color: Colors.white.withValues(alpha: 0.5), 
+                  fontSize: 15
+                  ),
+                onChange: (value) {
+                  //TODO: add to database + update ui
+                },
+                // inputValue: subTask!.isEmpty ? "Add step" : "Next Step"
+              ),
+              // title: inputNewSubTask ? taskTitle :
+              //   subTask!.isEmpty ? Text("Add step", style: subTaskTextStyle) : Text("Next Step", style: subTaskTextStyle,), //! Titlefield - take from above in listview
             ),
             SizedBox(height: 10),
             ListTile(
