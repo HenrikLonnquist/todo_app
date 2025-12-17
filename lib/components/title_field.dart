@@ -10,8 +10,9 @@ class TitleField extends StatefulWidget {
     this.inputValue = "",
     this.completed = false,
     this.textSize = 26,
-    this.labelText,
     this.fontWeight,
+    this.labelText,
+    this.labelStyle,
   });
 
   final bool enabled;
@@ -20,6 +21,7 @@ class TitleField extends StatefulWidget {
   final bool completed;
   final double textSize;
   final String? labelText;
+  final TextStyle? labelStyle;
   final FontWeight? fontWeight;
 
   @override
@@ -56,8 +58,9 @@ class _TitleFieldState extends State<TitleField> {
         cursorColor: Colors.white,
         decoration: InputDecoration(
           border: InputBorder.none,
-          isDense: true,
+          isCollapsed: true, //This fixed the gap above input line from labeltext
           labelText: widget.inputValue == "" ? widget.labelText : null,
+          labelStyle: widget.labelStyle,
           floatingLabelBehavior: FloatingLabelBehavior.never,
         ),
       ),
