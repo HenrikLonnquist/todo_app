@@ -144,7 +144,7 @@ class _TaskInfoState extends State<TaskInfo> {
               tileColor: Colors.grey.shade800.withValues(alpha: 0.2),
               // hoverColor: Colors.grey.shade800,
               leading: Checkbox(
-                value: isChecked,
+                value: task["is_done"] == 0 ? false : true,
                 //TODO: Change color of the checkbox, to white
                 onChanged: (value){
                   setState(() {
