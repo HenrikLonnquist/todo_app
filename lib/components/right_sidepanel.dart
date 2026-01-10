@@ -2,6 +2,7 @@
 
 import 'package:drift/drift.dart' hide Column;
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:todo_app/components/task_list.dart';
 import 'package:todo_app/components/title_field.dart';
 import 'package:todo_app/database.dart';
@@ -17,7 +18,7 @@ class RightSidePanel extends StatelessWidget {
     this.child, 
     this.show = true,
     this.sidePanelWidth = 340,
-    this.database,
+    // this.database,
     this.padding,
     this.bottomPadding,
     // this.topBarColor = const Color(0xffffffff),
@@ -31,7 +32,7 @@ class RightSidePanel extends StatelessWidget {
   final Widget? bottomBar;
   final Widget? topBar;
   final double? sidePanelWidth;
-  final AppDB? database;
+  // final AppDB? database;
   final EdgeInsetsGeometry? padding;
   final EdgeInsetsGeometry? bottomPadding;
   final Color? topBarColor;
@@ -153,7 +154,9 @@ class _TaskInfoState extends State<TaskInfo> {
                     
                     isChecked = value!;
 
-                    widget.task.
+                    final db = context.read<AppDB>();
+
+                    db.customInsert("");
 
                     //TODO: update database
                     // Maybe need to use stream here or something similar. Otherwise I need to call the database "manually" either way.

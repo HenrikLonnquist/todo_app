@@ -11,7 +11,7 @@ import 'package:todo_app/navigation_panel.dart';
 
 
 // TODO: need to make it faster when switching between lists/tabs. Probably because of the loading everytime.
-// TODO: why does the tasks in the database need to have a list id?
+//!Question: why does the tasks in the database need to have a list id?
 // TODO: switch to riverpod later - manually passing to everywidget > riverpod
 
 void main() async {
@@ -29,12 +29,9 @@ class MyApp extends StatelessWidget {
 
   const MyApp({super.key});
 
-
-
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(
@@ -51,9 +48,7 @@ class MyApp extends StatelessWidget {
       ),
       // home: NavigationPanel(database: database),
       //MARK: MAIN?
-      home: ParentPage(
-        database: database,
-      ),
+      home: ParentPage(),
     );
   }
 }
@@ -61,10 +56,7 @@ class MyApp extends StatelessWidget {
 class ParentPage extends StatefulWidget {
   const ParentPage({
     super.key,
-    required this.database,
   });
-
-  final AppDB database;
 
   @override
   State<ParentPage> createState() => _ParentPageState();
@@ -75,7 +67,7 @@ class _ParentPageState extends State<ParentPage> {
   final bool showLeftPanel = true;
   int selectedIndex = 2; 
 
-  AppDB get db => widget.database;
+  AppDB get db => context.read<AppDB>();
 
 
   @override
@@ -85,8 +77,6 @@ class _ParentPageState extends State<ParentPage> {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           NavigationPanel2(
-            //! Better to handle the updates and changes here, no need to send widget.database to it.
-            database: widget.database,
             selectedIndex: selectedIndex,
             handleTabTap: (tabId) {
               //TODo: what tap was pressed and then send the info to mainpage
@@ -107,7 +97,8 @@ class _ParentPageState extends State<ParentPage> {
             },
           ),
           MainPage(
-            database: widget.database, //TODO: replace/change to the current selected NavPanel(list > Myday,Tasks..) 
+            //TODO: replace/change to the current selected NavPanel(list > Myday,Tasks..) 
+            // database: widget.database, 
             selectedIndex: selectedIndex,
           ),
         ]
@@ -175,7 +166,6 @@ class _RightSidePanel2State extends State<RightSidePanel2> {
 class NavigationPanel2 extends StatefulWidget {
   const NavigationPanel2({
     super.key,
-    required this.database,
     required this.currentIndex, 
     required Null Function(int) handleTabTap,
     required this.selectedIndex,
@@ -183,8 +173,6 @@ class NavigationPanel2 extends StatefulWidget {
 
   final int selectedIndex;
   final Function(int) currentIndex;
-
-  final AppDB database;
 
   @override
   State<NavigationPanel2> createState() => _NavigationPanel2State();
@@ -199,7 +187,7 @@ class _NavigationPanel2State extends State<NavigationPanel2> {
 
 
   //TODO: grap database todoLists
-  AppDB get db => widget.database;
+  AppDB get db => context.read<AppDB>();
 
   void get_Lists() async {
 
@@ -223,7 +211,7 @@ class _NavigationPanel2State extends State<NavigationPanel2> {
     // get_Lists();
 
     return RightSidePanel(
-      database: widget.database,
+      // database: widget.database,
       show: true, // TODO: have a button if you want to hide/show the panel
       sidePanelWidth: 220,
       padding: null,
@@ -343,12 +331,12 @@ class _NavigationPanel2State extends State<NavigationPanel2> {
 class MainPage extends StatefulWidget {
   const MainPage({
     super.key,
-    required this.database,
+    // required this.database,
     this.onTap,
     required this.selectedIndex,
   });
 
-  final AppDB database;
+  // final AppDB database;
   final Function()? onTap;
   final int selectedIndex;
 
@@ -361,13 +349,18 @@ class _MainPageState extends State<MainPage> {
   bool showPanel = false;
 
   int get _taskList => widget.selectedIndex; //TODO: grap from database/navpanel? Change name as well?
-  AppDB get db => widget.database;
+  // AppDB get db => widget.database;
   // SimpleSelectStatement<Tasks, Task> get currentTabTasks => db.select(db.tasks)..where((tbl) => tbl.listsId.equals(widget.selectedIndex));
-  Future<List<QueryRow>> get currentTabTask => db.customSelect("SELECT * FROM tasks WHERE lists_id = ? AND parent_id IS null", 
+  Future<List<QueryRow>> get currentTabTask {
+    
+    final db = context.read<AppDB>();
+
+    return db.customSelect("SELECT * FROM tasks WHERE lists_id = ? AND parent_id IS null", 
     variables: [
       Variable.withInt(widget.selectedIndex),
     ], 
     readsFrom: {db.tasks}).get();
+  }
   
   
   Map currentTask = {};
@@ -375,6 +368,8 @@ class _MainPageState extends State<MainPage> {
 
 
   Future<List<QueryRow>> getSubTasks(int parentId) {
+
+    final db = context.read<AppDB>();
 
     return db.customSelect("SELECT * from tasks WHERE parent_id = ?",
     variables: [
@@ -395,7 +390,7 @@ class _MainPageState extends State<MainPage> {
         children: [
           Expanded(
             child: RightSidePanel(
-              database: widget.database,
+              // database: widget.database,
               bgColorPanel: Colors.black,
               sidePanelWidth: null,
               topBar: Column(
@@ -441,7 +436,8 @@ class _MainPageState extends State<MainPage> {
                 onSubmitted: (value) {
                   setState(() {
                     // _taskList += 1;
-                    
+                    final db = context.read<AppDB>();
+
                     db.customInsert("INSERT INTO tasks(lists_id, title, position) VALUES (?, ?, ?)", 
                     variables: [
                       Variable.withInt(widget.selectedIndex), 
@@ -449,7 +445,7 @@ class _MainPageState extends State<MainPage> {
                       Variable.withInt(0)
                     ]);
     
-                    //TODO: Make UI changes then update database or update database then change ui.
+                    //TODO: Make UI changes then update database.
                   });
                 },
               ),
