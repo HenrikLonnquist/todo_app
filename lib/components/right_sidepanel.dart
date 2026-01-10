@@ -137,6 +137,8 @@ class _TaskInfoState extends State<TaskInfo> {
                 // Due date
                 // repeat rule
                 // notes
+
+            //MARK: MAIN TASK
             ListTile(
               splashColor: Colors.transparent,
               tileColor: Colors.grey.shade800.withValues(alpha: 0.2),
@@ -158,18 +160,23 @@ class _TaskInfoState extends State<TaskInfo> {
                 inputValue: task["title"] ?? "Failed to grap",
                 onChange: (value) {
                   //TODO: update database
+                  // Now would be a good use of a stream, no? instead of sending the database manually to here.
+                  task["title"] = value;
+                  
                 },
               ),
             ),
             //TODO: is there any sub tasks > populate
             // db.subtask > 0 ? : 
             // !What is this? Is it to populate the subtask ui after?
-            if (subTask == null) 
+            //MARK: SUBTASK
+            if (subTask == null)
             ListView.builder(
               shrinkWrap: true,
               physics: NeverScrollableScrollPhysics(),
               itemCount: 1,
               itemBuilder: (context, index) {
+                //TODO: retrieve sub tasks? or sooner?
                 return ListTile(
                   splashColor: Colors.transparent,
                   tileColor: Colors.grey.shade800.withValues(alpha: 0.2),
@@ -185,8 +192,12 @@ class _TaskInfoState extends State<TaskInfo> {
                     },
                   ),
                   title: TitleField(
-                    textSize: 20,
-                    labelText: "Add step", //TODO: this should be subTask["title"]
+                    textSize: 15,
+                    labelText: "Add step 1", //TODO: this should be subTask["title"]?
+                    labelStyle: TextStyle(
+                      color: Colors.white.withValues(alpha: 0.5),
+                      fontSize: 15,
+                    ),
                     completed: false, // TODO: needs to be "connected" with isChecked variable
                     inputValue: "subtest", //If no subtask >
                     onChange: (value) {
@@ -196,6 +207,7 @@ class _TaskInfoState extends State<TaskInfo> {
                 );
               },
             ),
+            //! Show if there is no subtasks  
             ListTile(
               splashColor: Colors.transparent,
               tileColor: Colors.grey.shade800.withValues(alpha: 0.2),
@@ -209,7 +221,7 @@ class _TaskInfoState extends State<TaskInfo> {
                   fontSize: 15
                   ),
                 onChange: (value) {
-                  //TODO: add to database + update ui
+                  //TODO: add to database + update ui + hide this
                 },
                 // inputValue: subTask!.isEmpty ? "Add step" : "Next Step"
               ),
