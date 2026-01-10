@@ -98,7 +98,7 @@ class _TaskInfoState extends State<TaskInfo> {
 
   List? get subTask => widget.subTask;
 
-  bool get isChecked => task["is_done"] == 0 ? false : true;
+  late bool isChecked;
 
   TextStyle subTaskTextStyle = TextStyle(
     color: Colors.white.withValues(alpha: 0.5), 
@@ -123,7 +123,8 @@ class _TaskInfoState extends State<TaskInfo> {
     //TODO: Need to send over subtasks aswell if there is any.
     
     // print("same: $task"); //! Seems to be printing twice for some reason. Look into it.
-    print("subtask: $subTask");
+    // print("subtask: $subTask");
+    isChecked =  task["is_done"] == 0 ? false : true;
 
     return SingleChildScrollView(
       child: Material(
@@ -144,12 +145,18 @@ class _TaskInfoState extends State<TaskInfo> {
               tileColor: Colors.grey.shade800.withValues(alpha: 0.2),
               // hoverColor: Colors.grey.shade800,
               leading: Checkbox(
-                value: task["is_done"] == 0 ? false : true,
+                value: isChecked,
                 //TODO: Change color of the checkbox, to white
                 onChanged: (value){
-                  setState(() {
+                  print("testing $value");
+                  setState(() async {
+                    
+                    isChecked = value!;
+
+                    widget.task.
+
                     //TODO: update database
-                    // Maybe need to use stream here or something similar. Otherwise I need to call the database either way.
+                    // Maybe need to use stream here or something similar. Otherwise I need to call the database "manually" either way.
                     // isChecked = !isChecked;
                   });
                 },

@@ -3,6 +3,7 @@ import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:provider/provider.dart';
 import 'package:todo_app/components/add_task_field.dart';
 import 'package:todo_app/components/right_sidepanel.dart';
 import 'package:todo_app/database.dart';
@@ -14,15 +15,19 @@ import 'package:todo_app/navigation_panel.dart';
 // TODO: switch to riverpod later - manually passing to everywidget > riverpod
 
 void main() async {
-  final db = AppDB();
-  runApp(MyApp(database: db));
+  runApp(
+    Provider<AppDB>(
+      create: (_) => AppDB(),
+      dispose: (_, db) => db.close(),
+      child: MyApp(),
+    ),
+  );
   
 }
 
 class MyApp extends StatelessWidget {
-  final AppDB database;
 
-  const MyApp({super.key, required this.database});
+  const MyApp({super.key});
 
 
 
