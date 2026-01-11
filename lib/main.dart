@@ -109,20 +109,20 @@ class _ParentPageState extends State<ParentPage> {
 
 
 //MARK: true right sidepanel
-//! Why did I do this?
+//! Why did I do this? I can probably remove this
 //TODO: Can I remove or refactor
 class RightSidePanel2 extends StatefulWidget {
   const RightSidePanel2({
     super.key,
-    required this.task,
-    this.subTask,
+    // required this.task,
+    // this.subTask,
     this.showPanel = false,
     this.btnHidePanel,
     this.deleteTask,
   });
 
-  final Map task;
-  final List? subTask;
+  // final Map task;
+  // final List? subTask;
   final bool showPanel;
   final VoidCallback? btnHidePanel;
   final VoidCallback? deleteTask;
@@ -145,7 +145,7 @@ class _RightSidePanel2State extends State<RightSidePanel2> {
         hidePanel: () {
             widget.btnHidePanel!.call();
               
-            widget.task;
+            // widget.task;
             
         },
         deleteTask: () { 
@@ -153,10 +153,10 @@ class _RightSidePanel2State extends State<RightSidePanel2> {
           widget.deleteTask!.call();
         }
       ),
-      child: TaskInfo(
-        task: widget.task,
-        subTask: widget.subTask,
-      ),
+      // child: TaskInfo(
+      //   // taskId: widget.task, //! Might need to change this to taskId, instead of the entire taskinfo.
+      //   // subTaskId: widget.subTask,
+      // ),
     );
   }
 }
@@ -187,28 +187,29 @@ class _NavigationPanel2State extends State<NavigationPanel2> {
 
 
   //TODO: grap database todoLists
-  AppDB get db => context.read<AppDB>();
+  // AppDB get db => context.read<AppDB>();
 
-  void get_Lists() async {
+  // void get_Lists() async {
 
-    final query = await db.select(db.todoLists).get();
+  //   final query = await db.select(db.todoLists).get();
 
-    //! INSERT, UPDATE, DELETE ---> Use 'custom...'/raw sql | but when SELECT(returning values/graping) use .select drift
-    // db.customStatement("DELETE FROM todo_lists WHERE id = ?", [7]);
+  //   //! INSERT, UPDATE, DELETE ---> Use 'custom...'/raw sql | but when SELECT(returning values/graping) use .select drift
+  //   // db.customStatement("DELETE FROM todo_lists WHERE id = ?", [7]);
 
-    _userListCount = (query.length - 1).abs() ;
-    print(_userListCount);
+  //   _userListCount = (query.length - 1).abs() ;
+  //   print(_userListCount);
 
-    for (final row in query) {
-      print("Has row $row");
-    }
+  //   for (final row in query) {
+  //     print("Has row $row");
+  //   }
 
-  }  
+  // }  
 
   @override
   Widget build(BuildContext context) {
 
     // get_Lists();
+    final db = context.read<AppDB>();
 
     return RightSidePanel(
       // database: widget.database,
@@ -223,8 +224,10 @@ class _NavigationPanel2State extends State<NavigationPanel2> {
           onTap: () {
             //TODO: Have the parent handle this. Or where its called/used.
             //TODO: Create a new user list and add to database
+
             
-              db.into(db.todoLists).insert(TodoListsCompanion.insert(name: Value("Untitled list")));
+            
+            db.into(db.todoLists).insert(TodoListsCompanion.insert(name: Value("Untitled list")));
             
           },
         ),
@@ -283,14 +286,22 @@ class _NavigationPanel2State extends State<NavigationPanel2> {
               Divider(),
               //MARK: User Lists
               //TODO: Change to a StreamBuilder or FutureBuilder(?, same as in Main Page Class)
-              //TODO: Look up how to use StreamBUilder.
               //! Loading too fast? Need to wait for the get_lists function to grap first before loading.
               //TODO: If !snapshot.hasData > progress indicator else.
               // if (snapshot.hasData) CircularProgressIndicator(color: Colors.white), //! Works but needs a stream to track.
               StreamBuilder(
-                // stream: db.select(db.todoLists).watch(),
-                stream: null,
+                stream: db.watchLists(),
                 builder: (context, snapshot) {
+
+                  //TODO: Handle snapshot state cases
+                  if (!snapshot.hasData) {
+                    return const Text("Add a new list", style: TextStyle(color: Colors.white));
+                    // return CircularProgressIndicator();
+                  }
+
+                  if (snapshot.hasError) {
+                    return Text("Error: ${snapshot.error}", style: TextStyle(color: Colors.white));
+                  }
 
                   return ListView.builder(
                     shrinkWrap: true,
@@ -351,33 +362,37 @@ class _MainPageState extends State<MainPage> {
   int get _taskList => widget.selectedIndex; //TODO: grap from database/navpanel? Change name as well?
   // AppDB get db => widget.database;
   // SimpleSelectStatement<Tasks, Task> get currentTabTasks => db.select(db.tasks)..where((tbl) => tbl.listsId.equals(widget.selectedIndex));
-  Future<List<QueryRow>> get currentTabTask {
+  // Future<List<QueryRow>> get currentTabTask {
     
-    final db = context.read<AppDB>();
+  //   final db = context.read<AppDB>();
 
-    return db.customSelect("SELECT * FROM tasks WHERE lists_id = ? AND parent_id IS null", 
-    variables: [
-      Variable.withInt(widget.selectedIndex),
-    ], 
-    readsFrom: {db.tasks}).get();
-  }
+  //   return db.customSelect("SELECT * FROM tasks WHERE lists_id = ? AND parent_id IS null", 
+  //   variables: [
+  //     Variable.withInt(widget.selectedIndex),
+  //   ], 
+  //   readsFrom: {db.tasks}).get();
+  // }
   
   
-  Map currentTask = {};
-  List currentSubTask = [];
+  // Future resetDatabase() async {
+  //   await customStatement;
+  // }
+
+  int currentTask = 0;
+  int? currentSubTask;
 
 
-  Future<List<QueryRow>> getSubTasks(int parentId) {
+  // Future<List<QueryRow>> getSubTasks(int parentId) {
 
-    final db = context.read<AppDB>();
+  //   final db = context.read<AppDB>();
 
-    return db.customSelect("SELECT * from tasks WHERE parent_id = ?",
-    variables: [
-      Variable.withInt(parentId),
-    ],
-    readsFrom: {db.tasks}).get();
+  //   return db.customSelect("SELECT * from tasks WHERE parent_id = ?",
+  //   variables: [
+  //     Variable.withInt(parentId),
+  //   ],
+  //   readsFrom: {db.tasks}).get();
 
-  } 
+  // } 
 
   //TODO: Task-tile is flickers when pressed.
   //! could be because of the refreshing the UI from setstate. Which means I might need to 
@@ -385,12 +400,14 @@ class _MainPageState extends State<MainPage> {
 
   @override
   Widget build(BuildContext context) {
+
+    final db = context.read<AppDB>();
+
     return Expanded(
       child: Row(
         children: [
           Expanded(
             child: RightSidePanel(
-              // database: widget.database,
               bgColorPanel: Colors.black,
               sidePanelWidth: null,
               topBar: Column(
@@ -449,12 +466,22 @@ class _MainPageState extends State<MainPage> {
                   });
                 },
               ),
-              child: FutureBuilder(
-                future: currentTabTask,
+
+              //!! Probaly can remove this or replace this with an streamBuilder. 
+              //!! Same with other methods with Future - that graps from database.
+              child: StreamBuilder(
+                stream: db.watchTasks(),
                 builder: (context, snapshot) {
+
+                  
+
+                  print(snapshot.error);
+                  // print('Connection: ${snapshot.connectionState}');
+                  // print('Has data: ${snapshot.hasData}');
+                  // print('Data: ${snapshot.data}');
                   
                   if (snapshot.connectionState == ConnectionState.waiting) {
-                          return Center(child: CircularProgressIndicator());
+                    return Center(child: CircularProgressIndicator());
                   }
 
                   if (snapshot.hasError) {
@@ -487,11 +514,11 @@ class _MainPageState extends State<MainPage> {
                       itemBuilder: (context, index) {
                       
                         // TODO: Need a if/else statement to filter out subtasks.
-                        final task = snapshot.data![index].data;
-                        final taskTitle = task["title"];
+                        final task = snapshot.data![index];
+                        final taskTitle = task.title;
                         // print("Listview(TASKS) $task");
                         // print(taskTitle);
-                      
+
 
                       
                         return ListTile(
@@ -501,19 +528,20 @@ class _MainPageState extends State<MainPage> {
                           title: Text(taskTitle),
                           onTap: () async {
                       
-                            currentSubTask = await getSubTasks(task["id"]); //! Is this bad? Why is it bad?
+                            // currentSubTask = await getSubTasks(task["id"]); //! Is this bad? Why is it bad?
                       
                             setState(() {
                               // TODO: if showpanel true and tap again > close showpanel else if different task tap change taskinfo
+
                               
-                              if (showPanel == true && currentTask["id"] == task["id"]) {
+                              if (showPanel == true && currentTask == task.id) {
                                 showPanel = false;
                               }
                               else {
                                 showPanel = true;
                                 
                               }
-                              currentTask = task;
+                              currentTask = task.id;
                               
                       
                             });
@@ -529,21 +557,41 @@ class _MainPageState extends State<MainPage> {
               ),
             ),
           ),
-          //TODO: Maybe move this to parent Widget(MAIN). WHy? Because I need to hide this when I open a new "Tab"/List
-          RightSidePanel2(
-            task: currentTask, 
-            subTask: currentSubTask,
-            showPanel: showPanel,
-            btnHidePanel: () {
-              setState(() {
-                showPanel = false;
-              });
-            },
-            deleteTask: () {
-              // widget.database.into(widget.database.tasks);
-    
-            },
+          RightSidePanel(
+            show: showPanel,
+            sidePanelWidth: 340,
+            bottomBar: PanelBottomBar( //! Do I need this to be a separate widget? Probably not
+              hidePanel: () {
+                  // widget.btnHidePanel!.call();
+                    
+                  // widget.task;
+                  
+              },
+              deleteTask: () { 
+                //! Maybe remove this and just do this inside the file/widget, no need for a parameter.
+                // widget.deleteTask!.call();
+              }
+            ),
+            child: TaskInfo(
+              taskId: currentTask, //! Might need to change this to taskId, instead of the entire taskinfo.
+              subTaskId: currentSubTask,
+            ),
           ),
+          //TODO: Maybe move this to parent Widget(MAIN). WHy? Because I need to hide this when I open a new "Tab"/List
+          // RightSidePanel2(
+          //   // task: currentTask, 
+          //   // subTask: currentSubTask,
+          //   showPanel: showPanel,
+          //   btnHidePanel: () {
+          //     setState(() {
+          //       showPanel = false;
+          //     });
+          //   },
+          //   deleteTask: () {
+          //     // widget.database.into(widget.database.tasks);
+    
+          //   },
+          // ),
           //MARK: Suggestion Panel
           //TODO: Suggetsion Panel -- Move to parent widget(MAIN)?
         ],

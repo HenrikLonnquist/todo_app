@@ -82,12 +82,12 @@ class RightSidePanel extends StatelessWidget {
 class TaskInfo extends StatefulWidget {
   const TaskInfo({
     super.key, 
-    required this.task,
-    this.subTask,
+    required this.taskId,
+    this.subTaskId,
   });
 
-  final Map task;
-  final List? subTask;
+  final int taskId;
+  final int? subTaskId;
 
   @override
   State<TaskInfo> createState() => _TaskInfoState();
@@ -95,9 +95,9 @@ class TaskInfo extends StatefulWidget {
 
 class _TaskInfoState extends State<TaskInfo> {
 
-  Map get task => widget.task;
+  int get taskId => widget.taskId;
 
-  List? get subTask => widget.subTask;
+  int? get subTaskId => widget.subTaskId;
 
   bool isChecked = false;
 
@@ -126,147 +126,159 @@ class _TaskInfoState extends State<TaskInfo> {
     
     // print("same: $task"); //! Seems to be printing twice for some reason. Look into it.
     // print("subtask: $subTask");
-    
+    final db = context.read<AppDB>();
 
-    return SingleChildScrollView(
-      child: Material(
-        type: MaterialType.transparency,
-        child: Column(
-          children: [
-            //TODO:
-                // subtasks
-                // button for adding to 'My Day' list
-                // reminder
-                // Due date
-                // repeat rule
-                // notes
+    return StreamBuilder(
+      stream: db.watchTaskById(taskId),
+      builder: (context, snapshot) {
 
-            //MARK: MAIN TASK
-            ListTile(
-              splashColor: Colors.transparent,
-              tileColor: Colors.grey.shade800.withValues(alpha: 0.2),
-              // hoverColor: Colors.grey.shade800,
-              leading: Checkbox(
-                //! UI is not reacting after changes, there is no rebuild. That is because
-                //! there is no 'streambuilder' and 'db.watch()'/stream. Check out gipity(Modify Database..)
-                value: task["is_done"] == 0,
-                //TODO: Change color of the checkbox, to white
-                onChanged: (value) async   {
-                  final db = context.read<AppDB>();
-                  final int isDone = value! == true ? 1 : 0; 
+        print('Connection: ${snapshot.connectionState}');
+        print('Has data: ${snapshot.hasData}');
+        print('Data: ${snapshot.data}');
 
-                  // isChecked = value;
-                  
-                  db.customUpdate("UPDATE tasks SET is_done = ? WHERE id = ?",
-                  variables: [
-                    Variable<int>(isDone), 
-                    Variable<int>(task["id"]),
-                  ],
-                  updates: {db.tasks}
-                  );
-                  
-                },
-              ),
-              title: TitleField(
-                fontWeight: FontWeight.bold,
-                completed: false,
-                inputValue: task["title"] ?? "Failed to grap",
-                onChange: (value) {
-                  //TODO: update database
-                  // Now would be a good use of a stream, no? instead of sending the database manually to here.
-                  task["title"] = value;
-                  
-                },
-              ),
-            ),
-            //TODO: is there any sub tasks > populate
-            // db.subtask > 0 ? : 
-            // !What is this? Is it to populate the subtask ui after?
-            //MARK: SUBTASK
-            if (subTask == null)
-            ListView.builder(
-              shrinkWrap: true,
-              physics: NeverScrollableScrollPhysics(),
-              itemCount: 1,
-              itemBuilder: (context, index) {
-                //TODO: retrieve sub tasks? or sooner?
-                return ListTile(
+        if (!snapshot.hasData) {
+          return CircularProgressIndicator();
+        }
+
+        final task = snapshot.data!;
+        print("hello: $task");
+        
+
+        return SingleChildScrollView(
+          child: Material(
+            type: MaterialType.transparency,
+            child: Column(
+              children: [
+                //TODO:
+                    // subtasks
+                    // button for adding to 'My Day' list
+                    // reminder
+                    // Due date
+                    // repeat rule
+                    // notes
+        
+                //MARK: MAIN TASK NAME
+                ListTile(
                   splashColor: Colors.transparent,
                   tileColor: Colors.grey.shade800.withValues(alpha: 0.2),
                   // hoverColor: Colors.grey.shade800,
-                  //TODO: Change color of the checkbox, to white
-                  //! might not need this. maybe Do this in titleField.
                   leading: Checkbox(
-                    value: isChecked,
-                    onChanged: (value){
-                      setState(() {
-                        // isChecked = !isChecked;
-                      });
+                    //! UI is not reacting after changes, there is no rebuild. That is because
+                    //! there is no 'streambuilder' and 'db.watch()'/stream. Check out gipity(Modify Database..)
+                    value: true,
+                    //TODO: Change color of the checkbox, to white
+                    onChanged: (value) {
+                      // isChecked = value;
+
+                      if (value != null) {
+                        db.updateTaskDone(taskId, value);
+                      }
+
+                      
                     },
                   ),
                   title: TitleField(
-                    textSize: 15,
-                    labelText: "Add step 1", //TODO: this should be subTask["title"]?
-                    labelStyle: TextStyle(
-                      color: Colors.white.withValues(alpha: 0.5),
-                      fontSize: 15,
-                    ),
-                    completed: false, // TODO: needs to be "connected" with isChecked variable
-                    inputValue: "subtest", //If no subtask >
+                    fontWeight: FontWeight.bold,
+                    completed: false,
+                    // inputValue: task["title"] ?? "Failed to grap",
                     onChange: (value) {
-                      //TODO: update database and update listview.builder above - itemcount
+                      //TODO: update database
+                      // Now would be a good use of a stream, no? instead of sending the database manually to here.
+                      // task["title"] = value;
+                      
                     },
                   ),
-                );
-              },
-            ),
-            //! Show if there is no subtasks  
-            ListTile(
-              splashColor: Colors.transparent,
-              tileColor: Colors.grey.shade800.withValues(alpha: 0.2),
-              leading: Icon(Icons.add, size: 25), //TODO: Change to a diffrent icon when inputting new task
-              title: TitleField(
-                textSize: 15,
-                // inputValue: subTask["title"],
-                labelText: "Add step",
-                labelStyle: TextStyle(
-                  color: Colors.white.withValues(alpha: 0.5), 
-                  fontSize: 15
+                ),
+                //TODO: is there any sub tasks > populate
+                // db.subtask > 0 ? : 
+                // !What is this? Is it to populate the subtask ui after?
+                //MARK: SUBTASK
+                if (subTaskId == null)
+                ListView.builder(
+                  shrinkWrap: true,
+                  physics: NeverScrollableScrollPhysics(),
+                  itemCount: 1,
+                  itemBuilder: (context, index) {
+                    //TODO: retrieve sub tasks? or sooner?
+                    return ListTile(
+                      splashColor: Colors.transparent,
+                      tileColor: Colors.grey.shade800.withValues(alpha: 0.2),
+                      // hoverColor: Colors.grey.shade800,
+                      //TODO: Change color of the checkbox, to white
+                      //! might not need this. maybe Do this in titleField.
+                      leading: Checkbox(
+                        value: isChecked,
+                        onChanged: (value){
+                          setState(() {
+                            // isChecked = !isChecked;
+                          });
+                        },
+                      ),
+                      title: TitleField(
+                        textSize: 15,
+                        labelText: "Add step 1", //TODO: this should be subTask["title"]?
+                        labelStyle: TextStyle(
+                          color: Colors.white.withValues(alpha: 0.5),
+                          fontSize: 15,
+                        ),
+                        completed: false, // TODO: needs to be "connected" with isChecked variable
+                        inputValue: "subtest", //If no subtask >
+                        onChange: (value) {
+                          //TODO: update database and update listview.builder above - itemcount
+                        },
+                      ),
+                    );
+                  },
+                ),
+                //! Show if there is no subtasks  
+                ListTile(
+                  splashColor: Colors.transparent,
+                  tileColor: Colors.grey.shade800.withValues(alpha: 0.2),
+                  leading: Icon(Icons.add, size: 25), //TODO: Change to a diffrent icon when inputting new task
+                  title: TitleField(
+                    textSize: 15,
+                    // inputValue: subTask["title"],
+                    labelText: "Add step",
+                    labelStyle: TextStyle(
+                      color: Colors.white.withValues(alpha: 0.5), 
+                      fontSize: 15
+                      ),
+                    onChange: (value) {
+                      //TODO: add to database + update ui + hide this
+                    },
+                    // inputValue: subTask!.isEmpty ? "Add step" : "Next Step"
                   ),
-                onChange: (value) {
-                  //TODO: add to database + update ui + hide this
-                },
-                // inputValue: subTask!.isEmpty ? "Add step" : "Next Step"
-              ),
-              // title: inputNewSubTask ? taskTitle :
-              //   subTask!.isEmpty ? Text("Add step", style: subTaskTextStyle) : Text("Next Step", style: subTaskTextStyle,), //! Titlefield - take from above in listview
+                  // title: inputNewSubTask ? taskTitle :
+                  //   subTask!.isEmpty ? Text("Add step", style: subTaskTextStyle) : Text("Next Step", style: subTaskTextStyle,), //! Titlefield - take from above in listview
+                ),
+                SizedBox(height: 10),
+                ListTile(
+                  title:Text("Add to My Day"),
+                  tileColor: Colors.grey.shade800.withValues(alpha: 0.2),
+                ),
+                SizedBox(height: 10),
+                ListTile(
+                  title:Text("Remind Me"),
+                  tileColor: Colors.grey.shade800.withValues(alpha: 0.2),
+                ),
+                ListTile(
+                  title:Text("Due Date"),
+                  tileColor: Colors.grey.shade800.withValues(alpha: 0.2),
+                ),
+                ListTile(
+                  title:Text("Repeat"),
+                  tileColor: Colors.grey.shade800.withValues(alpha: 0.2),
+                ),
+                SizedBox(height: 10,),
+                ListTile(
+                  title:Text("Notes"),
+                  tileColor: Colors.grey.shade800.withValues(alpha: 0.2),
+                ),
+              ]
             ),
-            SizedBox(height: 10),
-            ListTile(
-              title:Text("Add to My Day"),
-              tileColor: Colors.grey.shade800.withValues(alpha: 0.2),
-            ),
-            SizedBox(height: 10),
-            ListTile(
-              title:Text("Remind Me"),
-              tileColor: Colors.grey.shade800.withValues(alpha: 0.2),
-            ),
-            ListTile(
-              title:Text("Due Date"),
-              tileColor: Colors.grey.shade800.withValues(alpha: 0.2),
-            ),
-            ListTile(
-              title:Text("Repeat"),
-              tileColor: Colors.grey.shade800.withValues(alpha: 0.2),
-            ),
-            SizedBox(height: 10,),
-            ListTile(
-              title:Text("Notes"),
-              tileColor: Colors.grey.shade800.withValues(alpha: 0.2),
-            ),
-          ]
-        ),
-      ),
+          ),
+        );
+      }
     );
   }
 }

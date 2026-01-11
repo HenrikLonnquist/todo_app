@@ -7,15 +7,36 @@ import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as p;
 
 
-
-
 part 'database.g.dart';
 
 @DriftDatabase(
   include: {'tables.drift'}
 )
-class AppDB extends _$AppDb{
+class AppDB extends _$AppDB{
   AppDB() : super(_openConnection());
+
+  Stream<List<TodoList>> watchLists() {
+    return select(todoLists).watch();
+  }
+
+  //! What to do you call these? Just methods? Maybe ask gipity - Check chat = Modify database... or Flutter Data...
+  Stream<List<Task>> watchTasks() {
+    return select(tasks).watch();
+  }
+
+  Stream<Task?> watchTaskById(int id) {
+    return (select(tasks)..where((t) => t.id.equals(id))).watchSingleOrNull();
+  }
+
+  Future<void> updateTaskDone(int id, bool done) {
+    return customUpdate("UPDATE tasks SET is_done = ? WHERE id = ?",
+    variables: [
+      Variable<int>(done ? 1 : 0),
+      Variable<int>(id),
+    ],
+    updates: {tasks}
+    );
+  }
 
   @override
   int get schemaVersion => 1;

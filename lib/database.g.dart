@@ -958,9 +958,9 @@ class TaskHistoryCompanion extends UpdateCompanion<TaskHistoryData> {
   }
 }
 
-abstract class _$AppDb extends GeneratedDatabase {
-  _$AppDb(QueryExecutor e) : super(e);
-  $AppDbManager get managers => $AppDbManager(this);
+abstract class _$AppDB extends GeneratedDatabase {
+  _$AppDB(QueryExecutor e) : super(e);
+  $AppDBManager get managers => $AppDBManager(this);
   late final TodoLists todoLists = TodoLists(this);
   late final Tasks tasks = Tasks(this);
   late final TaskHistory taskHistory = TaskHistory(this);
@@ -1001,10 +1001,10 @@ typedef $TodoListsUpdateCompanionBuilder = TodoListsCompanion Function({
 });
 
 final class $TodoListsReferences
-    extends BaseReferences<_$AppDb, TodoLists, TodoList> {
+    extends BaseReferences<_$AppDB, TodoLists, TodoList> {
   $TodoListsReferences(super.$_db, super.$_table, super.$_typedResult);
 
-  static MultiTypedResultKey<Tasks, List<Task>> _tasksRefsTable(_$AppDb db) =>
+  static MultiTypedResultKey<Tasks, List<Task>> _tasksRefsTable(_$AppDB db) =>
       MultiTypedResultKey.fromTable(db.tasks,
           aliasName: $_aliasNameGenerator(db.todoLists.id, db.tasks.listsId));
 
@@ -1018,7 +1018,7 @@ final class $TodoListsReferences
   }
 }
 
-class $TodoListsFilterComposer extends Composer<_$AppDb, TodoLists> {
+class $TodoListsFilterComposer extends Composer<_$AppDB, TodoLists> {
   $TodoListsFilterComposer({
     required super.$db,
     required super.$table,
@@ -1054,7 +1054,7 @@ class $TodoListsFilterComposer extends Composer<_$AppDb, TodoLists> {
   }
 }
 
-class $TodoListsOrderingComposer extends Composer<_$AppDb, TodoLists> {
+class $TodoListsOrderingComposer extends Composer<_$AppDB, TodoLists> {
   $TodoListsOrderingComposer({
     required super.$db,
     required super.$table,
@@ -1069,7 +1069,7 @@ class $TodoListsOrderingComposer extends Composer<_$AppDb, TodoLists> {
       column: $table.name, builder: (column) => ColumnOrderings(column));
 }
 
-class $TodoListsAnnotationComposer extends Composer<_$AppDb, TodoLists> {
+class $TodoListsAnnotationComposer extends Composer<_$AppDB, TodoLists> {
   $TodoListsAnnotationComposer({
     required super.$db,
     required super.$table,
@@ -1106,7 +1106,7 @@ class $TodoListsAnnotationComposer extends Composer<_$AppDb, TodoLists> {
 }
 
 class $TodoListsTableManager extends RootTableManager<
-    _$AppDb,
+    _$AppDB,
     TodoLists,
     TodoList,
     $TodoListsFilterComposer,
@@ -1117,7 +1117,7 @@ class $TodoListsTableManager extends RootTableManager<
     (TodoList, $TodoListsReferences),
     TodoList,
     PrefetchHooks Function({bool tasksRefs})> {
-  $TodoListsTableManager(_$AppDb db, TodoLists table)
+  $TodoListsTableManager(_$AppDB db, TodoLists table)
       : super(TableManagerState(
           db: db,
           table: table,
@@ -1173,7 +1173,7 @@ class $TodoListsTableManager extends RootTableManager<
 }
 
 typedef $TodoListsProcessedTableManager = ProcessedTableManager<
-    _$AppDb,
+    _$AppDB,
     TodoLists,
     TodoList,
     $TodoListsFilterComposer,
@@ -1213,10 +1213,10 @@ typedef $TasksUpdateCompanionBuilder = TasksCompanion Function({
   Value<DateTime?> updatedAt,
 });
 
-final class $TasksReferences extends BaseReferences<_$AppDb, Tasks, Task> {
+final class $TasksReferences extends BaseReferences<_$AppDB, Tasks, Task> {
   $TasksReferences(super.$_db, super.$_table, super.$_typedResult);
 
-  static TodoLists _listsIdTable(_$AppDb db) => db.todoLists
+  static TodoLists _listsIdTable(_$AppDB db) => db.todoLists
       .createAlias($_aliasNameGenerator(db.tasks.listsId, db.todoLists.id));
 
   $TodoListsProcessedTableManager? get listsId {
@@ -1231,7 +1231,7 @@ final class $TasksReferences extends BaseReferences<_$AppDb, Tasks, Task> {
   }
 
   static MultiTypedResultKey<TaskHistory, List<TaskHistoryData>>
-      _taskHistoryRefsTable(_$AppDb db) => MultiTypedResultKey.fromTable(
+      _taskHistoryRefsTable(_$AppDB db) => MultiTypedResultKey.fromTable(
           db.taskHistory,
           aliasName: $_aliasNameGenerator(db.tasks.id, db.taskHistory.tasksId));
 
@@ -1245,7 +1245,7 @@ final class $TasksReferences extends BaseReferences<_$AppDb, Tasks, Task> {
   }
 }
 
-class $TasksFilterComposer extends Composer<_$AppDb, Tasks> {
+class $TasksFilterComposer extends Composer<_$AppDB, Tasks> {
   $TasksFilterComposer({
     required super.$db,
     required super.$table,
@@ -1328,7 +1328,7 @@ class $TasksFilterComposer extends Composer<_$AppDb, Tasks> {
   }
 }
 
-class $TasksOrderingComposer extends Composer<_$AppDb, Tasks> {
+class $TasksOrderingComposer extends Composer<_$AppDB, Tasks> {
   $TasksOrderingComposer({
     required super.$db,
     required super.$table,
@@ -1390,7 +1390,7 @@ class $TasksOrderingComposer extends Composer<_$AppDb, Tasks> {
   }
 }
 
-class $TasksAnnotationComposer extends Composer<_$AppDb, Tasks> {
+class $TasksAnnotationComposer extends Composer<_$AppDB, Tasks> {
   $TasksAnnotationComposer({
     required super.$db,
     required super.$table,
@@ -1474,7 +1474,7 @@ class $TasksAnnotationComposer extends Composer<_$AppDb, Tasks> {
 }
 
 class $TasksTableManager extends RootTableManager<
-    _$AppDb,
+    _$AppDB,
     Tasks,
     Task,
     $TasksFilterComposer,
@@ -1485,7 +1485,7 @@ class $TasksTableManager extends RootTableManager<
     (Task, $TasksReferences),
     Task,
     PrefetchHooks Function({bool listsId, bool taskHistoryRefs})> {
-  $TasksTableManager(_$AppDb db, Tasks table)
+  $TasksTableManager(_$AppDB db, Tasks table)
       : super(TableManagerState(
           db: db,
           table: table,
@@ -1603,7 +1603,7 @@ class $TasksTableManager extends RootTableManager<
 }
 
 typedef $TasksProcessedTableManager = ProcessedTableManager<
-    _$AppDb,
+    _$AppDB,
     Tasks,
     Task,
     $TasksFilterComposer,
@@ -1624,10 +1624,10 @@ typedef $TaskHistoryUpdateCompanionBuilder = TaskHistoryCompanion Function({
 });
 
 final class $TaskHistoryReferences
-    extends BaseReferences<_$AppDb, TaskHistory, TaskHistoryData> {
+    extends BaseReferences<_$AppDB, TaskHistory, TaskHistoryData> {
   $TaskHistoryReferences(super.$_db, super.$_table, super.$_typedResult);
 
-  static Tasks _tasksIdTable(_$AppDb db) => db.tasks
+  static Tasks _tasksIdTable(_$AppDB db) => db.tasks
       .createAlias($_aliasNameGenerator(db.taskHistory.tasksId, db.tasks.id));
 
   $TasksProcessedTableManager? get tasksId {
@@ -1642,7 +1642,7 @@ final class $TaskHistoryReferences
   }
 }
 
-class $TaskHistoryFilterComposer extends Composer<_$AppDb, TaskHistory> {
+class $TaskHistoryFilterComposer extends Composer<_$AppDB, TaskHistory> {
   $TaskHistoryFilterComposer({
     required super.$db,
     required super.$table,
@@ -1674,7 +1674,7 @@ class $TaskHistoryFilterComposer extends Composer<_$AppDb, TaskHistory> {
   }
 }
 
-class $TaskHistoryOrderingComposer extends Composer<_$AppDb, TaskHistory> {
+class $TaskHistoryOrderingComposer extends Composer<_$AppDB, TaskHistory> {
   $TaskHistoryOrderingComposer({
     required super.$db,
     required super.$table,
@@ -1706,7 +1706,7 @@ class $TaskHistoryOrderingComposer extends Composer<_$AppDb, TaskHistory> {
   }
 }
 
-class $TaskHistoryAnnotationComposer extends Composer<_$AppDb, TaskHistory> {
+class $TaskHistoryAnnotationComposer extends Composer<_$AppDB, TaskHistory> {
   $TaskHistoryAnnotationComposer({
     required super.$db,
     required super.$table,
@@ -1739,7 +1739,7 @@ class $TaskHistoryAnnotationComposer extends Composer<_$AppDb, TaskHistory> {
 }
 
 class $TaskHistoryTableManager extends RootTableManager<
-    _$AppDb,
+    _$AppDB,
     TaskHistory,
     TaskHistoryData,
     $TaskHistoryFilterComposer,
@@ -1750,7 +1750,7 @@ class $TaskHistoryTableManager extends RootTableManager<
     (TaskHistoryData, $TaskHistoryReferences),
     TaskHistoryData,
     PrefetchHooks Function({bool tasksId})> {
-  $TaskHistoryTableManager(_$AppDb db, TaskHistory table)
+  $TaskHistoryTableManager(_$AppDB db, TaskHistory table)
       : super(TableManagerState(
           db: db,
           table: table,
@@ -1818,7 +1818,7 @@ class $TaskHistoryTableManager extends RootTableManager<
 }
 
 typedef $TaskHistoryProcessedTableManager = ProcessedTableManager<
-    _$AppDb,
+    _$AppDB,
     TaskHistory,
     TaskHistoryData,
     $TaskHistoryFilterComposer,
@@ -1830,9 +1830,9 @@ typedef $TaskHistoryProcessedTableManager = ProcessedTableManager<
     TaskHistoryData,
     PrefetchHooks Function({bool tasksId})>;
 
-class $AppDbManager {
-  final _$AppDb _db;
-  $AppDbManager(this._db);
+class $AppDBManager {
+  final _$AppDB _db;
+  $AppDBManager(this._db);
   $TodoListsTableManager get todoLists =>
       $TodoListsTableManager(_db, _db.todoLists);
   $TasksTableManager get tasks => $TasksTableManager(_db, _db.tasks);
