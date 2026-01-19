@@ -53,6 +53,7 @@ class MyApp extends StatelessWidget {
   }
 }
 
+//! Is this necessary? Maybe remove.
 class ParentPage extends StatefulWidget {
   const ParentPage({
     super.key,
@@ -180,10 +181,7 @@ class NavigationPanel2 extends StatefulWidget {
 
 class _NavigationPanel2State extends State<NavigationPanel2> {
 
-  int get _selectedIndex => widget.selectedIndex;
-
-  // List _userList = []; //TODO: Dont forget to change.
-  int _userListCount = 0;
+  int _userListCount = 0; //TODO: Make it into a stream instead?
 
 
   //TODO: grap database todoLists
@@ -208,11 +206,10 @@ class _NavigationPanel2State extends State<NavigationPanel2> {
   @override
   Widget build(BuildContext context) {
 
-    // get_Lists();
     final db = context.read<AppDB>();
+    int selectedIndex = widget.selectedIndex;
 
     return RightSidePanel(
-      // database: widget.database,
       show: true, // TODO: have a button if you want to hide/show the panel
       sidePanelWidth: 220,
       padding: null,
@@ -226,7 +223,7 @@ class _NavigationPanel2State extends State<NavigationPanel2> {
             //TODO: Create a new user list and add to database
 
             
-            
+            //! What is this?
             db.into(db.todoLists).insert(TodoListsCompanion.insert(name: Value("Untitled list")));
             
           },
@@ -235,19 +232,20 @@ class _NavigationPanel2State extends State<NavigationPanel2> {
       child: SingleChildScrollView(
         child: Material(
           type: MaterialType.transparency,
-          //TODO: initialize database - try to get the database
           child: Column(
             children: [
+
+              //TODO: Make widget into a method?
               ListTile(
                 hoverColor: Colors.grey.shade800,
-                selected: 0 == _selectedIndex,
+                selected: 0 == selectedIndex,
                 splashColor: Colors.transparent,
                 title: Text(
                   "My Day",
                 ),
                 onTap: (){
                   setState(() {
-                    // _selectedIndex = 0;
+                    // selectedIndex = 0;
                     widget.currentIndex(0);
                     
                   });
@@ -255,14 +253,14 @@ class _NavigationPanel2State extends State<NavigationPanel2> {
               ),
               ListTile(
                 hoverColor: Colors.grey.shade800,
-                selected: 1 == _selectedIndex,
+                selected: 1 == selectedIndex,
                 splashColor: Colors.transparent,
                 title: Text(
                   "Important",
                 ),
                 onTap: (){
                   setState(() {
-                    // _selectedIndex = 1;
+                    // selectedIndex = 1;
                     widget.currentIndex(1);
                     
                   });
@@ -270,14 +268,14 @@ class _NavigationPanel2State extends State<NavigationPanel2> {
               ),
               ListTile(
                 hoverColor: Colors.grey.shade800,
-                selected: 2 == _selectedIndex,
+                selected: 2 == selectedIndex,
                 splashColor: Colors.transparent,
                 title: Text(
                   "Tasks",
                 ),
                 onTap: (){
                   setState(() {
-                    // _selectedIndex = 2;
+                    // selectedIndex = 2;
                     widget.currentIndex(2);
                     
                   });
@@ -313,14 +311,14 @@ class _NavigationPanel2State extends State<NavigationPanel2> {
 
                       return ListTile(
                         hoverColor: Colors.grey.shade800,
-                        selected: userIndex == _selectedIndex,
+                        selected: userIndex == selectedIndex,
                         splashColor: Colors.transparent,
                         title: Text(
                           "test$index",
                         ),
                         onTap: (){
                           setState(() {
-                            // _selectedIndex = userIndex;
+                            // selectedIndex = userIndex;
                             widget.currentIndex(userIndex);
                           });
                         },
@@ -342,7 +340,6 @@ class _NavigationPanel2State extends State<NavigationPanel2> {
 class MainPage extends StatefulWidget {
   const MainPage({
     super.key,
-    // required this.database,
     this.onTap,
     required this.selectedIndex,
   });
@@ -394,6 +391,7 @@ class _MainPageState extends State<MainPage> {
 
   // } 
 
+
   //TODO: Task-tile is flickers when pressed.
   //! could be because of the refreshing the UI from setstate. Which means I might need to 
   //! separate from them to only refresh that class. Can't be in the same class/widget.
@@ -402,7 +400,7 @@ class _MainPageState extends State<MainPage> {
   Widget build(BuildContext context) {
 
     final db = context.read<AppDB>();
-
+    
     return Expanded(
       child: Row(
         children: [
@@ -455,11 +453,13 @@ class _MainPageState extends State<MainPage> {
                     // _taskList += 1;
                     final db = context.read<AppDB>();
 
-                    db.customInsert("INSERT INTO tasks(lists_id, title, position) VALUES (?, ?, ?)", 
+                    db.customInsert("INSERT INTO tasks(lists_id, title, position, created_at, updated_at) VALUES (?, ?, ?, ?, ?)", 
                     variables: [
                       Variable.withInt(widget.selectedIndex), 
                       Variable.withString(value), 
-                      Variable.withInt(0)
+                      Variable.withInt(0),
+                      Variable(DateTime.timestamp()),
+                      Variable(DateTime.timestamp())
                     ]);
     
                     //TODO: Make UI changes then update database.
@@ -467,18 +467,12 @@ class _MainPageState extends State<MainPage> {
                 },
               ),
 
-              //!! Probaly can remove this or replace this with an streamBuilder. 
-              //!! Same with other methods with Future - that graps from database.
+              //! Probaly can remove this or replace this with an streamBuilder. 
+              //! Same with other methods with Future - that graps from database.
+              //! Maybe it shouldn't be a streambuilder?
               child: StreamBuilder(
                 stream: db.watchTasks(),
                 builder: (context, snapshot) {
-
-                  
-
-                  print(snapshot.error);
-                  // print('Connection: ${snapshot.connectionState}');
-                  // print('Has data: ${snapshot.hasData}');
-                  // print('Data: ${snapshot.data}');
                   
                   if (snapshot.connectionState == ConnectionState.waiting) {
                     return Center(child: CircularProgressIndicator());
@@ -496,6 +490,7 @@ class _MainPageState extends State<MainPage> {
                   }
 
                   final data = snapshot.data ?? [];
+
                   if (data.isEmpty) {
                     return Center(
                       child: Text(
@@ -510,15 +505,14 @@ class _MainPageState extends State<MainPage> {
                   return Material(
                     type: MaterialType.transparency,
                     child: ListView.separated(
-                      itemCount: snapshot.data!.length,
+                      itemCount: data.length,
                       itemBuilder: (context, index) {
                       
                         // TODO: Need a if/else statement to filter out subtasks.
-                        final task = snapshot.data![index];
+                        final task = data[index];
                         final taskTitle = task.title;
-                        // print("Listview(TASKS) $task");
-                        // print(taskTitle);
 
+                        // List subTasks = [];
 
                       
                         return ListTile(
