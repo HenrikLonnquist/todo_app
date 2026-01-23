@@ -66,7 +66,7 @@ class ParentPage extends StatefulWidget {
 class _ParentPageState extends State<ParentPage> {
 
   final bool showLeftPanel = true;
-  int selectedIndex = 2; 
+  int selectedIndex = 2;
 
   AppDB get db => context.read<AppDB>();
 
@@ -78,7 +78,6 @@ class _ParentPageState extends State<ParentPage> {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           NavigationPanel2(
-            selectedIndex: selectedIndex,
             handleTabTap: (tabId) {
               //TODo: what tap was pressed and then send the info to mainpage
 
@@ -169,10 +168,8 @@ class NavigationPanel2 extends StatefulWidget {
     super.key,
     required this.currentIndex, 
     required Null Function(int) handleTabTap,
-    required this.selectedIndex,
   });
 
-  final int selectedIndex;
   final Function(int) currentIndex;
 
   @override
@@ -202,12 +199,13 @@ class _NavigationPanel2State extends State<NavigationPanel2> {
   //   }
 
   // }  
+  
+  int selectedIndex = 2;
 
   @override
   Widget build(BuildContext context) {
 
     final db = context.read<AppDB>();
-    int selectedIndex = widget.selectedIndex;
 
     return RightSidePanel(
       show: true, // TODO: have a button if you want to hide/show the panel
@@ -245,7 +243,7 @@ class _NavigationPanel2State extends State<NavigationPanel2> {
                 ),
                 onTap: (){
                   setState(() {
-                    // selectedIndex = 0;
+                    selectedIndex = 0;
                     widget.currentIndex(0);
                     
                   });
@@ -260,7 +258,7 @@ class _NavigationPanel2State extends State<NavigationPanel2> {
                 ),
                 onTap: (){
                   setState(() {
-                    // selectedIndex = 1;
+                    selectedIndex = 1;
                     widget.currentIndex(1);
                     
                   });
@@ -275,7 +273,7 @@ class _NavigationPanel2State extends State<NavigationPanel2> {
                 ),
                 onTap: (){
                   setState(() {
-                    // selectedIndex = 2;
+                    selectedIndex = 2;
                     widget.currentIndex(2);
                     
                   });
@@ -318,7 +316,7 @@ class _NavigationPanel2State extends State<NavigationPanel2> {
                         ),
                         onTap: (){
                           setState(() {
-                            // selectedIndex = userIndex;
+                            selectedIndex = userIndex;
                             widget.currentIndex(userIndex);
                           });
                         },
@@ -417,7 +415,7 @@ class _MainPageState extends State<MainPage> {
                       Spacer(),
                       Icon(Icons.swap_vert),
                       Icon(Icons.lightbulb),
-                      //! Very slow, how can I fix it?
+                      //TODO: Very slow, how can I fix it?
                       DropdownButton2(
                         customButton: const Icon(
                           Icons.more_vert
@@ -501,6 +499,13 @@ class _MainPageState extends State<MainPage> {
                         ),
                     );
                   }
+
+                  //TODO: filter the data here I think? Need to use the selectedindex here I think or it depends.
+                  // 0 - myday
+                  // 1 - importants
+                  // 2 - All tasks
+                  //TODO: probably need to change this to make it more intuitiv.
+                  print(data);
 
                   return Material(
                     type: MaterialType.transparency,
