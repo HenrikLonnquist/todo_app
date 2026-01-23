@@ -504,7 +504,7 @@ class _MainPageState extends State<MainPage> {
                   // 0 - myday
                   // 1 - importants
                   // 2 - All tasks
-                  //! probably need to change this to make it more intuitiv.
+                  //TODO: probably need to change this to make it more intuitiv.
                   print(data);
 
                   return Material(
