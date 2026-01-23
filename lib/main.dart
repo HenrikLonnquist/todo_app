@@ -206,8 +206,6 @@ class _NavigationPanel2State extends State<NavigationPanel2> {
   Widget build(BuildContext context) {
 
     final db = context.read<AppDB>();
-    print(selectedIndex);
-
 
     return RightSidePanel(
       show: true, // TODO: have a button if you want to hide/show the panel
@@ -501,6 +499,13 @@ class _MainPageState extends State<MainPage> {
                         ),
                     );
                   }
+
+                  //TODO: filter the data here I think? Need to use the selectedindex here I think or it depends.
+                  // 0 - myday
+                  // 1 - importants
+                  // 2 - All tasks
+                  //! probably need to change this to make it more intuitiv.
+                  print(data);
 
                   return Material(
                     type: MaterialType.transparency,
