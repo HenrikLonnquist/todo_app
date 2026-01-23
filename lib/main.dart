@@ -450,7 +450,7 @@ class _MainPageState extends State<MainPage> {
               bottomBar: AddTask(
                 onSubmitted: (value) {
                   setState(() {
-                    // _taskList += 1;
+                    
                     final db = context.read<AppDB>();
 
                     db.customInsert("INSERT INTO tasks(lists_id, title, position, created_at, updated_at) VALUES (?, ?, ?, ?, ?)", 
