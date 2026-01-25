@@ -138,6 +138,7 @@ class _TaskInfoState extends State<TaskInfo> {
         // print('Connection: ${snapshot.connectionState}');
         // print('Has data: ${snapshot.hasData}');
         // print('Data: ${snapshot.data}');
+        // print('taskid: ${widget.taskId}');
 
         if (!snapshot.hasData) {
           return CircularProgressIndicator();
@@ -183,7 +184,7 @@ class _TaskInfoState extends State<TaskInfo> {
                   title: TitleField(
                     fontWeight: FontWeight.bold,
                     completed: false,
-                    // inputValue: task["title"] ?? "Failed to grap",
+                    inputValue: task.title,
                     onChange: (value) {
                       //TODO: update database
                       // Now would be a good use of a stream, no? instead of sending the database manually to here.
@@ -219,13 +220,13 @@ class _TaskInfoState extends State<TaskInfo> {
                       ),
                       title: TitleField(
                         textSize: 15,
-                        labelText: "Add step 1", //TODO: this should be subTask["title"]?
-                        labelStyle: TextStyle(
-                          color: Colors.white.withValues(alpha: 0.5),
-                          fontSize: 15,
-                        ),
-                        completed: false, // TODO: needs to be "connected" with isChecked variable
-                        inputValue: "subtest", //If no subtask >
+                        // labelText: "Add step 1", //TODO: this should be subTask["title"]?
+                        // labelStyle: TextStyle(
+                        //   color: Colors.white.withValues(alpha: 0.5),
+                        //   fontSize: 15,
+                        // ),
+                        completed: false, // TODO: needs to be "connected" with isChecked variable - subTask["is_done"]
+                        inputValue: "subtest", //If no subtask > subTask.title/subTask["title"]
                         onChange: (value) {
                           //TODO: update database and update listview.builder above - itemcount
                         },
@@ -248,6 +249,17 @@ class _TaskInfoState extends State<TaskInfo> {
                       ),
                     onChange: (value) {
                       //TODO: add to database + update ui + hide this
+                      db.customInsert("INSERT INTO tasks(lists_id, parent_id, title, position, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?)", 
+                      variables: [
+                        Variable.withInt(task.listsId!),
+                        Variable.withInt(task.id),
+                        Variable.withString(value),
+                        Variable.withInt(0),
+                        Variable(DateTime.timestamp()),
+                        Variable(DateTime.timestamp()),
+                      ],
+                      );
+                      
                     },
                     // inputValue: subTask!.isEmpty ? "Add step" : "Next Step"
                   ),
