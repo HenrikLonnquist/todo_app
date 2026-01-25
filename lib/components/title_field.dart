@@ -16,7 +16,7 @@ class TitleField extends StatefulWidget {
   });
 
   final bool enabled;
-  final Function(String)? onChange;
+  final Function(String)? onChange; //TODO: rename to something more fitting
   final String inputValue;
   final bool completed;
   final double textSize;
