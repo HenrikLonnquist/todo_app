@@ -8,7 +8,7 @@ import 'package:todo_app/components/title_field.dart';
 import 'package:todo_app/database.dart';
 
 //TODO: Move it/place somewhere else, have to restart(ctrl+shift+f10) debug session instead of hot reload to get an effect.
-
+//TODO: Rename to CustomPanel or something
 //MARK: Panel
 class RightSidePanel extends StatelessWidget {
   const RightSidePanel({
@@ -128,20 +128,23 @@ class _TaskInfoState extends State<TaskInfo> {
     // print("subtask: $subTask");
     final db = context.read<AppDB>();
 
+    //! Subtasks will have the same list_id as the parent so it is include in the watchTaskById,no? No, it is not included.
+    //! According to the stream we are only get a task object, not a list which it needs to be if there are subtasks.
+    //TODO: Change .watchTaskById(taskId) to include subtasks as well.
     return StreamBuilder(
       stream: db.watchTaskById(taskId),
       builder: (context, snapshot) {
 
-        print('Connection: ${snapshot.connectionState}');
-        print('Has data: ${snapshot.hasData}');
-        print('Data: ${snapshot.data}');
+        // print('Connection: ${snapshot.connectionState}');
+        // print('Has data: ${snapshot.hasData}');
+        // print('Data: ${snapshot.data}');
 
         if (!snapshot.hasData) {
           return CircularProgressIndicator();
         }
 
         final task = snapshot.data!;
-        print("hello: $task");
+        // print("hello: $task");
         
 
         return SingleChildScrollView(
