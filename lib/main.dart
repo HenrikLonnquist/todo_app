@@ -398,7 +398,7 @@ class _MainPageState extends State<MainPage> {
   Widget build(BuildContext context) {
 
     final db = context.read<AppDB>();
-    
+
     return Expanded(
       child: Row(
         children: [
