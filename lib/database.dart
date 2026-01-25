@@ -24,8 +24,8 @@ class AppDB extends _$AppDB{
     return select(tasks).watch();
   }
 
-  Stream<Task?> watchTaskById(int id) {
-    return (select(tasks)..where((t) => t.id.equals(id))).watchSingleOrNull();
+  Stream<List<Task>> watchTasksById(int id) {
+    return (select(tasks)..where((t) => t.id.equals(id))).watch();
   }
 
   Future<void> updateTaskDone(int id, bool done) {
