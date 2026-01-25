@@ -501,25 +501,14 @@ class _MainPageState extends State<MainPage> {
                     );
                   }
 
-                  //TODO: filter the data here I think? Need to use the selectedindex here I think or it depends.
-                  // 0 - myday
-                  // 1 - importants
-                  // 2 - All tasks
-                  //TODO: probably need to change this to make it more intuitiv.
-                  print(data);
-
                   return Material(
                     type: MaterialType.transparency,
                     child: ListView.separated(
                       itemCount: data.length,
                       itemBuilder: (context, index) {
                       
-                        // TODO: Need a if/else statement to filter out subtasks.
                         final task = data[index];
                         final taskTitle = task.title;
-
-                        // List subTasks = [];
-
                       
                         return ListTile(
                           tileColor: Colors.grey.shade900,
