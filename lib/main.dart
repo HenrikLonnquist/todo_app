@@ -1,3 +1,5 @@
+import 'dart:ffi';
+
 import 'package:drift/drift.dart' hide Column;
 import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:flutter/foundation.dart';
@@ -99,7 +101,7 @@ class _ParentPageState extends State<ParentPage> {
           MainPage(
             //TODO: replace/change to the current selected NavPanel(list > Myday,Tasks..) 
             // database: widget.database, 
-            selectedIndex: selectedIndex,
+            selectedListIndex: selectedIndex,
           ),
         ]
       )
@@ -339,12 +341,12 @@ class MainPage extends StatefulWidget {
   const MainPage({
     super.key,
     this.onTap,
-    required this.selectedIndex,
+    required this.selectedListIndex,
   });
 
   // final AppDB database;
   final Function()? onTap;
-  final int selectedIndex;
+  final int selectedListIndex;
 
   @override
   State<MainPage> createState() => _MainPageState();
@@ -353,8 +355,7 @@ class MainPage extends StatefulWidget {
 class _MainPageState extends State<MainPage> {
 
   bool showPanel = false;
-
-  int get _taskList => widget.selectedIndex; //TODO: grap from database/navpanel? Change name as well?
+  
   // AppDB get db => widget.database;
   // SimpleSelectStatement<Tasks, Task> get currentTabTasks => db.select(db.tasks)..where((tbl) => tbl.listsId.equals(widget.selectedIndex));
   // Future<List<QueryRow>> get currentTabTask {
@@ -411,7 +412,7 @@ class _MainPageState extends State<MainPage> {
                   Row(
                     children: [
                       Icon(Icons.home),
-                      Text("Main Page ${widget.selectedIndex}"),
+                      Text("Main Page ${widget.selectedListIndex}"),
                       Spacer(),
                       Icon(Icons.swap_vert),
                       Icon(Icons.lightbulb),
@@ -453,7 +454,7 @@ class _MainPageState extends State<MainPage> {
 
                     db.customInsert("INSERT INTO tasks(lists_id, title, position, created_at, updated_at) VALUES (?, ?, ?, ?, ?)", 
                     variables: [
-                      Variable.withInt(widget.selectedIndex), 
+                      Variable.withInt(widget.selectedListIndex), 
                       Variable.withString(value), 
                       Variable.withInt(0),
                       Variable(DateTime.timestamp()),
@@ -469,7 +470,7 @@ class _MainPageState extends State<MainPage> {
               //! Same with other methods with Future - that graps from database.
               //! Maybe it shouldn't be a streambuilder?
               child: StreamBuilder(
-                stream: db.watchTasks(),
+                stream: db.watchTasksByListId(widget.selectedListIndex),
                 builder: (context, snapshot) {
                   
                   if (snapshot.connectionState == ConnectionState.waiting) {
