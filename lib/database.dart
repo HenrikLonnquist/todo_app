@@ -28,6 +28,10 @@ class AppDB extends _$AppDB{
     return (select(tasks)..where((t) => t.id.equals(id))).watch();
   }
 
+  Stream<Task?> watchTaskById(int id) {
+    return (select(tasks)..where((t) => t.id.equals(id))).watchSingleOrNull();
+  }
+
   Future<void> updateTaskDone(int id, bool done) {
     return customUpdate("UPDATE tasks SET is_done = ? WHERE id = ?",
     variables: [
