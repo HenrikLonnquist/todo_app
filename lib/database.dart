@@ -28,6 +28,7 @@ class AppDB extends _$AppDB{
     return (select(tasks)..where((t) => t.listsId.equals(listId))).watch();
   }
 
+  //TODO: Need to get the subtasks as well, if there is any.
   Stream<Task?> watchTaskById(int id) {
     return (select(tasks)..where((t) => t.id.equals(id))).watchSingleOrNull();
   }
