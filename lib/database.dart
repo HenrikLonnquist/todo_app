@@ -19,13 +19,12 @@ class AppDB extends _$AppDB{
     return select(todoLists).watch();
   }
 
-  //! What to do you call these? Just methods? Maybe ask gipity - Check chat = Modify database... or Flutter Data...
   Stream<List<Task>> watchTasks() {
     return select(tasks).watch();
   }
 
   Stream<List<Task>> watchTasksByListId(int listId) {
-    return (select(tasks)..where((t) => t.listsId.equals(listId))).watch();
+    return (select(tasks)..where((t) => t.listsId.equals(listId) & t.parentId.isNull() )).watch();
   }
 
   Stream<List<Task>> watchTaskByIdWithSubTasks(int id) {
