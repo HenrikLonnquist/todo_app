@@ -1,5 +1,7 @@
 // ignore_for_file: avoid_print
 
+import 'dart:ui';
+
 import 'package:drift/drift.dart' hide Column;
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -132,7 +134,7 @@ class _TaskInfoState extends State<TaskInfo> {
     //! According to the stream we are only get a task object, not a list which it needs to be if there are subtasks.
     //TODO: Change .watchTaskById(taskId) to include subtasks as well.
     return StreamBuilder(
-      stream: db.watchTaskById(taskId),
+      stream: db.watchTaskByIdWithSubTasks(taskId),
       builder: (context, snapshot) {
 
         // print('Connection: ${snapshot.connectionState}');
@@ -145,6 +147,8 @@ class _TaskInfoState extends State<TaskInfo> {
         }
 
         final task = snapshot.data!;
+        final parentTask = task[0];
+        final subTasks = snapshot.data!.where((t) => t.parentId == parentTask.id).toList();
         // print("hello: $task");
         
 
@@ -167,9 +171,7 @@ class _TaskInfoState extends State<TaskInfo> {
                   tileColor: Colors.grey.shade800.withValues(alpha: 0.2),
                   // hoverColor: Colors.grey.shade800,
                   leading: Checkbox(
-                    //! UI is not reacting after changes, there is no rebuild. That is because
-                    //! there is no 'streambuilder' and 'db.watch()'/stream. Check out gipity(Modify Database..)
-                    value: true,
+                    value: parentTask.isDone,
                     //TODO: Change color of the checkbox, to white
                     onChanged: (value) {
                       // isChecked = value;
@@ -183,8 +185,8 @@ class _TaskInfoState extends State<TaskInfo> {
                   ),
                   title: TitleField(
                     fontWeight: FontWeight.bold,
-                    completed: false,
-                    inputValue: task.title,
+                    completed: parentTask.isDone!,
+                    inputValue: parentTask.title,
                     onChange: (value) {
                       //TODO: update database
                       // Now would be a good use of a stream, no? instead of sending the database manually to here.
@@ -193,17 +195,16 @@ class _TaskInfoState extends State<TaskInfo> {
                     },
                   ),
                 ),
-                //TODO: is there any sub tasks > populate
-                // db.subtask > 0 ? : 
-                // !What is this? Is it to populate the subtask ui after?
                 //MARK: SUBTASK
-                if (subTaskId == null)
+                if (subTasks.isNotEmpty)
                 ListView.builder(
                   shrinkWrap: true,
                   physics: NeverScrollableScrollPhysics(),
-                  itemCount: 1,
+                  itemCount: subTasks.length,
                   itemBuilder: (context, index) {
-                    //TODO: retrieve sub tasks? or sooner?
+
+                    final subTask = subTasks[index];
+
                     return ListTile(
                       splashColor: Colors.transparent,
                       tileColor: Colors.grey.shade800.withValues(alpha: 0.2),
@@ -225,8 +226,8 @@ class _TaskInfoState extends State<TaskInfo> {
                         //   color: Colors.white.withValues(alpha: 0.5),
                         //   fontSize: 15,
                         // ),
-                        completed: false, // TODO: needs to be "connected" with isChecked variable - subTask["is_done"]
-                        inputValue: "subtest", //If no subtask > subTask.title/subTask["title"]
+                        completed: subTask.isDone!, // TODO: needs to be "connected" with isChecked variable - subTask["is_done"]
+                        inputValue: subTask.title, //If no subtask > subTask.title/subTask["title"]
                         onChange: (value) {
                           //TODO: update database and update listview.builder above - itemcount
                         },
@@ -251,8 +252,8 @@ class _TaskInfoState extends State<TaskInfo> {
                       //TODO: add to database + update ui + hide this
                       db.customInsert("INSERT INTO tasks(lists_id, parent_id, title, position, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?)", 
                       variables: [
-                        Variable.withInt(task.listsId!),
-                        Variable.withInt(task.id),
+                        Variable.withInt(parentTask.listsId!),
+                        Variable.withInt(parentTask.id),
                         Variable.withString(value),
                         Variable.withInt(0),
                         Variable(DateTime.timestamp()),
