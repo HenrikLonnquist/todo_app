@@ -216,7 +216,7 @@ class _TaskInfoState extends State<TaskInfo> {
                         value: subTask.isDone,
                         onChanged: (value){
 
-                          db.updateSubTaskDone(parentTask.id, value!);
+                          db.updateTaskDone(subTask.id, value!);
 
                         },
                       ),
@@ -225,7 +225,9 @@ class _TaskInfoState extends State<TaskInfo> {
                         completed: subTask.isDone!,
                         inputValue: subTask.title,
                         onChange: (value) {
-                          //TODO: update database and update listview.builder above - itemcount
+                          
+                          db.updateTaskTitle(subTask.id, value);
+
                         },
                       ),
                     );
@@ -238,14 +240,13 @@ class _TaskInfoState extends State<TaskInfo> {
                   leading: Icon(Icons.add, size: 25), //TODO: Change to a diffrent icon when inputting new task
                   title: TitleField(
                     textSize: 15,
-                    // inputValue: subTask["title"],
-                    labelText: "Add step",
+                    labelText: subTasks.isNotEmpty ? "Next step" : "Add step",
                     labelStyle: TextStyle(
                       color: Colors.white.withValues(alpha: 0.5), 
                       fontSize: 15
                       ),
                     onChange: (value) {
-                      //TODO: add to database + update ui + hide this
+                      //TODO: add to database + update ui + hide this(hide what? The titlefield?)
                       db.customInsert("INSERT INTO tasks(lists_id, parent_id, title, position, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?)", 
                       variables: [
                         Variable.withInt(parentTask.listsId!),
