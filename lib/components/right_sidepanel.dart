@@ -197,6 +197,7 @@ class _TaskInfoState extends State<TaskInfo> {
                 ),
                 //MARK: SUBTASK
                 if (subTasks.isNotEmpty)
+                //TODO: Make this into a separate class?
                 ListView.builder(
                   shrinkWrap: true,
                   physics: NeverScrollableScrollPhysics(),
@@ -212,22 +213,17 @@ class _TaskInfoState extends State<TaskInfo> {
                       //TODO: Change color of the checkbox, to white
                       //! might not need this. maybe Do this in titleField.
                       leading: Checkbox(
-                        value: isChecked,
+                        value: subTask.isDone,
                         onChanged: (value){
-                          setState(() {
-                            // isChecked = !isChecked;
-                          });
+
+                          db.updateSubTaskDone(parentTask.id, value!);
+
                         },
                       ),
                       title: TitleField(
                         textSize: 15,
-                        // labelText: "Add step 1", //TODO: this should be subTask["title"]?
-                        // labelStyle: TextStyle(
-                        //   color: Colors.white.withValues(alpha: 0.5),
-                        //   fontSize: 15,
-                        // ),
-                        completed: subTask.isDone!, // TODO: needs to be "connected" with isChecked variable - subTask["is_done"]
-                        inputValue: subTask.title, //If no subtask > subTask.title/subTask["title"]
+                        completed: subTask.isDone!,
+                        inputValue: subTask.title,
                         onChange: (value) {
                           //TODO: update database and update listview.builder above - itemcount
                         },
