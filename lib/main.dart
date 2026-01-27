@@ -355,41 +355,9 @@ class MainPage extends StatefulWidget {
 class _MainPageState extends State<MainPage> {
 
   bool showPanel = false;
-  
-  // AppDB get db => widget.database;
-  // SimpleSelectStatement<Tasks, Task> get currentTabTasks => db.select(db.tasks)..where((tbl) => tbl.listsId.equals(widget.selectedIndex));
-  // Future<List<QueryRow>> get currentTabTask {
-    
-  //   final db = context.read<AppDB>();
-
-  //   return db.customSelect("SELECT * FROM tasks WHERE lists_id = ? AND parent_id IS null", 
-  //   variables: [
-  //     Variable.withInt(widget.selectedIndex),
-  //   ], 
-  //   readsFrom: {db.tasks}).get();
-  // }
-  
-  
-  // Future resetDatabase() async {
-  //   await customStatement;
-  // }
 
   int currentTask = 0;
   int? currentSubTask;
-
-
-  // Future<List<QueryRow>> getSubTasks(int parentId) {
-
-  //   final db = context.read<AppDB>();
-
-  //   return db.customSelect("SELECT * from tasks WHERE parent_id = ?",
-  //   variables: [
-  //     Variable.withInt(parentId),
-  //   ],
-  //   readsFrom: {db.tasks}).get();
-
-  // } 
-
 
   //TODO: Task-tile is flickers when pressed.
   //! could be because of the refreshing the UI from setstate. Which means I might need to 
@@ -457,8 +425,8 @@ class _MainPageState extends State<MainPage> {
                       Variable.withInt(widget.selectedListIndex), 
                       Variable.withString(value), 
                       Variable.withInt(0),
-                      Variable(DateTime.timestamp()),
-                      Variable(DateTime.timestamp())
+                      Variable(DateTime.now()),
+                      Variable(DateTime.now())
                     ]);
     
                     //TODO: Make UI changes then update database.
@@ -535,6 +503,14 @@ class _MainPageState extends State<MainPage> {
                       
                             });
                           },
+                          trailing: IconButton(
+                            icon: Icon(Icons.dangerous),
+                            onPressed: () {
+                              
+                              (db.delete(db.tasks)..where((t) => t.id.equals(task.id) | t.parentId.equals(task.id))).go();
+                              
+                            },
+                          ),
                         );
                       },
                       separatorBuilder: (context, index) {
