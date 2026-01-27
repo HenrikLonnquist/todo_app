@@ -41,16 +41,6 @@ class AppDB extends _$AppDB{
     );
   }
 
-  Future<void> updateSubTaskDone(int parentID, bool done) {
-    return customUpdate("UPDATE tasks SET is_done = ? WHERE parent_id = ?",
-    variables: [
-      Variable<int>(done ? 1 : 0),
-      Variable<int>(parentID),
-    ],
-    updates: {tasks}
-    );
-  }
-
   @override
   int get schemaVersion => 1;
 
