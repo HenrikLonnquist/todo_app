@@ -41,6 +41,16 @@ class AppDB extends _$AppDB{
     );
   }
 
+  Future<void> updateTaskTitle(int id, String title) {
+    return customUpdate("UPDATE tasks SET title = ? WHERE id = ?",
+    variables: [
+      Variable.withString(title),
+      Variable.withInt(id),
+    ],
+    updates: {tasks}
+    );
+  }
+
   @override
   int get schemaVersion => 1;
 
