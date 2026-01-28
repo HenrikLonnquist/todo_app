@@ -44,9 +44,10 @@ class AppDB extends _$AppDB{
   }
 
   Future<void> updateTaskTitle(int id, String title) {
-    return customUpdate("UPDATE tasks SET title = ? WHERE id = ?",
+    return customUpdate("UPDATE tasks SET title = ?, updated_at = ? WHERE id = ?",
     variables: [
       Variable.withString(title),
+      Variable(DateTime.now()),
       Variable.withInt(id),
     ],
     updates: {tasks}
