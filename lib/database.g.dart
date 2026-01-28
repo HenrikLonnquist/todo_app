@@ -261,16 +261,14 @@ class Tasks extends Table with TableInfo<Tasks, Task> {
       'created_at', aliasedName, true,
       type: DriftSqlType.dateTime,
       requiredDuringInsert: false,
-      $customConstraints: 'DEFAULT CURRENT_TIMESTAMP',
-      defaultValue: const CustomExpression('CURRENT_TIMESTAMP'));
+      $customConstraints: '');
   static const VerificationMeta _updatedAtMeta =
       const VerificationMeta('updatedAt');
   late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
       'updated_at', aliasedName, true,
       type: DriftSqlType.dateTime,
       requiredDuringInsert: false,
-      $customConstraints: 'DEFAULT CURRENT_TIMESTAMP',
-      defaultValue: const CustomExpression('CURRENT_TIMESTAMP'));
+      $customConstraints: '');
   @override
   List<GeneratedColumn> get $columns => [
         id,
@@ -404,6 +402,8 @@ class Task extends DataClass implements Insertable<Task> {
 
   ///sorting within list
   final DateTime? createdAt;
+
+  ///DEFAULT CURRENT_TIMESTAMP: not working, format error
   final DateTime? updatedAt;
   const Task(
       {required this.id,
