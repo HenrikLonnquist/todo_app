@@ -68,9 +68,8 @@ class ParentPage extends StatefulWidget {
 class _ParentPageState extends State<ParentPage> {
 
   final bool showLeftPanel = true;
+  
   int selectedIndex = 2;
-
-  AppDB get db => context.read<AppDB>();
 
 
   @override
