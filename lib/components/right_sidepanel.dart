@@ -146,6 +146,7 @@ class _TaskInfoState extends State<TaskInfo> {
           return CircularProgressIndicator();
         }
 
+
         final task = snapshot.data!;
         final parentTask = task[0];
         final subTasks = snapshot.data!.where((t) => t.parentId == parentTask.id).toList();

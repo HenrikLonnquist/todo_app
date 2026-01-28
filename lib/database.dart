@@ -31,10 +31,12 @@ class AppDB extends _$AppDB{
     return (select(tasks)..where((t) => t.id.equals(id) | t.parentId.equals(id) )).watch();
   }
 
+  //! Seems to work on linux.
   Future<void> updateTaskDone(int id, bool done) {
-    return customUpdate("UPDATE tasks SET is_done = ? WHERE id = ?",
+    return customUpdate("UPDATE tasks SET is_done = ?, updated_at = ? WHERE id = ?",
     variables: [
       Variable<int>(done ? 1 : 0),
+      Variable(DateTime.now()),
       Variable<int>(id),
     ],
     updates: {tasks}
@@ -42,9 +44,10 @@ class AppDB extends _$AppDB{
   }
 
   Future<void> updateTaskTitle(int id, String title) {
-    return customUpdate("UPDATE tasks SET title = ? WHERE id = ?",
+    return customUpdate("UPDATE tasks SET title = ?, updated_at = ? WHERE id = ?",
     variables: [
       Variable.withString(title),
+      Variable(DateTime.now()),
       Variable.withInt(id),
     ],
     updates: {tasks}
