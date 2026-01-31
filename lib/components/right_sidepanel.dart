@@ -174,11 +174,14 @@ class _TaskInfoState extends State<TaskInfo> {
                   leading: Checkbox(
                     value: parentTask.isDone,
                     //TODO: Change color of the checkbox, to white
-                    onChanged: (value) {
+                    onChanged: (isDone) {
                       // isChecked = value;
 
-                      if (value != null) {
-                        db.updateTaskDone(taskId, value);
+                      if (isDone != null) {
+                        db.updateTask(
+                          taskId, 
+                          isDone: Value(isDone),
+                        );
                       }
 
                       
@@ -215,19 +218,27 @@ class _TaskInfoState extends State<TaskInfo> {
                       //! might not need this. maybe Do this in titleField.
                       leading: Checkbox(
                         value: subTask.isDone,
-                        onChanged: (value){
+                        onChanged: (isDone) async {
 
-                          db.updateTaskDone(subTask.id, value!);
-
+                          await db.updateTask(
+                            subTask.id,
+                            isDone: Value(isDone!),
+                            parentID: parentTask.id //updating parent task - updated_at
+                          );
+                          
                         },
                       ),
                       title: TitleField(
                         textSize: 15,
                         completed: subTask.isDone!,
                         inputValue: subTask.title,
-                        onChange: (value) {
-                          
-                          db.updateTaskTitle(subTask.id, value);
+                        onChange: (title) async {
+
+                          await db.updateTask(
+                            subTask.id,
+                            title: Value(title),
+                            parentID: parentTask.id, //Updating parent task - updated_at
+                          );
 
                         },
                       ),
@@ -246,17 +257,14 @@ class _TaskInfoState extends State<TaskInfo> {
                       color: Colors.white.withValues(alpha: 0.5), 
                       fontSize: 15
                       ),
-                    onChange: (value) {
-                      //TODO: add to database + update ui + hide this(hide what? The titlefield?)
-                      db.customInsert("INSERT INTO tasks(lists_id, parent_id, title, position, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?)", 
-                      variables: [
-                        Variable.withInt(parentTask.listsId!),
-                        Variable.withInt(parentTask.id),
-                        Variable.withString(value),
-                        Variable.withInt(0),
-                        Variable(DateTime.timestamp()),
-                        Variable(DateTime.timestamp()),
-                      ],
+                    onChange: (subTitle) async {
+                      
+                      // Adding a new sub task to database
+                      await db.insertTask(
+                        parentID: parentTask.id,
+                        listID: parentTask.listsId!,
+                        title: subTitle,
+                        position: 0,
                       );
                       
                     },
