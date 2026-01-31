@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:drift/drift.dart';
 import 'dart:io';
 
@@ -15,8 +17,8 @@ part 'database.g.dart';
 class AppDB extends _$AppDB{
   AppDB() : super(_openConnection());
 
-  Stream<List<TodoList>> watchLists() {
-    return select(todoLists).watch();
+  Stream<List<TodoList>> watchUserLists() {
+    return (select(todoLists)..where((t) => t.id.isBiggerThanValue(2))).watch();
   }
 
   Stream<List<Task>> watchTasks() {
