@@ -414,22 +414,14 @@ class _MainPageState extends State<MainPage> {
                 ],
               ),
               bottomBar: AddTask(
-                onSubmitted: (value) {
-                  setState(() {
+                onSubmitted: (title) async {
                     
-                    final db = context.read<AppDB>();
+                  await db.insertTask(
+                    title: title,
+                    listID: widget.selectedListIndex,
+                    position: 0,
+                  );
 
-                    db.customInsert("INSERT INTO tasks(lists_id, title, position, created_at, updated_at) VALUES (?, ?, ?, ?, ?)", 
-                    variables: [
-                      Variable.withInt(widget.selectedListIndex), 
-                      Variable.withString(value), 
-                      Variable.withInt(0),
-                      Variable(DateTime.now()),
-                      Variable(DateTime.now())
-                    ]);
-    
-                    //TODO: Make UI changes then update database.
-                  });
                 },
               ),
 
@@ -506,6 +498,7 @@ class _MainPageState extends State<MainPage> {
                             icon: Icon(Icons.dangerous),
                             onPressed: () {
                               
+                              //TODO: have a popup in case of one wants to undo it. Or just add it to history list.
                               (db.delete(db.tasks)..where((t) => t.id.equals(task.id) | t.parentId.equals(task.id))).go();
                               
                             },
