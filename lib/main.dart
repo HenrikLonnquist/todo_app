@@ -217,13 +217,13 @@ class _NavigationPanel2State extends State<NavigationPanel2> {
         child: ListTile(
           title: Text("New list +"),
           hoverColor: Colors.grey.shade800,
-          onTap: () {
+          onTap: () async {
             //TODO: Have the parent handle this. Or where its called/used.
             //TODO: Create a new user list and add to database
 
             
-            //! What is this?
-            db.into(db.todoLists).insert(TodoListsCompanion.insert(name: Value("Untitled list")));
+            //! What is this? Huh? Why did ask this? Obviously this an to insert an new user list to the database.
+            await db.into(db.todoLists).insert(TodoListsCompanion.insert(name: Value("Untitled list")));
             
           },
         ),
@@ -287,10 +287,10 @@ class _NavigationPanel2State extends State<NavigationPanel2> {
               //TODO: If !snapshot.hasData > progress indicator else.
               // if (snapshot.hasData) CircularProgressIndicator(color: Colors.white), //! Works but needs a stream to track.
               StreamBuilder(
-                stream: db.watchLists(),
+                stream: db.watchUserLists(),
                 builder: (context, snapshot) {
 
-                  //TODO: Handle snapshot state cases
+                  //TODO: Handle snapshot state cases - copy from Task List(mark)
                   if (!snapshot.hasData) {
                     return const Text("Add a new list", style: TextStyle(color: Colors.white));
                     // return CircularProgressIndicator();
@@ -300,25 +300,30 @@ class _NavigationPanel2State extends State<NavigationPanel2> {
                     return Text("Error: ${snapshot.error}", style: TextStyle(color: Colors.white));
                   }
 
+                  final data = snapshot.data!;
+
                   return ListView.builder(
                     shrinkWrap: true,
                     physics: NeverScrollableScrollPhysics(),
-                    itemCount: _userListCount, 
+                    itemCount: data.length, 
                     itemBuilder: (context, index) {
                       
-                      final userIndex = 3 + index; // 3 = default lists(MyDay, Important, Tasks)
+                      // final userIndex = 3 + index; // 3 = default lists(MyDay, Important, Tasks)
+
+                      final userList = data[index];
 
                       return ListTile(
                         hoverColor: Colors.grey.shade800,
-                        selected: userIndex == selectedIndex,
+                        selected: userList.id == selectedIndex,
                         splashColor: Colors.transparent,
                         title: Text(
-                          "test$index",
+                          userList.name!,
                         ),
                         onTap: (){
                           setState(() {
-                            selectedIndex = userIndex;
-                            widget.currentIndex(userIndex);
+                            selectedIndex = userList.id; //! Seems a redundant. Why not just use the widget.currentIndex.
+                            //! Was thinking of using stream or something like that for this. Emit index change.
+                            widget.currentIndex(userList.id);
                           });
                         },
                       ); 
@@ -410,7 +415,7 @@ class _MainPageState extends State<MainPage> {
                       )
                     ],
                   ),
-                  // Text("Current Date"), //TODO: If it's 'My Day' tab. show this
+                  if (widget.selectedListIndex == 0) Text("Current Date"), //TODO: Change to actual current Date and change when it's an new day
                 ],
               ),
               bottomBar: AddTask(
@@ -424,10 +429,7 @@ class _MainPageState extends State<MainPage> {
 
                 },
               ),
-
-              //! Probaly can remove this or replace this with an streamBuilder. 
-              //! Same with other methods with Future - that graps from database.
-              //! Maybe it shouldn't be a streambuilder?
+              //MARK: Task List
               child: StreamBuilder(
                 stream: db.watchTasksByListId(widget.selectedListIndex),
                 builder: (context, snapshot) {
@@ -474,21 +476,17 @@ class _MainPageState extends State<MainPage> {
                           hoverColor: Colors.grey.shade800,
                           splashColor: Colors.transparent,
                           title: Text(taskTitle),
-                          onTap: () async {
-                      
-                            // currentSubTask = await getSubTasks(task["id"]); //! Is this bad? Why is it bad?
+                          onTap: () {
                       
                             setState(() {
-                              // TODO: if showpanel true and tap again > close showpanel else if different task tap change taskinfo
-
                               
                               if (showPanel == true && currentTask == task.id) {
                                 showPanel = false;
                               }
                               else {
                                 showPanel = true;
-                                
                               }
+
                               currentTask = task.id;
                               
                       
