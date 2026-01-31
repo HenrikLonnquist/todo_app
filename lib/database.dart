@@ -31,27 +31,87 @@ class AppDB extends _$AppDB{
     return (select(tasks)..where((t) => t.id.equals(id) | t.parentId.equals(id) )).watch();
   }
 
-  //! Seems to work on linux.
-  Future<void> updateTaskDone(int id, bool done) {
-    return customUpdate("UPDATE tasks SET is_done = ?, updated_at = ? WHERE id = ?",
-    variables: [
-      Variable<int>(done ? 1 : 0),
-      Variable(DateTime.now()),
-      Variable<int>(id),
-    ],
-    updates: {tasks}
-    );
-  }
+  Future<void> insertTask(
+    {
+      required int listID,
+      required String title,
+      required int position,
+      int? parentID, //NULL == parent task
+    }
 
-  Future<void> updateTaskTitle(int id, String title) {
-    return customUpdate("UPDATE tasks SET title = ?, updated_at = ? WHERE id = ?",
-    variables: [
-      Variable.withString(title),
-      Variable(DateTime.now()),
-      Variable.withInt(id),
-    ],
-    updates: {tasks}
-    );
+    ) async {
+      
+      final now = DateTime.now();
+
+      await transaction(() async {
+        
+        await into(tasks).insert(
+          TasksCompanion(
+            listsId: Value(listID),
+            title: Value(title),
+            position: Value(position),
+            parentId: Value(parentID),
+            createdAt: Value(now),
+            updatedAt: Value(now),
+          ),
+        );
+
+        if (parentID != null) {
+          await customUpdate("UPDATE tasks SET updated_at = ? WHERE id = ?",
+          variables: [
+            Variable(now),
+            Variable.withInt(parentID),
+          ],
+          updates: {tasks}
+          );
+        }
+
+      });
+          
+  }
+  Future<void> updateTask(
+    int id,{
+      int? parentID,
+      Value<int>? listID,
+      Value<String>? title,
+      Value<bool>? isDone,
+      Value<DateTime>? reminder,
+      Value<DateTime>? dueDate,
+      Value<String>? repeat,
+      Value<String>? notes,
+      Value<int>? position,
+      Value<DateTime>? createdAt,
+      Value<DateTime>? updatedAT
+    }) async {
+      
+      final now = DateTime.now();
+
+      await transaction(() async {
+        await (update(tasks)..where((t) => t.id.equals(id))).write(
+          TasksCompanion(
+            title: title ?? const Value.absent(),
+            isDone: isDone ?? const Value.absent(),
+            reminder: reminder ?? const Value.absent(),
+            dueDate: dueDate ?? const Value.absent(),
+            repeat: repeat ?? const Value.absent(),
+            notes: notes ?? const Value.absent(),
+            position: position ?? const Value.absent(),
+            updatedAt: Value(now),
+          ),
+        );
+
+        if (parentID != null) {
+          await customUpdate("UPDATE tasks SET updated_at = ? WHERE id = ?",
+          variables: [
+            Variable(now),
+            Variable.withInt(parentID),
+          ],
+          updates: {tasks}
+          );
+        }
+
+      });
+          
   }
 
   @override
