@@ -18,7 +18,7 @@ class AppDB extends _$AppDB{
   AppDB() : super(_openConnection());
 
   Stream<List<TodoList>> watchUserLists() {
-    return (select(todoLists)..where((t) => t.id.isBiggerThanValue(2))).watch();
+    return (select(todoLists)..where((t) => t.id.isBiggerThanValue(3))).watch();
   }
 
   Stream<List<Task>> watchTasks() {
@@ -132,7 +132,13 @@ class AppDB extends _$AppDB{
             TodoListsCompanion.insert(name: Value("Tasks")),
           ]);
         });
-      }
+      },
+      //! When data matters and I want to add new columns, dont forget to change schemaversion as well. (Example)
+      // onUpgrade: (m, from, to) async {
+      //   if (from < 2) {
+      //     await m.addColumn(todoLists, todoLists.position);
+      //   }
+      // }
     );
   }
 
@@ -144,7 +150,7 @@ LazyDatabase _openConnection() {
     // put the database file, called db.sqlite here, into the documents folder
     // for your app.
     final dbFolder = await getApplicationDocumentsDirectory();
-    final file = File(p.join(dbFolder.path, 'db.sqlite'));
+    final file = File(p.join(dbFolder.path, 'db_v2.sqlite'));
 
     return NativeDatabase.createInBackground(file);
   });

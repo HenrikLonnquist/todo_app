@@ -21,8 +21,15 @@ class TodoLists extends Table with TableInfo<TodoLists, TodoList> {
       type: DriftSqlType.string,
       requiredDuringInsert: false,
       $customConstraints: '');
+  static const VerificationMeta _positionMeta =
+      const VerificationMeta('position');
+  late final GeneratedColumn<int> position = GeneratedColumn<int>(
+      'position', aliasedName, true,
+      type: DriftSqlType.int,
+      requiredDuringInsert: false,
+      $customConstraints: '');
   @override
-  List<GeneratedColumn> get $columns => [id, name];
+  List<GeneratedColumn> get $columns => [id, name, position];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
@@ -40,6 +47,10 @@ class TodoLists extends Table with TableInfo<TodoLists, TodoList> {
       context.handle(
           _nameMeta, name.isAcceptableOrUnknown(data['name']!, _nameMeta));
     }
+    if (data.containsKey('position')) {
+      context.handle(_positionMeta,
+          position.isAcceptableOrUnknown(data['position']!, _positionMeta));
+    }
     return context;
   }
 
@@ -53,6 +64,8 @@ class TodoLists extends Table with TableInfo<TodoLists, TodoList> {
           .read(DriftSqlType.int, data['${effectivePrefix}id'])!,
       name: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}name']),
+      position: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}position']),
     );
   }
 
@@ -68,13 +81,17 @@ class TodoLists extends Table with TableInfo<TodoLists, TodoList> {
 class TodoList extends DataClass implements Insertable<TodoList> {
   final int id;
   final String? name;
-  const TodoList({required this.id, this.name});
+  final int? position;
+  const TodoList({required this.id, this.name, this.position});
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
     map['id'] = Variable<int>(id);
     if (!nullToAbsent || name != null) {
       map['name'] = Variable<String>(name);
+    }
+    if (!nullToAbsent || position != null) {
+      map['position'] = Variable<int>(position);
     }
     return map;
   }
@@ -83,6 +100,9 @@ class TodoList extends DataClass implements Insertable<TodoList> {
     return TodoListsCompanion(
       id: Value(id),
       name: name == null && nullToAbsent ? const Value.absent() : Value(name),
+      position: position == null && nullToAbsent
+          ? const Value.absent()
+          : Value(position),
     );
   }
 
@@ -92,6 +112,7 @@ class TodoList extends DataClass implements Insertable<TodoList> {
     return TodoList(
       id: serializer.fromJson<int>(json['id']),
       name: serializer.fromJson<String?>(json['name']),
+      position: serializer.fromJson<int?>(json['position']),
     );
   }
   @override
@@ -100,18 +121,24 @@ class TodoList extends DataClass implements Insertable<TodoList> {
     return <String, dynamic>{
       'id': serializer.toJson<int>(id),
       'name': serializer.toJson<String?>(name),
+      'position': serializer.toJson<int?>(position),
     };
   }
 
-  TodoList copyWith({int? id, Value<String?> name = const Value.absent()}) =>
+  TodoList copyWith(
+          {int? id,
+          Value<String?> name = const Value.absent(),
+          Value<int?> position = const Value.absent()}) =>
       TodoList(
         id: id ?? this.id,
         name: name.present ? name.value : this.name,
+        position: position.present ? position.value : this.position,
       );
   TodoList copyWithCompanion(TodoListsCompanion data) {
     return TodoList(
       id: data.id.present ? data.id.value : this.id,
       name: data.name.present ? data.name.value : this.name,
+      position: data.position.present ? data.position.value : this.position,
     );
   }
 
@@ -119,44 +146,55 @@ class TodoList extends DataClass implements Insertable<TodoList> {
   String toString() {
     return (StringBuffer('TodoList(')
           ..write('id: $id, ')
-          ..write('name: $name')
+          ..write('name: $name, ')
+          ..write('position: $position')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode => Object.hash(id, name);
+  int get hashCode => Object.hash(id, name, position);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      (other is TodoList && other.id == this.id && other.name == this.name);
+      (other is TodoList &&
+          other.id == this.id &&
+          other.name == this.name &&
+          other.position == this.position);
 }
 
 class TodoListsCompanion extends UpdateCompanion<TodoList> {
   final Value<int> id;
   final Value<String?> name;
+  final Value<int?> position;
   const TodoListsCompanion({
     this.id = const Value.absent(),
     this.name = const Value.absent(),
+    this.position = const Value.absent(),
   });
   TodoListsCompanion.insert({
     this.id = const Value.absent(),
     this.name = const Value.absent(),
+    this.position = const Value.absent(),
   });
   static Insertable<TodoList> custom({
     Expression<int>? id,
     Expression<String>? name,
+    Expression<int>? position,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
       if (name != null) 'name': name,
+      if (position != null) 'position': position,
     });
   }
 
-  TodoListsCompanion copyWith({Value<int>? id, Value<String?>? name}) {
+  TodoListsCompanion copyWith(
+      {Value<int>? id, Value<String?>? name, Value<int?>? position}) {
     return TodoListsCompanion(
       id: id ?? this.id,
       name: name ?? this.name,
+      position: position ?? this.position,
     );
   }
 
@@ -169,6 +207,9 @@ class TodoListsCompanion extends UpdateCompanion<TodoList> {
     if (name.present) {
       map['name'] = Variable<String>(name.value);
     }
+    if (position.present) {
+      map['position'] = Variable<int>(position.value);
+    }
     return map;
   }
 
@@ -176,7 +217,8 @@ class TodoListsCompanion extends UpdateCompanion<TodoList> {
   String toString() {
     return (StringBuffer('TodoListsCompanion(')
           ..write('id: $id, ')
-          ..write('name: $name')
+          ..write('name: $name, ')
+          ..write('position: $position')
           ..write(')'))
         .toString();
   }
@@ -994,10 +1036,12 @@ abstract class _$AppDB extends GeneratedDatabase {
 typedef $TodoListsCreateCompanionBuilder = TodoListsCompanion Function({
   Value<int> id,
   Value<String?> name,
+  Value<int?> position,
 });
 typedef $TodoListsUpdateCompanionBuilder = TodoListsCompanion Function({
   Value<int> id,
   Value<String?> name,
+  Value<int?> position,
 });
 
 final class $TodoListsReferences
@@ -1031,6 +1075,9 @@ class $TodoListsFilterComposer extends Composer<_$AppDB, TodoLists> {
 
   ColumnFilters<String> get name => $composableBuilder(
       column: $table.name, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get position => $composableBuilder(
+      column: $table.position, builder: (column) => ColumnFilters(column));
 
   Expression<bool> tasksRefs(
       Expression<bool> Function($TasksFilterComposer f) f) {
@@ -1067,6 +1114,9 @@ class $TodoListsOrderingComposer extends Composer<_$AppDB, TodoLists> {
 
   ColumnOrderings<String> get name => $composableBuilder(
       column: $table.name, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get position => $composableBuilder(
+      column: $table.position, builder: (column) => ColumnOrderings(column));
 }
 
 class $TodoListsAnnotationComposer extends Composer<_$AppDB, TodoLists> {
@@ -1082,6 +1132,9 @@ class $TodoListsAnnotationComposer extends Composer<_$AppDB, TodoLists> {
 
   GeneratedColumn<String> get name =>
       $composableBuilder(column: $table.name, builder: (column) => column);
+
+  GeneratedColumn<int> get position =>
+      $composableBuilder(column: $table.position, builder: (column) => column);
 
   Expression<T> tasksRefs<T extends Object>(
       Expression<T> Function($TasksAnnotationComposer a) f) {
@@ -1130,18 +1183,22 @@ class $TodoListsTableManager extends RootTableManager<
           updateCompanionCallback: ({
             Value<int> id = const Value.absent(),
             Value<String?> name = const Value.absent(),
+            Value<int?> position = const Value.absent(),
           }) =>
               TodoListsCompanion(
             id: id,
             name: name,
+            position: position,
           ),
           createCompanionCallback: ({
             Value<int> id = const Value.absent(),
             Value<String?> name = const Value.absent(),
+            Value<int?> position = const Value.absent(),
           }) =>
               TodoListsCompanion.insert(
             id: id,
             name: name,
+            position: position,
           ),
           withReferenceMapper: (p0) => p0
               .map((e) =>
