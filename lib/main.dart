@@ -194,6 +194,10 @@ class _NavigationPanel2State extends State<NavigationPanel2> {
                 child: ListTile(
                   title: Text("Delete list"),
                   onTap: () async {
+
+                    // Close/hide dropdown menu
+                    Navigator.of(context).pop(); //! Cannot have it afterwards because it is slow at closing.
+
                     final db = context.read<AppDB>();
                     await (db.delete(db.todoLists)..where((t) => t.id.equals(index))).go();
 
