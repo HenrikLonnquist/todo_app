@@ -191,6 +191,7 @@ class _NavigationPanel2State extends State<NavigationPanel2> {
 
                 },
                 // child: Text("item 8")
+                //TODO: remove the bad click/tap effect
                 child: ListTile(
                   title: Text("Delete list"),
                   onTap: () async {
