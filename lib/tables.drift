@@ -2,7 +2,8 @@
 
 CREATE TABLE todo_lists (
     id INT NOT NULL PRIMARY KEY AUTOINCREMENT,
-    name TEXT
+    name TEXT,
+    position INT NOT NULL
 );
 
 
@@ -16,7 +17,7 @@ CREATE TABLE tasks(
     due_date DATETIME,
     repeat TEXT CHECK(repeat IN('daily', 'weekly', 'monthly')), 
     notes TEXT,
-    position INT, --sorting within list
+    position INT NOT NULL, --sorting within list
     created_at DATETIME, --DEFAULT CURRENT_TIMESTAMP: not working, format error
     updated_at DATETIME --DEFAULT CURRENT_TIMESTAMP: not working, format error
 ) as Task;
