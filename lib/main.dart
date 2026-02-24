@@ -1,4 +1,5 @@
 import 'dart:ffi';
+import 'dart:math';
 
 import 'package:drift/drift.dart' hide Column;
 import 'package:dropdown_button2/dropdown_button2.dart';
@@ -9,6 +10,7 @@ import 'package:provider/provider.dart';
 import 'package:todo_app/components/add_task_field.dart';
 import 'package:todo_app/components/right_sidepanel.dart';
 import 'package:todo_app/database.dart';
+import 'package:todo_app/nav_controller.dart';
 import 'package:todo_app/navigation_panel.dart';
 
 
@@ -18,9 +20,17 @@ import 'package:todo_app/navigation_panel.dart';
 
 void main() async {
   runApp(
-    Provider<AppDB>(
-      create: (_) => AppDB(),
-      dispose: (_, db) => db.close(),
+    MultiProvider(
+      providers: [
+        Provider<AppDB>(
+          create: (_) => AppDB(),
+          dispose: (_, db) => db.close(),
+          child: MyApp(),
+        ),
+        ChangeNotifierProvider(
+          create: (_) => NavController(),
+        ),
+      ],
       child: MyApp(),
     ),
   );
@@ -51,6 +61,7 @@ class MyApp extends StatelessWidget {
       // home: NavigationPanel(database: database),
       //MARK: MAIN?
       home: ParentPage(),
+      
     );
   }
 }
@@ -69,7 +80,7 @@ class _ParentPageState extends State<ParentPage> {
 
   final bool showLeftPanel = true;
   
-  int selectedIndex = 2;
+  // int selectedIndex = 2;
 
 
   @override
@@ -79,85 +90,12 @@ class _ParentPageState extends State<ParentPage> {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           NavigationPanel2(
-            handleTabTap: (tabId) {
-              //TODo: what tap was pressed and then send the info to mainpage
-
-              // db.select().get();
-
-
-            },
-            currentIndex: (index) {
-              // 0 = Myday
-              // 1 = Important
-              // 2 = Tasks
-              // db.      
-
-              setState(() {
-                selectedIndex = index;
-              });
-            },
           ),
           MainPage(
-            //TODO: replace/change to the current selected NavPanel(list > Myday,Tasks..) 
-            // database: widget.database, 
-            selectedListIndex: selectedIndex,
           ),
+          //RightSidePanel/TaskInfo
         ]
       )
-    );
-  }
-}
-
-
-//MARK: true right sidepanel
-//! Why did I do this? I can probably remove this
-//TODO: Can I remove or refactor
-class RightSidePanel2 extends StatefulWidget {
-  const RightSidePanel2({
-    super.key,
-    // required this.task,
-    // this.subTask,
-    this.showPanel = false,
-    this.btnHidePanel,
-    this.deleteTask,
-  });
-
-  // final Map task;
-  // final List? subTask;
-  final bool showPanel;
-  final VoidCallback? btnHidePanel;
-  final VoidCallback? deleteTask;
-
-  @override
-  State<RightSidePanel2> createState() => _RightSidePanel2State();
-}
-
-class _RightSidePanel2State extends State<RightSidePanel2> {
-  @override
-  Widget build(BuildContext context) {
-
-    // print("right: ${widget.subTask}");
-
-    // TODO: Merge this with TaskInfo Class?
-    return RightSidePanel(
-      show: widget.showPanel,
-      sidePanelWidth: 340,
-      bottomBar: PanelBottomBar( //! Do I need this to be a separate widget? Probably not
-        hidePanel: () {
-            widget.btnHidePanel!.call();
-              
-            // widget.task;
-            
-        },
-        deleteTask: () { 
-          //! Maybe remove this and just do this inside the file/widget, no need for a parameter.
-          widget.deleteTask!.call();
-        }
-      ),
-      // child: TaskInfo(
-      //   // taskId: widget.task, //! Might need to change this to taskId, instead of the entire taskinfo.
-      //   // subTaskId: widget.subTask,
-      // ),
     );
   }
 }
@@ -167,11 +105,7 @@ class _RightSidePanel2State extends State<RightSidePanel2> {
 class NavigationPanel2 extends StatefulWidget {
   const NavigationPanel2({
     super.key,
-    required this.currentIndex, 
-    required Null Function(int) handleTabTap,
   });
-
-  final Function(int) currentIndex;
 
   @override
   State<NavigationPanel2> createState() => _NavigationPanel2State();
@@ -179,37 +113,135 @@ class NavigationPanel2 extends StatefulWidget {
 
 class _NavigationPanel2State extends State<NavigationPanel2> {
 
-  int _userListCount = 0; //TODO: Make it into a stream instead?
+  final listKey = GlobalKey();
 
 
-  //TODO: grap database todoLists
-  // AppDB get db => context.read<AppDB>();
+  dynamic commonListTile({
+    required int index, 
+    required int selectedIndex,
+    required String title,
+    GlobalKey? itemKey,
+    bool isUserList = false,
+    }) {
 
-  // void get_Lists() async {
+      return GestureDetector(
+        key: itemKey,
+        onSecondaryTapDown: !isUserList ? null : (detail) async {
+          final offset = detail.globalPosition;
+          
+          // TODO: might wanna create something my own. Can't really customize this as much.
+          //! Not able to right click another item while menu is showing. You can do this in MS Todo tho.
+          showMenu(
+            menuPadding: EdgeInsets.all(0),
+            color: Colors.grey.shade800,
+            context: context,
+            position: RelativeRect.fromLTRB(
+              offset.dx,
+              offset.dy,
+              MediaQuery.of(context).size.width - offset.dx,
+              MediaQuery.of(context).size.height - offset.dy,
+            ),
+            popUpAnimationStyle: AnimationStyle(duration: Duration(milliseconds: 5)),
+            items: [
+              // Rename list
+              PopupMenuItem(
+                mouseCursor: SystemMouseCursors.basic,
+                child: Text("item 1")
+              ),
 
-  //   final query = await db.select(db.todoLists).get();
+              // Share List
+              PopupMenuItem(
+                child: Text("item 2")
+              ),
 
-  //   //! INSERT, UPDATE, DELETE ---> Use 'custom...'/raw sql | but when SELECT(returning values/graping) use .select drift
-  //   // db.customStatement("DELETE FROM todo_lists WHERE id = ?", [7]);
+              //DIVIDER
+              PopupMenuItem(
+                height: 0,
+                enabled: false,
+                padding: EdgeInsets.all(0),
+                child: PopupMenuDivider(),
+              ),
 
-  //   _userListCount = (query.length - 1).abs() ;
-  //   print(_userListCount);
+              // Move list to... >
+              PopupMenuItem(
+                child: Text("item 3")
+              ),
+              
+              // Print List
+              PopupMenuItem(
+                child: Text("item 4")
+              ),
+              
+              // Email List
+              PopupMenuItem(
+                child: Text("item 5")
+              ),
+              
+              // Pin start
+              PopupMenuItem(
+                child: Text("item 6")
+              ),
+              
+              // Duplicate List
+              PopupMenuItem(
+                child: Text("item 7")
+              ),
+              
+              // Remove List
+              PopupMenuItem(
+                mouseCursor: SystemMouseCursors.basic,
+                onTap: () {
+                  // TODO: call db - should I delete or add it to history? 
+                  // Obviouisly we need a popup that asks to confirm deletion.
+                  // Then a snackbar message that tells user that it got deleted, but still got a chance to 
+                  // undo before the snackbar message goes away.
 
-  //   for (final row in query) {
-  //     print("Has row $row");
-  //   }
 
-  // }  
-  
-  int selectedIndex = 2;
+                },
+                // child: Text("item 8")
+                child: ListTile(
+                  title: Text("Delete list"),
+                  onTap: () async {
+                    final db = context.read<AppDB>();
+                    await (db.delete(db.todoLists)..where((t) => t.id.equals(index))).go();
 
+                  },
+                ),
+              ),
+            ],
+            
+          );
+          
+        },
+        //! HIDE OR Show no info when the object is being dragged.
+        child: ListTile(
+          mouseCursor: SystemMouseCursors.basic,
+          hoverColor: Colors.grey.shade800,
+          selected: index == selectedIndex,
+          splashColor: Colors.transparent,
+          title: Text(
+            title,
+          ),
+          onTap: (){
+            setState(() {
+              context.read<NavController>().setindex(index);
+              
+            });
+          },
+        ),
+      );
+    
+  }
+
+
+  //MARK: Nav tab
   @override
   Widget build(BuildContext context) {
 
     final db = context.read<AppDB>();
+    final selectedIndex = context.select<NavController, int>((i) => i.index);
 
-    return RightSidePanel(
-      show: true, // TODO: have a button if you want to hide/show the panel
+    return CustomPanel(
       sidePanelWidth: 220,
       padding: null,
       bottomBar: Material(
@@ -218,12 +250,16 @@ class _NavigationPanel2State extends State<NavigationPanel2> {
           title: Text("New list +"),
           hoverColor: Colors.grey.shade800,
           onTap: () async {
-            //TODO: Have the parent handle this. Or where its called/used.
-            //TODO: Create a new user list and add to database
-
             
-            //! What is this? Huh? Why did ask this? Obviously this an to insert an new user list to the database.
-            await db.into(db.todoLists).insert(TodoListsCompanion.insert(name: Value("Untitled list")));
+            await db.todoLists.count().get().then((value) async {
+              
+              int size = value[0] - 3; // 3 default tabs("My day"..
+              int lastPos = size > 0 ? size * 1000 : 1000; 
+            
+              await db.into(db.todoLists).insert(TodoListsCompanion.insert(name: Value("Untitled list ${size + 1}"), position: Value(lastPos)));
+
+            },);
+
             
           },
         ),
@@ -234,99 +270,52 @@ class _NavigationPanel2State extends State<NavigationPanel2> {
           child: Column(
             children: [
 
-              //TODO: Make widget into a method?
-              ListTile(
-                hoverColor: Colors.grey.shade800,
-                selected: 0 == selectedIndex,
-                splashColor: Colors.transparent,
-                title: Text(
-                  "My Day",
-                ),
-                onTap: (){
-                  setState(() {
-                    selectedIndex = 0;
-                    widget.currentIndex(0);
-                    
-                  });
-                },
-              ),
-              ListTile(
-                hoverColor: Colors.grey.shade800,
-                selected: 1 == selectedIndex,
-                splashColor: Colors.transparent,
-                title: Text(
-                  "Important",
-                ),
-                onTap: (){
-                  setState(() {
-                    selectedIndex = 1;
-                    widget.currentIndex(1);
-                    
-                  });
-                },
-              ),
-              ListTile(
-                hoverColor: Colors.grey.shade800,
-                selected: 2 == selectedIndex,
-                splashColor: Colors.transparent,
-                title: Text(
-                  "Tasks",
-                ),
-                onTap: (){
-                  setState(() {
-                    selectedIndex = 2;
-                    widget.currentIndex(2);
-                    
-                  });
-                },
-              ),
+              commonListTile(title: "My Day", index: 0, selectedIndex: selectedIndex),
+              commonListTile(title: "Important", index: 1, selectedIndex: selectedIndex),
+              commonListTile(title: "Tasks", index: 2, selectedIndex: selectedIndex),
+              
               Divider(),
+
               //MARK: User Lists
-              //TODO: Change to a StreamBuilder or FutureBuilder(?, same as in Main Page Class)
-              //! Loading too fast? Need to wait for the get_lists function to grap first before loading.
-              //TODO: If !snapshot.hasData > progress indicator else.
-              // if (snapshot.hasData) CircularProgressIndicator(color: Colors.white), //! Works but needs a stream to track.
               StreamBuilder(
                 stream: db.watchUserLists(),
                 builder: (context, snapshot) {
-
-                  //TODO: Handle snapshot state cases - copy from Task List(mark)
-                  if (!snapshot.hasData) {
-                    return const Text("Add a new list", style: TextStyle(color: Colors.white));
-                    // return CircularProgressIndicator();
-                  }
 
                   if (snapshot.hasError) {
                     return Text("Error: ${snapshot.error}", style: TextStyle(color: Colors.white));
                   }
 
-                  final data = snapshot.data!;
+
+                  final data = snapshot.data ?? [];
+
+                  if (data.isEmpty) {
+                    return Center(
+                      child: Text(
+                        "Add a new list",
+                        style: TextStyle(
+                          color: Colors.white,
+                        ),
+                        ),
+                    );
+                  }
 
                   return ListView.builder(
+                    key: listKey,
                     shrinkWrap: true,
                     physics: NeverScrollableScrollPhysics(),
                     itemCount: data.length, 
                     itemBuilder: (context, index) {
-                      
-                      // final userIndex = 3 + index; // 3 = default lists(MyDay, Important, Tasks)
 
                       final userList = data[index];
+                      final itemKey = GlobalKey();
 
-                      return ListTile(
-                        hoverColor: Colors.grey.shade800,
-                        selected: userList.id == selectedIndex,
-                        splashColor: Colors.transparent,
-                        title: Text(
-                          userList.name!,
-                        ),
-                        onTap: (){
-                          setState(() {
-                            selectedIndex = userList.id; //! Seems a redundant. Why not just use the widget.currentIndex.
-                            //! Was thinking of using stream or something like that for this. Emit index change.
-                            widget.currentIndex(userList.id);
-                          });
-                        },
-                      ); 
+                      return commonListTile(
+                        itemKey: itemKey,
+                        title: userList.name!, 
+                        index: userList.id, 
+                        selectedIndex: selectedIndex,
+                        isUserList: true,
+                      );
                     },
                   );
                 }
@@ -345,12 +334,10 @@ class MainPage extends StatefulWidget {
   const MainPage({
     super.key,
     this.onTap,
-    required this.selectedListIndex,
   });
 
-  // final AppDB database;
   final Function()? onTap;
-  final int selectedListIndex;
+  // final int selectedListIndex;
 
   @override
   State<MainPage> createState() => _MainPageState();
@@ -361,22 +348,19 @@ class _MainPageState extends State<MainPage> {
   bool showPanel = false;
 
   int currentTask = 0;
-  int? currentSubTask;
-
-  //TODO: Task-tile is flickers when pressed.
-  //! could be because of the refreshing the UI from setstate. Which means I might need to 
-  //! separate from them to only refresh that class. Can't be in the same class/widget.
+  
 
   @override
   Widget build(BuildContext context) {
 
     final db = context.read<AppDB>();
+    final navIndex = context.select<NavController, int>((i) => i.index);
 
     return Expanded(
       child: Row(
         children: [
           Expanded(
-            child: RightSidePanel(
+            child: CustomPanel(
               bgColorPanel: Colors.black,
               sidePanelWidth: null,
               topBar: Column(
@@ -384,11 +368,11 @@ class _MainPageState extends State<MainPage> {
                   Row(
                     children: [
                       Icon(Icons.home),
-                      Text("Main Page ${widget.selectedListIndex}"),
+                      Text("Main Page $navIndex"), //TODO Change to titlefield
                       Spacer(),
                       Icon(Icons.swap_vert),
                       Icon(Icons.lightbulb),
-                      //TODO: Very slow, how can I fix it?
+                      //TODO: Very slow, how can I fix it? I guess make my own no need to make it complicated, just a window and a list of items.
                       DropdownButton2(
                         customButton: const Icon(
                           Icons.more_vert
@@ -415,29 +399,42 @@ class _MainPageState extends State<MainPage> {
                       )
                     ],
                   ),
-                  if (widget.selectedListIndex == 0) Text("Current Date"), //TODO: Change to actual current Date and change when it's an new day
+                  if (navIndex == 0) Text("Current Date"), //TODO: Change to actual current Date and change when it's an new day
                 ],
               ),
               bottomBar: AddTask(
                 onSubmitted: (title) async {
+
+                  await db.tasks.count().get().then((value) async {
                     
-                  await db.insertTask(
-                    title: title,
-                    listID: widget.selectedListIndex,
-                    position: 0,
+                    final size = value[0];
+                    final pos = size > 0 ? size * 1000 : 1000;
+                      
+                    await db.insertTask(
+                      title: title,
+                      listID: navIndex,
+                      position: pos,
+                    );
+                  },
+                  onError: (e) {
+                    print("Add task error: $e");
+                  }
                   );
 
                 },
               ),
               //MARK: Task List
               child: StreamBuilder(
-                stream: db.watchTasksByListId(widget.selectedListIndex),
+                stream: db.watchTasksByListId(navIndex),
                 builder: (context, snapshot) {
-                  
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    return Center(child: CircularProgressIndicator());
-                  }
 
+                  // debugPrint(
+                  //   'StreamBuilder rebuild — '
+                  //   'hasData=${snapshot.hasData} '
+                  //   'len=${snapshot.data?.length} '
+                  //   'connectionState=${snapshot.connectionState}',
+                  // );
+                  
                   if (snapshot.hasError) {
                     return Center(
                       child: Text(
@@ -472,6 +469,7 @@ class _MainPageState extends State<MainPage> {
                         final taskTitle = task.title;
                       
                         return ListTile(
+                          mouseCursor: SystemMouseCursors.basic,
                           tileColor: Colors.grey.shade900,
                           hoverColor: Colors.grey.shade800,
                           splashColor: Colors.transparent,
@@ -487,8 +485,8 @@ class _MainPageState extends State<MainPage> {
                                 showPanel = true;
                               }
 
+                              //! WOuld adding this to navcontroller be too much? same for showpanel.
                               currentTask = task.id;
-                              
                       
                             });
                           },
@@ -512,43 +510,17 @@ class _MainPageState extends State<MainPage> {
               ),
             ),
           ),
-          RightSidePanel(
-            show: showPanel,
-            sidePanelWidth: 340,
-            bottomBar: PanelBottomBar( //! Do I need this to be a separate widget? Probably not
-              hidePanel: () {
-                  // widget.btnHidePanel!.call();
-                    
-                  // widget.task;
-                  
-              },
-              deleteTask: () { 
-                //! Maybe remove this and just do this inside the file/widget, no need for a parameter.
-                // widget.deleteTask!.call();
-              }
-            ),
-            child: TaskInfo(
-              taskId: currentTask, //! Might need to change this to taskId, instead of the entire taskinfo.
-              subTaskId: currentSubTask,
-            ),
+          //MARK: Right Side Panel
+          //TODO: Move this to Parent Page(mark: MAIN?)
+          //TODO: put this inside of 'Task Info' class? Need the task stuff from it.
+          TaskInfo(
+            taskId: currentTask,
+            showPanel: showPanel, 
           ),
-          //TODO: Maybe move this to parent Widget(MAIN). WHy? Because I need to hide this when I open a new "Tab"/List
-          // RightSidePanel2(
-          //   // task: currentTask, 
-          //   // subTask: currentSubTask,
-          //   showPanel: showPanel,
-          //   btnHidePanel: () {
-          //     setState(() {
-          //       showPanel = false;
-          //     });
-          //   },
-          //   deleteTask: () {
-          //     // widget.database.into(widget.database.tasks);
-    
-          //   },
-          // ),
           //MARK: Suggestion Panel
           //TODO: Suggetsion Panel -- Move to parent widget(MAIN)?
+          // Should I show it on top of a current panel if it's open? No, I just want it to switch between them regardless of state
+          //! but they can't share the same 'showPanel' variable. I think that will conflict with each other. 
         ],
       ),
     );
