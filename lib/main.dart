@@ -1,23 +1,15 @@
-import 'dart:ffi';
-import 'dart:math';
+// import 'dart:ffi';
 
 import 'package:drift/drift.dart' hide Column;
 import 'package:dropdown_button2/dropdown_button2.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 import 'package:provider/provider.dart';
 import 'package:todo_app/components/add_task_field.dart';
 import 'package:todo_app/components/right_sidepanel.dart';
 import 'package:todo_app/database.dart';
 import 'package:todo_app/nav_controller.dart';
-import 'package:todo_app/navigation_panel.dart';
 
-
-// TODO: need to make it faster when switching between lists/tabs. Probably because of the loading everytime.
 //!Question: why does the tasks in the database need to have a list id?
-// TODO: switch to riverpod later - manually passing to everywidget > riverpod
-
 void main() async {
   runApp(
     MultiProvider(
