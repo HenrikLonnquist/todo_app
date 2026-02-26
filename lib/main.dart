@@ -107,9 +107,27 @@ class _NavigationPanel2State extends State<NavigationPanel2> {
 
   final listKey = GlobalKey();
 
+  PopupMenuItem commonMenuItem(
+    {
+    Function? onTap,
+    required String title,
+  }) {
+
+    return PopupMenuItem(
+      mouseCursor: SystemMouseCursors.basic,
+      onTap: () async {
+        Navigator.of(context).pop();
+
+        //do someshit.
+      },
+      child: Text(title),
+    );
+
+  }
+
 
   dynamic commonListTile({
-    required int index, 
+    required int index, // listId
     required int selectedIndex,
     required String title,
     GlobalKey? itemKey,
@@ -136,9 +154,19 @@ class _NavigationPanel2State extends State<NavigationPanel2> {
             popUpAnimationStyle: AnimationStyle(duration: Duration(milliseconds: 5)),
             items: [
               // Rename list
-              PopupMenuItem(
-                mouseCursor: SystemMouseCursors.basic,
-                child: Text("item 1")
+              commonMenuItem(
+                title: "Rename List",
+                onTap: () {
+
+                  //look for the selected item and change its name it guess or something
+                  //! but this needs to be a field if I want to do that. Or be turned into a field.
+                  //TODO: make this into a separate class.
+
+                  //maybe how it would look like
+                  // setstate 
+                  //    change variable to show field instead of listtile.
+
+                },
               ),
 
               // Share List
