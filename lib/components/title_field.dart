@@ -13,9 +13,11 @@ class TitleField extends StatefulWidget {
     this.fontWeight,
     this.labelText,
     this.labelStyle,
+    this.mouseCursor,
   });
 
   final bool enabled;
+  final MouseCursor? mouseCursor;
   final Function(String)? onChange; //TODO: rename to something more fitting
   final String inputValue;
   final bool completed;
@@ -29,7 +31,9 @@ class TitleField extends StatefulWidget {
 }
 
 class _TitleFieldState extends State<TitleField> {
+  
   final TextEditingController _titleController = TextEditingController();
+  
 
   @override
   void dispose() {
@@ -39,9 +43,13 @@ class _TitleFieldState extends State<TitleField> {
   
   @override
   Widget build(BuildContext context) {
+    
     _titleController.text = widget.inputValue;
+
     return IntrinsicWidth(
       child: TextField(
+        autofocus: true,
+        mouseCursor: widget.mouseCursor,
         enabled: widget.enabled,
         controller: _titleController,
         onSubmitted: (value) {
