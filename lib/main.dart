@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:todo_app/components/add_task_field.dart';
 import 'package:todo_app/components/right_sidepanel.dart';
+import 'package:todo_app/components/title_field.dart';
 import 'package:todo_app/database.dart';
 import 'package:todo_app/nav_controller.dart';
 
@@ -107,157 +108,6 @@ class _NavigationPanel2State extends State<NavigationPanel2> {
 
   final listKey = GlobalKey();
 
-  PopupMenuItem commonMenuItem(
-    {
-    Function? onTap,
-    required String title,
-  }) {
-
-    return PopupMenuItem(
-      mouseCursor: SystemMouseCursors.basic,
-      onTap: () async {
-        Navigator.of(context).pop();
-
-        //do someshit.
-      },
-      child: Text(title),
-    );
-
-  }
-
-
-  dynamic commonListTile({
-    required int index, // listId
-    required int selectedIndex,
-    required String title,
-    GlobalKey? itemKey,
-    bool isUserList = false,
-    }) {
-
-      return GestureDetector(
-        key: itemKey,
-        onSecondaryTapDown: !isUserList ? null : (detail) async {
-          final offset = detail.globalPosition;
-          
-          // TODO: might wanna create something my own. Can't really customize this as much.
-          //! Not able to right click another item while menu is showing. You can do this in MS Todo tho.
-          showMenu(
-            menuPadding: EdgeInsets.all(0),
-            color: Colors.grey.shade800,
-            context: context,
-            position: RelativeRect.fromLTRB(
-              offset.dx,
-              offset.dy,
-              MediaQuery.of(context).size.width - offset.dx,
-              MediaQuery.of(context).size.height - offset.dy,
-            ),
-            popUpAnimationStyle: AnimationStyle(duration: Duration(milliseconds: 5)),
-            items: [
-              // Rename list
-              commonMenuItem(
-                title: "Rename List",
-                onTap: () {
-
-                  //look for the selected item and change its name it guess or something
-                  //! but this needs to be a field if I want to do that. Or be turned into a field.
-                  //TODO: make this into a separate class.
-
-                  //maybe how it would look like
-                  // setstate 
-                  //    change variable to show field instead of listtile.
-
-                },
-              ),
-
-              // Share List
-              PopupMenuItem(
-                child: Text("item 2")
-              ),
-
-              //DIVIDER
-              PopupMenuItem(
-                height: 0,
-                enabled: false,
-                padding: EdgeInsets.all(0),
-                child: PopupMenuDivider(),
-              ),
-
-              // Move list to... >
-              PopupMenuItem(
-                child: Text("item 3")
-              ),
-              
-              // Print List
-              PopupMenuItem(
-                child: Text("item 4")
-              ),
-              
-              // Email List
-              PopupMenuItem(
-                child: Text("item 5")
-              ),
-              
-              // Pin start
-              PopupMenuItem(
-                child: Text("item 6")
-              ),
-              
-              // Duplicate List
-              PopupMenuItem(
-                child: Text("item 7")
-              ),
-              
-              // Remove List
-              PopupMenuItem(
-                mouseCursor: SystemMouseCursors.basic,
-                onTap: () {
-                  // TODO: call db - should I delete or add it to history? 
-                  // Obviouisly we need a popup that asks to confirm deletion.
-                  // Then a snackbar message that tells user that it got deleted, but still got a chance to 
-                  // undo before the snackbar message goes away.
-
-
-                },
-                // child: Text("item 8")
-                //TODO: remove the bad click/tap effect
-                child: ListTile(
-                  title: Text("Delete list"),
-                  onTap: () async {
-
-                    // Close/hide dropdown menu
-                    Navigator.of(context).pop(); //! Cannot have it afterwards because it is slow at closing.
-
-                    final db = context.read<AppDB>();
-                    await (db.delete(db.todoLists)..where((t) => t.id.equals(index))).go();
-
-                  },
-                ),
-              ),
-            ],
-            
-          );
-          
-        },
-        //! HIDE OR Show no info when the object is being dragged.
-        child: ListTile(
-          mouseCursor: SystemMouseCursors.basic,
-          hoverColor: Colors.grey.shade800,
-          selected: index == selectedIndex,
-          splashColor: Colors.transparent,
-          title: Text(
-            title,
-          ),
-          onTap: (){
-            setState(() {
-              context.read<NavController>().setindex(index);
-              
-            });
-          },
-        ),
-      );
-    
-  }
-
 
   //MARK: Nav tab
   @override
@@ -295,9 +145,9 @@ class _NavigationPanel2State extends State<NavigationPanel2> {
           child: Column(
             children: [
 
-              commonListTile(title: "My Day", index: 0, selectedIndex: selectedIndex),
-              commonListTile(title: "Important", index: 1, selectedIndex: selectedIndex),
-              commonListTile(title: "Tasks", index: 2, selectedIndex: selectedIndex),
+              CommonListTile(title: "My Day", index: 0, selectedIndex: selectedIndex),
+              CommonListTile(title: "Important", index: 1, selectedIndex: selectedIndex),
+              CommonListTile(title: "Tasks", index: 2, selectedIndex: selectedIndex),
               
               Divider(),
 
@@ -332,10 +182,8 @@ class _NavigationPanel2State extends State<NavigationPanel2> {
                     itemBuilder: (context, index) {
 
                       final userList = data[index];
-                      final itemKey = GlobalKey();
 
-                      return commonListTile(
-                        itemKey: itemKey,
+                      return CommonListTile(
                         title: userList.name!, 
                         index: userList.id, 
                         selectedIndex: selectedIndex,
@@ -348,6 +196,200 @@ class _NavigationPanel2State extends State<NavigationPanel2> {
             ]
           ),
         ),
+      ),
+    );
+  }
+}
+
+//MARK: Custom listtile
+//TODO: maybe changethe name later
+class CommonListTile extends StatefulWidget {
+  const CommonListTile({
+    super.key,
+    required this.index,
+    required this.selectedIndex,
+    required this.title,
+    this.isUserList = false,
+  });
+
+
+  final int index; // listId
+  final int selectedIndex;
+  final String title;
+  final bool isUserList;
+
+  @override
+  State<CommonListTile> createState() => _CommonListTileState();
+}
+
+class _CommonListTileState extends State<CommonListTile> {
+
+  bool listRename = false;
+
+  PopupMenuItem commonMenuItem({
+    VoidCallback? onTap,
+    required String title,
+  }) {
+
+    return PopupMenuItem(
+      mouseCursor: SystemMouseCursors.basic,
+      // onTap: () => Navigator.of(context).pop(),
+      onTap: onTap,
+      child: Text(title),
+    );
+
+  }
+
+  @override
+  Widget build(BuildContext context) {
+
+    return GestureDetector(
+      key: ValueKey(widget.index),
+      onSecondaryTapDown: !widget.isUserList ? null : (detail) async {
+
+        print("test");
+        final offset = detail.globalPosition;
+        
+        // TODO: might wanna create something my own. Can't really customize this as much.
+        //! Not able to right click another item while menu is showing. You can do this in MS Todo tho.
+        showMenu(
+          menuPadding: EdgeInsets.all(0),
+          color: Colors.grey.shade800,
+          context: context,
+          position: RelativeRect.fromLTRB(
+            offset.dx,
+            offset.dy,
+            MediaQuery.of(context).size.width - offset.dx,
+            MediaQuery.of(context).size.height - offset.dy,
+          ),
+          popUpAnimationStyle: AnimationStyle(duration: Duration(milliseconds: 5)),
+          items: [
+            // Rename list
+            commonMenuItem(
+              title: "Rename List",
+              onTap: () {
+
+                //look for the selected item and change its name it guess or something
+                //! but this needs to be a field if I want to do that. Or be turned into a field.
+                //TODO: make this into a separate class.
+
+                // lets fix the db thing first
+                // need to know which list to change and we can get that from the index of this function which
+                // should be the same as the listid.
+                //! or no. I shouldnt be doing db stuff but inside of the titlefield that I'll be using.
+
+                //Now make the listtile into a titlefield
+                setState(() {
+                  // change to titlefield
+                  listRename = true;
+                  print(listRename);
+
+                });
+
+                //maybe how it would look like
+                // setstate 
+                //    change variable to show field instead of listtile.
+
+              },
+            ),
+
+            // Share List
+            PopupMenuItem(
+              child: Text("item 2")
+            ),
+
+            //DIVIDER
+            PopupMenuItem(
+              height: 0,
+              enabled: false,
+              padding: EdgeInsets.all(0),
+              child: PopupMenuDivider(),
+            ),
+
+            // Move list to... >
+            PopupMenuItem(
+              child: Text("item 3")
+            ),
+            
+            // Print List
+            PopupMenuItem(
+              child: Text("item 4")
+            ),
+            
+            // Email List
+            PopupMenuItem(
+              child: Text("item 5")
+            ),
+            
+            // Pin start
+            PopupMenuItem(
+              child: Text("item 6")
+            ),
+            
+            // Duplicate List
+            PopupMenuItem(
+              child: Text("item 7")
+            ),
+            
+            // Remove List
+            PopupMenuItem(
+              mouseCursor: SystemMouseCursors.basic,
+              onTap: () {
+                // TODO: call db - should I delete or add it to history? 
+                // Obviouisly we need a popup that asks to confirm deletion.
+                // Then a snackbar message that tells user that it got deleted, but still got a chance to 
+                // undo before the snackbar message goes away.
+
+
+              },
+              // child: Text("item 8")
+              //TODO: remove the bad click/tap effect
+              child: ListTile(
+                title: Text("Delete list"),
+                onTap: () async {
+
+                  // Close/hide dropdown menu
+                  Navigator.of(context).pop(); //! Cannot have it afterwards because makes it feel slow.
+
+                  final db = context.read<AppDB>();
+                  await (db.delete(db.todoLists)..where((t) => t.id.equals(widget.index))).go();
+
+                },
+              ),
+            ),
+          ],
+          
+        );
+        
+      },
+      //! HIDE OR Show no info when the object is being dragged.
+      child: ListTile(
+        mouseCursor: SystemMouseCursors.basic,
+        hoverColor: Colors.grey.shade800,
+        selected: widget.index == widget.selectedIndex,
+        splashColor: Colors.transparent,
+        title: TitleField(
+          //TODO: autofocus/focus doesnt work
+          mouseCursor: listRename ? null : SystemMouseCursors.basic,
+          textSize: 16,
+          enabled: listRename,
+          inputValue: widget.title,
+          //TODO: need something for tapping outside
+          onChange: (value) {
+
+            print(value);
+
+            setState(() {
+              listRename = false;
+            });
+          },
+        ),
+        onTap: (){
+          setState(() {
+            context.read<NavController>().setindex(widget.index);
+            
+          });
+        },
       ),
     );
   }
