@@ -379,6 +379,8 @@ class _CommonListTileState extends State<CommonListTile> {
 
             print(value);
 
+            //TODO: change title in db
+
             setState(() {
               listRename = false;
             });
