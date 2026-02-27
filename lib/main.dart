@@ -375,11 +375,22 @@ class _CommonListTileState extends State<CommonListTile> {
           enabled: listRename,
           inputValue: widget.title,
           //TODO: need something for tapping outside
-          onChange: (value) {
+          onChange: (value) async {
 
             print(value);
 
-            //TODO: change title in db
+            // skip if the value has not changed.
+            if (value != widget.title) {
+             
+              final db = context.read<AppDB>();
+
+              await db.updateList(
+                widget.index, //listid
+                name: Value(value),
+              );
+
+            } 
+
 
             setState(() {
               listRename = false;
