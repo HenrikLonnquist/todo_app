@@ -233,7 +233,6 @@ class _CommonListTileState extends State<CommonListTile> {
 
     return PopupMenuItem(
       mouseCursor: SystemMouseCursors.basic,
-      // onTap: () => Navigator.of(context).pop(),
       onTap: onTap,
       child: Text(title),
     );
@@ -247,7 +246,6 @@ class _CommonListTileState extends State<CommonListTile> {
       key: ValueKey(widget.index),
       onSecondaryTapDown: !widget.isUserList ? null : (detail) async {
 
-        print("test");
         final offset = detail.globalPosition;
         
         // TODO: might wanna create something my own. Can't really customize this as much.
@@ -269,26 +267,12 @@ class _CommonListTileState extends State<CommonListTile> {
               title: "Rename List",
               onTap: () {
 
-                //look for the selected item and change its name it guess or something
-                //! but this needs to be a field if I want to do that. Or be turned into a field.
-                //TODO: make this into a separate class.
-
-                // lets fix the db thing first
-                // need to know which list to change and we can get that from the index of this function which
-                // should be the same as the listid.
-                //! or no. I shouldnt be doing db stuff but inside of the titlefield that I'll be using.
-
                 //Now make the listtile into a titlefield
                 setState(() {
-                  // change to titlefield
+
                   listRename = true;
-                  print(listRename);
 
                 });
-
-                //maybe how it would look like
-                // setstate 
-                //    change variable to show field instead of listtile.
 
               },
             ),
@@ -379,7 +363,7 @@ class _CommonListTileState extends State<CommonListTile> {
 
             // skip if the value has not changed.
             if (value != widget.title) {
-             
+
               final db = context.read<AppDB>();
 
               await db.updateList(
@@ -392,7 +376,7 @@ class _CommonListTileState extends State<CommonListTile> {
             setState(() {
               listRename = false;
             });
-            
+
           },
         ),
         onTap: (){
