@@ -14,8 +14,10 @@ class TitleField extends StatefulWidget {
     this.labelText,
     this.labelStyle,
     this.mouseCursor,
+    this.focusNode,
   });
 
+  final FocusNode? focusNode;
   final bool enabled;
   final MouseCursor? mouseCursor;
   final Function(String)? onChange; //TODO: rename to something more fitting
@@ -46,14 +48,21 @@ class _TitleFieldState extends State<TitleField> {
     
     _titleController.text = widget.inputValue;
 
+    print(widget.focusNode);
+
     return IntrinsicWidth(
       child: TextField(
-        autofocus: true,
+        onTapOutside: (event) {
+          // TODO: lose focus or something when pressed outside
+        },
+        // autofocus: true, // can probably remove this
+        focusNode: widget.focusNode,
         mouseCursor: widget.mouseCursor,
         enabled: widget.enabled,
         controller: _titleController,
         onSubmitted: (value) {
           _titleController.text = value;
+          //Todo: need to remove empty space after the text if there is any.
           widget.onChange!.call(value);
         },
         style: TextStyle(

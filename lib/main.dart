@@ -226,6 +226,23 @@ class _CommonListTileState extends State<CommonListTile> {
 
   bool listRename = false;
 
+  late FocusNode focusNode;
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+
+    focusNode = FocusNode();
+  }
+
+  @override
+  void dispose() {
+    focusNode.dispose();
+
+    super.dispose();
+  }
+
   PopupMenuItem commonMenuItem({
     VoidCallback? onTap,
     required String title,
@@ -271,6 +288,7 @@ class _CommonListTileState extends State<CommonListTile> {
                 setState(() {
 
                   listRename = true;
+                  focusNode.requestFocus();
 
                 });
 
@@ -354,6 +372,7 @@ class _CommonListTileState extends State<CommonListTile> {
         splashColor: Colors.transparent,
         title: TitleField(
           //TODO: autofocus/focus doesnt work
+          focusNode: focusNode,
           mouseCursor: listRename ? null : SystemMouseCursors.basic,
           textSize: 16,
           enabled: listRename,
