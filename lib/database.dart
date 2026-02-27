@@ -71,6 +71,7 @@ class AppDB extends _$AppDB{
       });
           
   }
+
   Future<void> updateTask(
     int id,{
       int? parentID,
@@ -114,6 +115,23 @@ class AppDB extends _$AppDB{
 
       });
           
+  }
+
+  Future<void> updateList(
+    int id,{
+    Value<String>? name,
+    Value<int>? position,
+  }) async {
+
+    await transaction(() async {
+        await (update(todoLists)..where((list) => list.id.equals(id))).write(
+          TodoListsCompanion(
+            name: name ?? const Value.absent(),
+            position: position ?? const Value.absent(),
+          ),
+        );
+      });
+
   }
 
   @override
