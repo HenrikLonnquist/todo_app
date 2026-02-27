@@ -377,8 +377,6 @@ class _CommonListTileState extends State<CommonListTile> {
           //TODO: need something for tapping outside
           onChange: (value) async {
 
-            print(value);
-
             // skip if the value has not changed.
             if (value != widget.title) {
              
@@ -391,10 +389,10 @@ class _CommonListTileState extends State<CommonListTile> {
 
             } 
 
-
             setState(() {
               listRename = false;
             });
+            
           },
         ),
         onTap: (){
