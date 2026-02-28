@@ -15,11 +15,9 @@ class TitleField extends StatefulWidget {
     this.labelText,
     this.labelStyle,
     this.mouseCursor,
-    this.focusNode,
     this.onTapOutside,
   });
 
-  final FocusNode? focusNode;
   final bool enabled;
   final MouseCursor? mouseCursor;
   final Function(String)? onChange; //TODO: rename to something more fitting
@@ -39,6 +37,15 @@ class _TitleFieldState extends State<TitleField> {
   
   final TextEditingController _titleController = TextEditingController();
   
+  late FocusNode focusNode;
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+
+    focusNode = FocusNode();
+  }
 
   @override
   void dispose() {
@@ -51,10 +58,23 @@ class _TitleFieldState extends State<TitleField> {
     
     _titleController.text = widget.inputValue;
 
+    // adds focus to textfield after first frame build/call
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      focusNode.requestFocus();
+      
+
+    });
+
+
     return IntrinsicWidth(
       child: TextField(
-        onTapOutside: widget.onTapOutside,
-        focusNode: widget.focusNode,
+        onTapOutside: (event) {
+          
+          focusNode.unfocus();
+          widget.onTapOutside!.call(event);
+          
+        },
+        focusNode: focusNode,
         mouseCursor: widget.mouseCursor,
         enabled: widget.enabled,
         controller: _titleController,

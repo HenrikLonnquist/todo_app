@@ -226,23 +226,6 @@ class _CommonListTileState extends State<CommonListTile> {
 
   bool listRename = false;
 
-  late FocusNode focusNode;
-
-  @override
-  void initState() {
-    // TODO: implement initState
-    super.initState();
-
-    focusNode = FocusNode();
-  }
-
-  @override
-  void dispose() {
-    focusNode.dispose();
-
-    super.dispose();
-  }
-
   PopupMenuItem commonMenuItem({
     VoidCallback? onTap,
     required String title,
@@ -288,12 +271,6 @@ class _CommonListTileState extends State<CommonListTile> {
                 setState(() {
 
                   listRename = true;
-
-                  // adds focus to textfield after first frame build/call
-                  WidgetsBinding.instance.addPostFrameCallback((_) {
-                    focusNode.requestFocus();
-
-                  });
 
                 });
 
@@ -380,7 +357,7 @@ class _CommonListTileState extends State<CommonListTile> {
           // TODO: focusnode not very stable, sometimes it highlights text
           // just want it to put the cursor in the field. nothing else.
           // I wonder if its because focusnode or something else.
-          focusNode: focusNode,
+
           onTapOutside: (event) {
         
             setState(() {
