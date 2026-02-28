@@ -284,11 +284,15 @@ class _CommonListTileState extends State<CommonListTile> {
               title: "Rename List",
               onTap: () {
 
-                //Now make the listtile into a titlefield
                 setState(() {
 
                   listRename = true;
-                  focusNode.requestFocus();
+
+                  // adds focus after first frame build/call
+                  WidgetsBinding.instance.addPostFrameCallback((_) {
+                    focusNode.requestFocus();
+
+                  });
 
                 });
 
@@ -370,35 +374,45 @@ class _CommonListTileState extends State<CommonListTile> {
         hoverColor: Colors.grey.shade800,
         selected: widget.index == widget.selectedIndex,
         splashColor: Colors.transparent,
+        //TODO: need something for indicating its in "editable mode"
         title: TitleField(
-          //TODO: autofocus/focus doesnt work
+          // TODO: focusnode not very stable, sometimes it highlights text
+          // just want it to put the cursor in the field. nothing else.
+          // I wonder if its because focusnode or something else.
           focusNode: focusNode,
+          onTapOutside: (event) {
+        
+            setState(() {
+              listRename = false;
+            });
+        
+          },
           mouseCursor: listRename ? null : SystemMouseCursors.basic,
           textSize: 16,
           enabled: listRename,
           inputValue: widget.title,
-          //TODO: need something for tapping outside
+          // TODO: need something for tapping outside
           onChange: (value) async {
-
+        
             // skip if the value has not changed.
             if (value != widget.title) {
-
+        
               final db = context.read<AppDB>();
-
+        
               await db.updateList(
                 widget.index, //listid
                 name: Value(value),
               );
-
+        
             } 
-
+        
             setState(() {
               listRename = false;
             });
-
+        
           },
         ),
-        onTap: (){
+        onTap: listRename ? null : (){
           setState(() {
             context.read<NavController>().setindex(widget.index);
             

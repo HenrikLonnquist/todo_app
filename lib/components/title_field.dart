@@ -2,6 +2,7 @@
 
 import 'package:flutter/material.dart';
 
+//TODO: probably make this into a stateless one
 class TitleField extends StatefulWidget {
   const TitleField({
     super.key,
@@ -15,6 +16,7 @@ class TitleField extends StatefulWidget {
     this.labelStyle,
     this.mouseCursor,
     this.focusNode,
+    this.onTapOutside,
   });
 
   final FocusNode? focusNode;
@@ -27,6 +29,7 @@ class TitleField extends StatefulWidget {
   final String? labelText;
   final TextStyle? labelStyle;
   final FontWeight? fontWeight;
+  final Function(PointerEvent)? onTapOutside;
 
   @override
   State<TitleField> createState() => _TitleFieldState();
@@ -48,14 +51,9 @@ class _TitleFieldState extends State<TitleField> {
     
     _titleController.text = widget.inputValue;
 
-    print(widget.focusNode);
-
     return IntrinsicWidth(
       child: TextField(
-        onTapOutside: (event) {
-          // TODO: lose focus or something when pressed outside
-        },
-        // autofocus: true, // can probably remove this
+        onTapOutside: widget.onTapOutside,
         focusNode: widget.focusNode,
         mouseCursor: widget.mouseCursor,
         enabled: widget.enabled,
