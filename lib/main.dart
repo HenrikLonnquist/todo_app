@@ -267,6 +267,7 @@ class _CommonListTileState extends State<CommonListTile> {
         
         // TODO: might wanna create something my own. Can't really customize this as much.
         //! Not able to right click another item while menu is showing. You can do this in MS Todo tho.
+        //! BUG: Does not appear outside of the program, constrained to the size of the app. 
         showMenu(
           menuPadding: EdgeInsets.all(0),
           color: Colors.grey.shade800,
@@ -288,7 +289,7 @@ class _CommonListTileState extends State<CommonListTile> {
 
                   listRename = true;
 
-                  // adds focus after first frame build/call
+                  // adds focus to textfield after first frame build/call
                   WidgetsBinding.instance.addPostFrameCallback((_) {
                     focusNode.requestFocus();
 
