@@ -41,7 +41,6 @@ class _TitleFieldState extends State<TitleField> {
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
 
     focusNode = FocusNode();
@@ -59,11 +58,14 @@ class _TitleFieldState extends State<TitleField> {
     _titleController.text = widget.inputValue;
 
     // adds focus to textfield after first frame build/call
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      focusNode.requestFocus();
-      
+    if (widget.enabled) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
 
-    });
+        focusNode.requestFocus();
+
+      });
+
+    }
 
 
     return IntrinsicWidth(
@@ -72,9 +74,11 @@ class _TitleFieldState extends State<TitleField> {
           
           focusNode.unfocus();
           widget.onTapOutside!.call(event);
-          
+
         },
-        focusNode: focusNode,
+        // TODO: fix highlighting issue with text. Focus the second time causes it to highlight, not the first time tho.
+        // might be because of operating system. Could work differently in windows and mobile.
+        focusNode: focusNode, 
         mouseCursor: widget.mouseCursor,
         enabled: widget.enabled,
         controller: _titleController,
