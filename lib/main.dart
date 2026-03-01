@@ -234,7 +234,7 @@ class _CommonListTileState extends State<CommonListTile> {
     return PopupMenuItem(
       mouseCursor: SystemMouseCursors.basic,
       onTap: onTap,
-      child: Text(title),
+      child: Text(title, style: TextStyle(color: Colors.white)),
     );
 
   }
@@ -316,30 +316,22 @@ class _CommonListTileState extends State<CommonListTile> {
             ),
             
             // Remove List
-            PopupMenuItem(
-              mouseCursor: SystemMouseCursors.basic,
-              onTap: () {
+            commonMenuItem(
+              title: "Delete List",
+              onTap: () async {
+
                 // TODO: call db - should I delete or add it to history? 
                 // Obviouisly we need a popup that asks to confirm deletion.
                 // Then a snackbar message that tells user that it got deleted, but still got a chance to 
                 // undo before the snackbar message goes away.
 
+                //Snackbar
+                //.then( delete list after confirmation)
 
+                final db = context.read<AppDB>();
+                await (db.delete(db.todoLists)..where((t) => t.id.equals(widget.index))).go();
+                
               },
-              // child: Text("item 8")
-              //TODO: remove the bad click/tap effect
-              child: ListTile(
-                title: Text("Delete list"),
-                onTap: () async {
-
-                  // Close/hide dropdown menu
-                  Navigator.of(context).pop(); //! Cannot have it afterwards because makes it feel slow.
-
-                  final db = context.read<AppDB>();
-                  await (db.delete(db.todoLists)..where((t) => t.id.equals(widget.index))).go();
-
-                },
-              ),
             ),
           ],
           
