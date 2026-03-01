@@ -344,11 +344,8 @@ class _CommonListTileState extends State<CommonListTile> {
         hoverColor: Colors.grey.shade800,
         selected: widget.index == widget.selectedIndex,
         splashColor: Colors.transparent,
-        //TODO: need something for indicating its in "editable mode"
+        //TODO: need something for indicating its in "editable mode" > dotted-line border/underscore
         title: TitleField(
-          // TODO: focusnode not very stable, sometimes it highlights text
-          // just want it to put the cursor in the field. nothing else.
-          // I wonder if its because focusnode or something else.
 
           onTapOutside: (event) {
         
@@ -359,7 +356,7 @@ class _CommonListTileState extends State<CommonListTile> {
           },
           mouseCursor: listRename ? null : SystemMouseCursors.basic,
           textSize: 16,
-          enabled: listRename,
+          requestFocus: listRename,
           inputValue: widget.title,
           // TODO: need something for tapping outside
           onChange: (value) async {

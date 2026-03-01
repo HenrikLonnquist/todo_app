@@ -7,7 +7,7 @@ class TitleField extends StatefulWidget {
   const TitleField({
     super.key,
     this.onChange,
-    this.enabled = true,
+    this.requestFocus,
     this.inputValue = "",
     this.completed = false,
     this.textSize = 26,
@@ -18,7 +18,7 @@ class TitleField extends StatefulWidget {
     this.onTapOutside,
   });
 
-  final bool enabled;
+  final bool? requestFocus;
   final MouseCursor? mouseCursor;
   final Function(String)? onChange; //TODO: rename to something more fitting
   final String inputValue;
@@ -39,6 +39,7 @@ class _TitleFieldState extends State<TitleField> {
   
   late FocusNode focusNode;
 
+
   @override
   void initState() {
     super.initState();
@@ -57,8 +58,9 @@ class _TitleFieldState extends State<TitleField> {
     
     _titleController.text = widget.inputValue;
 
-    // adds focus to textfield after first frame build/call
-    if (widget.enabled) {
+    if (widget.requestFocus ?? false) {
+      
+      // adds focus to textfield after first frame build/call
       WidgetsBinding.instance.addPostFrameCallback((_) {
 
         focusNode.requestFocus();
@@ -73,14 +75,13 @@ class _TitleFieldState extends State<TitleField> {
         onTapOutside: (event) {
           
           focusNode.unfocus();
-          widget.onTapOutside!.call(event);
+          widget.onTapOutside?.call(event);
 
         },
-        // TODO: fix highlighting issue with text. Focus the second time causes it to highlight, not the first time tho.
-        // might be because of operating system. Could work differently in windows and mobile.
-        focusNode: focusNode, 
+        focusNode: focusNode,
+        selectAllOnFocus: false,
         mouseCursor: widget.mouseCursor,
-        enabled: widget.enabled,
+        enabled: widget.requestFocus,
         controller: _titleController,
         onSubmitted: (value) {
           _titleController.text = value;
