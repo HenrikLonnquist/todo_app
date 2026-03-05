@@ -407,7 +407,8 @@ class MainPage extends StatefulWidget {
 
 class _MainPageState extends State<MainPage> {
 
-  bool showPanel = false;
+  // this is should handle by provider/riverpod
+  bool showPanel = false; 
 
   int currentTask = 0;
   

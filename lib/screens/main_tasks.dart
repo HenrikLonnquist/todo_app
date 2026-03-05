@@ -71,7 +71,6 @@ class _MainTasksPageState extends State<MainTasksPage> {
                 Padding(
                   padding: const EdgeInsets.only(left: 8.0),
                   child: TitleField(
-                    enabled: widget.userList!,
                     inputValue: pageTitle,
                     onChange: (value) {
                       widget.dataList["user_list_name"] = value;
