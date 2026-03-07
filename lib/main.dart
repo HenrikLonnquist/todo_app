@@ -389,7 +389,14 @@ class _CommonListTileState extends State<CommonListTile> {
         ),
         onTap: listRename ? null : (){
 
+          // notify provider on tab change / new list
           context.read<NavController>().setindex(widget.index);
+          
+          // in case the panel is open
+          context.read<NavController>().togglePanel(
+            state: false,
+            whichPanel: "right",            
+          );
             
         },
       ),
@@ -548,33 +555,23 @@ class _MainPageState extends State<MainPage> {
                     onTap: () {
         
                 
-                      // setState(() {
-
-                        print("${task.id} $currentTaskID ${task.id == currentTaskID}");
-                        print(taskPanelState);
+                      if (taskPanelState == true && currentTaskID == task.id) {
                         
-                        if (taskPanelState == true && currentTaskID == task.id) {
-                          
-                          //! pretty slow to open panel with this. the first time
-                          context.read<NavController>().togglePanel(
-                            state: false,
-                            whichPanel:"right",
-                            // currentTaskID: task.id,
-                          );
-                        }
-                        else {
+                        //! pretty slow to open panel with this. the first time
+                        context.read<NavController>().togglePanel(
+                          state: false,
+                          whichPanel:"right",
+                        );
+                      }
+                      else {
 
-                          context.read<NavController>().togglePanel(
-                            state: true,
-                            whichPanel: "right",
-                            taskID: task.id
-                          );
-                        }
+                        context.read<NavController>().togglePanel(
+                          state: true,
+                          whichPanel: "right",
+                          taskID: task.id
+                        );
+                      }
         
-                        //! WOuld adding this to navcontroller be too much? same for showpanel.
-                        // currentTaskID = task.id;
-                
-                      // });
                     },
                     trailing: IconButton(
                       icon: Icon(Icons.dangerous),
