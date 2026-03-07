@@ -18,22 +18,25 @@ class NavController extends ChangeNotifier {
 
   void togglePanel(
     {
-      bool? state,
+      bool state = false,
       String? whichPanel, 
-      int? taskID
+      int taskID = 0
     }) {
 
-    // Could've done a bool instead of a string to discern which panel to show/hide
-    // in case of adding more. I think this setup is better.
-    if (whichPanel == "left") {
-      showNavPanel = state!;
-    }
-    else {
-      currentTaskID = taskID!;
-      showTaskInfoPanel = state!;
-    }
+      // No-op: panel is already in the requested state
+      if (showTaskInfoPanel == state) return;
 
-    notifyListeners();
+      // Could've done a bool instead of a string to discern which panel to show/hide
+      // in case of adding more. I think this setup is better.
+      if (whichPanel == "left") {
+        showNavPanel = state;
+      }
+      else {
+        currentTaskID = taskID;
+        showTaskInfoPanel = state;
+      }
+
+      notifyListeners();
     
   }
 
