@@ -9,6 +9,7 @@ import 'package:provider/provider.dart';
 // import 'package:todo_app/components/task_list.dart';
 import 'package:todo_app/components/title_field.dart';
 import 'package:todo_app/database.dart';
+import 'package:todo_app/nav_controller.dart';
 
 //MARK: Panel
 class CustomPanel extends StatelessWidget {
@@ -74,34 +75,29 @@ class CustomPanel extends StatelessWidget {
 }
 
 //MARK: Task Info
-class TaskInfo extends StatefulWidget {
-  const TaskInfo({
+class TaskInfo extends StatelessWidget {
+  TaskInfo({
     super.key, 
-    required this.taskId,
-    required this.showPanel,
+    // required this.taskID,
+    // required this.showPanel,
   });
 
-  final int taskId;
-  final bool showPanel;
+  // int taskID;
+  // bool showPanel;
   
-  @override
-  State<TaskInfo> createState() => _TaskInfoState();
-}
+  // int get taskID => taskID;
 
-class _TaskInfoState extends State<TaskInfo> {
+  final bool isChecked = false;
 
-  int get taskId => widget.taskId;
-
-  bool isChecked = false;
-
-  TextStyle subTaskTextStyle = TextStyle(
-    color: Colors.white.withValues(alpha: 0.5), 
+  final TextStyle subTaskTextStyle = TextStyle(
+    color: Colors.white.withValues(alpha: 0.5),
+    // color: Colors.white.withValues(alpha: 0.5), 
     fontSize: 15
   );
 
-  bool inputNewSubTask = false;
+  final bool inputNewSubTask = false;
 
-  TitleField taskTitle = TitleField(
+  final TitleField taskTitle = TitleField(
     textSize: 20,
     fontWeight: FontWeight.bold,
     completed: false,
@@ -111,30 +107,46 @@ class _TaskInfoState extends State<TaskInfo> {
     },
   );
 
-
+  //TODO: fix - it loads pretty slowly the first time. Ask claude.
   @override
   Widget build(BuildContext context) {
 
     final db = context.read<AppDB>();
+    final taskID = context.watch<NavController>().currentTaskID;
+    final isPanelOpen = context.watch<NavController>().showTaskInfoPanel;
 
-    return widget.showPanel ? StreamBuilder(
-      stream: db.watchTaskByIdWithSubTasks(taskId),
+    // print(taskID);
+
+    return isPanelOpen ? StreamBuilder(
+      stream: db.watchTaskByIdWithSubTasks(taskID),
       builder: (context, snapshot) {
     
         // print('Connection: ${snapshot.connectionState}');
         // print('Has data: ${snapshot.hasData}');
         // print('Data: ${snapshot.data}');
         // print('taskid: ${widget.taskId}');
+        if (snapshot.hasError) {
+          print("error");
+          return Center(
+            child: Text(
+              "Error: ${snapshot.error}",
+              style: TextStyle(
+                color: Colors.black,
+              ),
+              ),
+          );
+        }
     
         if (!snapshot.hasData) {
           // return CustomPanel(sidePanelWidth: 340, show: true, child: CircularProgressIndicator()); //! can use this for being empty and error
           //! Maybe return a snackbar or popup if there is an error or something or if it couldn't grap anything from db(empty).
+          //! or not.
           return SizedBox(width: 0, height: 0);
         }
-          
-        final task = snapshot.data!;
+
+        final task = snapshot.data;
     
-        final parentTask = task[0];
+        final parentTask = task![0];
         
         final subTasks = snapshot.data!.where((t) => t.parentId == parentTask.id).toList();
     
@@ -170,7 +182,7 @@ class _TaskInfoState extends State<TaskInfo> {
               
                         if (isDone != null) {
                           db.updateTask(
-                            taskId, 
+                            taskID, 
                             isDone: Value(isDone),
                           );
                         }
@@ -296,7 +308,6 @@ class _TaskInfoState extends State<TaskInfo> {
     ) : SizedBox(height: 0, width: 0,);
   }
 }
-
 
 // MARK: BottomBar
 class PanelBottomBar extends StatelessWidget {
