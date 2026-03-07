@@ -1,23 +1,37 @@
 import 'package:flutter/material.dart';
+import 'package:path/path.dart';
 
 class NavController extends ChangeNotifier {
+
   int index = 2;
 
-  bool showRightSidePanel = false;
+  bool showTaskInfoPanel = false;
 
-  bool showLeftSidePanel = true;
+  int currentTaskID = 1;
+
+  bool showNavPanel = true;
 
   void setindex(int i) {
     index = i;
     notifyListeners();
   }
 
-  void setRightPanel(bool state, String whichPanel) {
+  void togglePanel(
+    {
+      bool? state,
+      String? whichPanel, 
+      int? taskID
+    }) {
 
     // Could've done a bool instead of a string to discern which panel to show/hide
-    if (whichPanel == "left") 
-
-    // if (right == true) 
+    // in case of adding more. I think this setup is better.
+    if (whichPanel == "left") {
+      showNavPanel = state!;
+    }
+    else {
+      currentTaskID = taskID!;
+      showTaskInfoPanel = state!;
+    }
 
     notifyListeners();
     
