@@ -567,7 +567,7 @@ class _MainPageState extends State<MainPage> {
                           context.read<NavController>().togglePanel(
                             state: true,
                             whichPanel: "right",
-                            currentTaskID: task.id
+                            taskID: task.id
                           );
                         }
         
