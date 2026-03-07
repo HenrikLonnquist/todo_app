@@ -78,6 +78,10 @@ class _ParentPageState extends State<ParentPage> {
 
   @override
   Widget build(BuildContext context) {
+
+    final showTaskInfoPanel = context.select<NavController, bool>((b) => b.showTaskInfoPanel);
+    final currentTaskID = context.select<NavController, int>((i) => i.currentTaskID);
+
     return Scaffold(
       body: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -87,6 +91,10 @@ class _ParentPageState extends State<ParentPage> {
           MainPage(
           ),
           //RightSidePanel/TaskInfo
+          TaskInfo(
+            // taskID: currentTaskID,
+            // showPanel: showTaskInfoPanel, 
+          ),
         ]
       )
     );
@@ -380,10 +388,9 @@ class _CommonListTileState extends State<CommonListTile> {
           },
         ),
         onTap: listRename ? null : (){
-          setState(() {
-            context.read<NavController>().setindex(widget.index);
+
+          context.read<NavController>().setindex(widget.index);
             
-          });
         },
       ),
     );
@@ -408,9 +415,9 @@ class MainPage extends StatefulWidget {
 class _MainPageState extends State<MainPage> {
 
   // this is should handle by provider/riverpod
-  bool showPanel = false; 
+  // bool showPanel = false; 
 
-  int currentTask = 0;
+  // int currentTaskID = 0;  //! DO I need this?
   
 
   @override
@@ -418,173 +425,175 @@ class _MainPageState extends State<MainPage> {
 
     final db = context.read<AppDB>();
     final navIndex = context.select<NavController, int>((i) => i.index);
+    // final taskPanelState = context.select<NavController, bool>((b) => b.showTaskInfoPanel);
+    // final currentTaskID = context.select<NavController, int>((i) => i.currentTaskID);
+    final taskPanelState = context.watch<NavController>().showTaskInfoPanel;
+    final currentTaskID = context.watch<NavController>().currentTaskID;
 
     return Expanded(
-      child: Row(
-        children: [
-          Expanded(
-            child: CustomPanel(
-              bgColorPanel: Colors.black,
-              sidePanelWidth: null,
-              topBar: Column(
-                children: [
-                  Row(
-                    children: [
-                      Icon(Icons.home),
-                      Text("Main Page $navIndex"), //TODO Change to titlefield
-                      Spacer(),
-                      Icon(Icons.swap_vert),
-                      Icon(Icons.lightbulb),
-                      //TODO: Very slow, how can I fix it? I guess make my own no need to make it complicated, just a window and a list of items.
-                      DropdownButton2(
-                        customButton: const Icon(
-                          Icons.more_vert
-                          ),
-                        onChanged: (value) {
-                          
-                        },
-                        items: [
-                          DropdownMenuItem(
-                            onTap: () {
-                              setState(() {
-                                //TODO: find current todoList id
-                                //TODO: DELETE list from database + update ui
-                                // widget.database.delete();
-                              });
-                            },
-                            child: Text("Delete List"),
-                          )
-                        ],
-                        //TODO: Finish the styling
-                        dropdownStyleData: DropdownStyleData(
-                          width: 160,
-                        ),
-                      )
-                    ],
-                  ),
-                  if (navIndex == 0) Text("Current Date"), //TODO: Change to actual current Date and change when it's an new day
-                ],
-              ),
-              bottomBar: AddTask(
-                onSubmitted: (title) async {
-
-                  await db.tasks.count().get().then((value) async {
+      child: CustomPanel(
+        bgColorPanel: Colors.black,
+        sidePanelWidth: null,
+        topBar: Column(
+          children: [
+            Row(
+              children: [
+                Icon(Icons.home),
+                Text("Main Page $navIndex"), //TODO Change to titlefield
+                Spacer(),
+                Icon(Icons.swap_vert),
+                Icon(Icons.lightbulb),
+                //TODO: Very slow, how can I fix it? I guess make my own no need to make it complicated, just a window and a list of items.
+                DropdownButton2(
+                  customButton: const Icon(
+                    Icons.more_vert
+                    ),
+                  onChanged: (value) {
                     
-                    final size = value[0];
-                    final pos = size > 0 ? size * 1000 : 1000;
-                      
-                    await db.insertTask(
-                      title: title,
-                      listID: navIndex,
-                      position: pos,
-                    );
                   },
-                  onError: (e) {
-                    print("Add task error: $e");
-                  }
-                  );
-
-                },
-              ),
-              //MARK: Task List
-              child: StreamBuilder(
-                stream: db.watchTasksByListId(navIndex),
-                builder: (context, snapshot) {
-
-                  // debugPrint(
-                  //   'StreamBuilder rebuild — '
-                  //   'hasData=${snapshot.hasData} '
-                  //   'len=${snapshot.data?.length} '
-                  //   'connectionState=${snapshot.connectionState}',
-                  // );
-                  
-                  if (snapshot.hasError) {
-                    return Center(
-                      child: Text(
-                        "Error: ${snapshot.error}",
-                        style: TextStyle(
-                          color: Colors.white,
-                        ),
-                        ),
-                    );
-                  }
-
-                  final data = snapshot.data ?? [];
-
-                  if (data.isEmpty) {
-                    return Center(
-                      child: Text(
-                        "No tasks found. Add tasks to the list!",
-                        style: TextStyle(
-                          color: Colors.white,
-                        ),
-                        ),
-                    );
-                  }
-
-                  return Material(
-                    type: MaterialType.transparency,
-                    child: ListView.separated(
-                      itemCount: data.length,
-                      itemBuilder: (context, index) {
-                      
-                        final task = data[index];
-                        final taskTitle = task.title;
-                      
-                        return ListTile(
-                          mouseCursor: SystemMouseCursors.basic,
-                          tileColor: Colors.grey.shade900,
-                          hoverColor: Colors.grey.shade800,
-                          splashColor: Colors.transparent,
-                          title: Text(taskTitle),
-                          onTap: () {
-                      
-                            setState(() {
-                              
-                              if (showPanel == true && currentTask == task.id) {
-                                showPanel = false;
-                              }
-                              else {
-                                showPanel = true;
-                              }
-
-                              //! WOuld adding this to navcontroller be too much? same for showpanel.
-                              currentTask = task.id;
-                      
-                            });
-                          },
-                          trailing: IconButton(
-                            icon: Icon(Icons.dangerous),
-                            onPressed: () {
-                              
-                              //TODO: have a popup in case of one wants to undo it. Or just add it to history list.
-                              (db.delete(db.tasks)..where((t) => t.id.equals(task.id) | t.parentId.equals(task.id))).go();
-                              
-                            },
-                          ),
-                        );
+                  items: [
+                    DropdownMenuItem(
+                      onTap: () {
+                        setState(() {
+                          //TODO: find current todoList id
+                          //TODO: DELETE list from database + update ui
+                          // widget.database.delete();
+                        });
                       },
-                      separatorBuilder: (context, index) {
-                        return SizedBox(height: 8,);
+                      child: Text("Delete List"),
+                    )
+                  ],
+                  //TODO: Finish the styling
+                  dropdownStyleData: DropdownStyleData(
+                    width: 160,
+                  ),
+                )
+              ],
+            ),
+            if (navIndex == 0) Text("Current Date"), //TODO: Change to actual current Date and change when it's an new day
+          ],
+        ),
+        bottomBar: AddTask(
+          onSubmitted: (title) async {
+        
+            await db.tasks.count().get().then((value) async {
+              
+              final size = value[0];
+              final pos = size > 0 ? size * 1000 : 1000;
+                
+              await db.insertTask(
+                title: title,
+                listID: navIndex,
+                position: pos,
+              );
+            },
+            onError: (e) {
+              print("Add task error: $e");
+            }
+            );
+        
+          },
+        ),
+        //MARK: Task List
+        child: StreamBuilder(
+          stream: db.watchTasksByListId(navIndex),
+          builder: (context, snapshot) {
+        
+            // debugPrint(
+            //   'StreamBuilder rebuild — '
+            //   'hasData=${snapshot.hasData} '
+            //   'len=${snapshot.data?.length} '
+            //   'connectionState=${snapshot.connectionState}',
+            // );
+            
+            if (snapshot.hasError) {
+              return Center(
+                child: Text(
+                  "Error: ${snapshot.error}",
+                  style: TextStyle(
+                    color: Colors.white,
+                  ),
+                ),
+              );
+            }
+        
+            final data = snapshot.data ?? [];
+        
+            if (data.isEmpty) {
+              return Center(
+                child: Text(
+                  "No tasks found. Add tasks to the list!",
+                  style: TextStyle(
+                    color: Colors.white,
+                  ),
+                  ),
+              );
+            }
+        
+            return Material(
+              type: MaterialType.transparency,
+              child: ListView.separated(
+                itemCount: data.length,
+                itemBuilder: (context, index) {
+                
+                  final task = data[index];
+                  final taskTitle = task.title;
+                
+                  return ListTile(
+                    mouseCursor: SystemMouseCursors.basic,
+                    tileColor: Colors.grey.shade900,
+                    hoverColor: Colors.grey.shade800,
+                    splashColor: Colors.transparent,
+                    title: Text(taskTitle),
+                    onTap: () {
+        
+                
+                      // setState(() {
+
+                        print("${task.id} $currentTaskID ${task.id == currentTaskID}");
+                        print(taskPanelState);
+                        
+                        if (taskPanelState == true && currentTaskID == task.id) {
+                          
+                          //! pretty slow to open panel with this. the first time
+                          context.read<NavController>().togglePanel(
+                            state: false,
+                            whichPanel:"right",
+                            // currentTaskID: task.id,
+                          );
+                        }
+                        else {
+
+                          context.read<NavController>().togglePanel(
+                            state: true,
+                            whichPanel: "right",
+                            currentTaskID: task.id
+                          );
+                        }
+        
+                        //! WOuld adding this to navcontroller be too much? same for showpanel.
+                        // currentTaskID = task.id;
+                
+                      // });
+                    },
+                    trailing: IconButton(
+                      icon: Icon(Icons.dangerous),
+                      onPressed: () {
+                        
+                        //TODO: have a popup in case of one wants to undo it. Or just add it to history list.
+                        (db.delete(db.tasks)..where((t) => t.id.equals(task.id) | t.parentId.equals(task.id))).go();
+                        
                       },
                     ),
                   );
-                }
+                },
+                separatorBuilder: (context, index) {
+                  return SizedBox(height: 8,);
+                },
               ),
-            ),
-          ),
-          //MARK: Right Side Panel
-          //TODO: Move this to Parent Page(mark: MAIN?)
-          //TODO: put this inside of 'Task Info' class? Need the task stuff from it.
-          TaskInfo(
-            taskId: currentTask,
-            showPanel: showPanel, 
-          ),
-          //MARK: Suggestion Panel
-          //TODO: Suggetsion Panel -- Move to parent widget(MAIN)?
-          // Should I show it on top of a current panel if it's open? No, I just want it to switch between them regardless of state
-          //! but they can't share the same 'showPanel' variable. I think that will conflict with each other. 
-        ],
+            );
+          }
+        ),
       ),
     );
   }
