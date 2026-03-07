@@ -23,7 +23,7 @@ class NavController extends ChangeNotifier {
       int taskID = 0
     }) {
 
-      // No-op: panel is already in the requested state
+      // Avoid unnecessary rebuilds if state hasn't changed
       if (showTaskInfoPanel == state) return;
 
       // Could've done a bool instead of a string to discern which panel to show/hide
