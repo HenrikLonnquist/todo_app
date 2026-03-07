@@ -10,7 +10,7 @@ import 'package:todo_app/components/title_field.dart';
 import 'package:todo_app/database.dart';
 import 'package:todo_app/nav_controller.dart';
 
-//!Question: why does the tasks in the database need to have a list id?
+
 void main() async {
   runApp(
     MultiProvider(
