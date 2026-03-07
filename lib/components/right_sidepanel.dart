@@ -116,14 +116,15 @@ class TaskInfo extends StatelessWidget {
     final isPanelOpen = context.watch<NavController>().showTaskInfoPanel;
 
 
-    return isPanelOpen ? StreamBuilder(
+    return StreamBuilder(
       stream: db.watchTaskByIdWithSubTasks(taskID),
       builder: (context, snapshot) {
-    
-        // print('Connection: ${snapshot.connectionState}');
-        // print('Has data: ${snapshot.hasData}');
-        // print('Data: ${snapshot.data}');
-        // print('taskid: ${widget.taskId}');
+
+
+        if (!isPanelOpen) return SizedBox.shrink();
+
+        if (!snapshot.hasData || snapshot.data!.isEmpty ) return SizedBox.shrink();
+
         if (snapshot.hasError) {
           print("error");
           return Center(
@@ -135,13 +136,14 @@ class TaskInfo extends StatelessWidget {
               ),
           );
         }
-    
-        if (!snapshot.hasData) {
-          // return CustomPanel(sidePanelWidth: 340, show: true, child: CircularProgressIndicator()); //! can use this for being empty and error
-          //! Maybe return a snackbar or popup if there is an error or something or if it couldn't grap anything from db(empty).
-          //! or not.
-          return SizedBox(width: 0, height: 0);
-        }
+
+
+        // if (!snapshot.hasData) {
+        //   // return CustomPanel(sidePanelWidth: 340, show: true, child: CircularProgressIndicator()); //! can use this for being empty and error
+        //   //! Maybe return a snackbar or popup if there is an error or something or if it couldn't grap anything from db(empty).
+        //   //! or not.
+        //   return SizedBox(width: 0, height: 0);
+        // }
 
         final task = snapshot.data;
     
@@ -304,7 +306,7 @@ class TaskInfo extends StatelessWidget {
           ),
         );
       }
-    ) : SizedBox(height: 0, width: 0,);
+    );
   }
 }
 

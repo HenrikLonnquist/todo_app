@@ -24,7 +24,12 @@ class NavController extends ChangeNotifier {
     }) {
 
       // Avoid unnecessary rebuilds if state hasn't changed
+      print("$currentTaskID $taskID $showTaskInfoPanel $state");
       if (showTaskInfoPanel == state) return;
+
+      //TODO: might just be better to make them separate functions. same currenttaskid and navpanel.
+
+      //TODO: need to pre-fetch currenttaskid. Look for answer in claude chat.
 
       // Could've done a bool instead of a string to discern which panel to show/hide
       // in case of adding more. I think this setup is better.
