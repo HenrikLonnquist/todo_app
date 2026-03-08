@@ -28,6 +28,8 @@ class NavController extends ChangeNotifier {
 
       // Avoid unnecessary rebuilds if state hasn't changed
       if (showTaskInfoPanel == state) {
+
+        // Updates task info
         if (taskID != currentTaskID) {
           currentTaskID = taskID;
           notifyListeners();

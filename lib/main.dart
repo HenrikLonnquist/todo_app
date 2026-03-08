@@ -554,10 +554,11 @@ class _MainPageState extends State<MainPage> {
                     title: Text(taskTitle),
                     onTap: () {
         
-                
+                      //! Could probably do this differently or better than what i'm doing now.
                       if (taskPanelState == true && currentTaskID == task.id) {
                         
                         //! pretty slow to open panel with this. the first time
+                        //! Needed to do something about prefetching or something(claude).
                         context.read<NavController>().togglePanel(
                           state: false,
                           whichPanel:"right",
