@@ -16,6 +16,7 @@ class NavController extends ChangeNotifier {
     notifyListeners();
   }
 
+
   void togglePanel(
     {
       bool state = false,
@@ -23,11 +24,16 @@ class NavController extends ChangeNotifier {
       int taskID = 0
     }) {
 
-      // Avoid unnecessary rebuilds if state hasn't changed
-      print("$currentTaskID $taskID $showTaskInfoPanel $state");
-      if (showTaskInfoPanel == state) return;
+      // print("$currentTaskID $taskID $showTaskInfoPanel $state");
 
-      //TODO: might just be better to make them separate functions. same currenttaskid and navpanel.
+      // Avoid unnecessary rebuilds if state hasn't changed
+      if (showTaskInfoPanel == state) {
+        if (taskID != currentTaskID) {
+          currentTaskID = taskID;
+          notifyListeners();
+        } 
+        return; 
+      }
 
       //TODO: need to pre-fetch currenttaskid. Look for answer in claude chat.
 

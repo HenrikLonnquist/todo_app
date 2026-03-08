@@ -123,7 +123,9 @@ class TaskInfo extends StatelessWidget {
 
         if (!isPanelOpen) return SizedBox.shrink();
 
-        if (!snapshot.hasData || snapshot.data!.isEmpty ) return SizedBox.shrink();
+        if (!snapshot.hasData) return SizedBox.shrink();
+
+        if (snapshot.data!.isEmpty) return SizedBox.shrink();
 
         if (snapshot.hasError) {
           print("error");
@@ -144,6 +146,7 @@ class TaskInfo extends StatelessWidget {
         //   //! or not.
         //   return SizedBox(width: 0, height: 0);
         // }
+
 
         final task = snapshot.data;
     
