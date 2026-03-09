@@ -77,21 +77,13 @@ class CustomPanel extends StatelessWidget {
 //MARK: Task Info
 class TaskInfo extends StatelessWidget {
   TaskInfo({
-    super.key, 
-    // required this.taskID,
-    // required this.showPanel,
+    super.key,
   });
-
-  // int taskID;
-  // bool showPanel;
-  
-  // int get taskID => taskID;
 
   final bool isChecked = false;
 
   final TextStyle subTaskTextStyle = TextStyle(
-    color: Colors.white.withValues(alpha: 0.5),
-    // color: Colors.white.withValues(alpha: 0.5), 
+    color: Colors.white.withValues(alpha: 0.5), 
     fontSize: 15
   );
 
@@ -107,7 +99,7 @@ class TaskInfo extends StatelessWidget {
     },
   );
 
-  //TODO: fix - it loads pretty slowly the first time. Ask claude.
+  
   @override
   Widget build(BuildContext context) {
 
@@ -120,32 +112,24 @@ class TaskInfo extends StatelessWidget {
       stream: db.watchTaskByIdWithSubTasks(taskID),
       builder: (context, snapshot) {
 
-
-        if (!isPanelOpen) return SizedBox.shrink();
-
         if (!snapshot.hasData) return SizedBox.shrink();
 
         if (snapshot.data!.isEmpty) return SizedBox.shrink();
 
         if (snapshot.hasError) {
           print("error");
-          return Center(
-            child: Text(
-              "Error: ${snapshot.error}",
-              style: TextStyle(
-                color: Colors.black,
+          // TODO: if this happens, then let the user try to refresh or something.
+          return CustomPanel(
+            child: Center(
+              child: Text(
+                "Error: ${snapshot.error}",
+                style: TextStyle(
+                  color: Colors.black,
+                ),
               ),
-              ),
+            ),
           );
         }
-
-
-        // if (!snapshot.hasData) {
-        //   // return CustomPanel(sidePanelWidth: 340, show: true, child: CircularProgressIndicator()); //! can use this for being empty and error
-        //   //! Maybe return a snackbar or popup if there is an error or something or if it couldn't grap anything from db(empty).
-        //   //! or not.
-        //   return SizedBox(width: 0, height: 0);
-        // }
 
 
         final task = snapshot.data;
@@ -154,156 +138,161 @@ class TaskInfo extends StatelessWidget {
         
         final subTasks = snapshot.data!.where((t) => t.parentId == parentTask.id).toList();
     
-        return CustomPanel(
-          bottomBar: PanelBottomBar(
-            taskDateLastModified: parentTask.updatedAt,
-            deleteTask: () {},
-            hidePanel: () {},
-          ),
-          child: SingleChildScrollView(
-            child: Material(
-              type: MaterialType.transparency,
-              child: Column(
-                children: [
-                  //TODO:
-                      // subtasks
-                      // button for adding to 'My Day' list
-                      // reminder
-                      // Due date
-                      // repeat rule
-                      // notes
-          
-                  //MARK: MAIN TASK NAME
-                  ListTile(
-                    splashColor: Colors.transparent,
-                    tileColor: Colors.grey.shade800.withValues(alpha: 0.2),
-                    // hoverColor: Colors.grey.shade800,
-                    leading: Checkbox(
-                      value: parentTask.isDone,
-                      //TODO: Change color of the checkbox, to white
-                      onChanged: (isDone) {
-                        // isChecked = value;
-              
-                        if (isDone != null) {
-                          db.updateTask(
-                            taskID, 
-                            isDone: Value(isDone),
-                          );
-                        }
-              
-                        
-                      },
-                    ),
-                    title: TitleField(
-                      fontWeight: FontWeight.bold,
-                      completed: parentTask.isDone!,
-                      inputValue: parentTask.title,
-                      onChange: (value) {
-                        //TODO: update database
-                        // Now would be a good use of a stream, no? instead of sending the database manually to here.
-                        // task["title"] = value;
-                        
-                      },
-                    ),
-                  ),
-                  //MARK: SUBTASK
-                  if (subTasks.isNotEmpty)
-                  //TODO: Make this into a separate class?
-                  ListView.builder(
-                    shrinkWrap: true,
-                    physics: NeverScrollableScrollPhysics(),
-                    itemCount: subTasks.length,
-                    itemBuilder: (context, index) {
-              
-                      final subTask = subTasks[index];
-              
-                      return ListTile(
-                        splashColor: Colors.transparent,
-                        tileColor: Colors.grey.shade800.withValues(alpha: 0.2),
-                        // hoverColor: Colors.grey.shade800,
+        return Visibility(
+          visible: isPanelOpen,
+          maintainState: true,
+          maintainAnimation: true,
+          child: CustomPanel(
+            bottomBar: PanelBottomBar(
+              taskDateLastModified: parentTask.updatedAt,
+              deleteTask: () {},
+              hidePanel: () {},
+            ),
+            child: SingleChildScrollView(
+              child: Material(
+                type: MaterialType.transparency,
+                child: Column(
+                  children: [
+                    //TODO:
+                        //// subtasks
+                        // button for adding to 'My Day' list
+                        // reminder
+                        // Due date
+                        // repeat rule
+                        // notes
+            
+                    //MARK: MAIN TASK NAME
+                    ListTile(
+                      splashColor: Colors.transparent,
+                      tileColor: Colors.grey.shade800.withValues(alpha: 0.2),
+                      // hoverColor: Colors.grey.shade800,
+                      leading: Checkbox(
+                        value: parentTask.isDone,
                         //TODO: Change color of the checkbox, to white
-                        //! might not need this. maybe Do this in titleField.
-                        leading: Checkbox(
-                          value: subTask.isDone,
-                          onChanged: (isDone) async {
-              
-                            await db.updateTask(
-                              subTask.id,
-                              isDone: Value(isDone!),
-                              parentID: parentTask.id //updating parent task - updated_at
+                        onChanged: (isDone) {
+                          // isChecked = value;
+                
+                          if (isDone != null) {
+                            db.updateTask(
+                              taskID, 
+                              isDone: Value(isDone),
                             );
-                            
-                          },
-                        ),
-                        title: TitleField(
-                          textSize: 15,
-                          completed: subTask.isDone!,
-                          inputValue: subTask.title,
-                          onChange: (title) async {
-              
-                            await db.updateTask(
-                              subTask.id,
-                              title: Value(title),
-                              parentID: parentTask.id, //Updating parent task - updated_at
-                            );
-              
-                          },
-                        ),
-                      );
-                    },
-                  ),
-                  //! Show if there is no subtasks  
-                  ListTile(
-                    splashColor: Colors.transparent,
-                    tileColor: Colors.grey.shade800.withValues(alpha: 0.2),
-                    leading: Icon(Icons.add, size: 25), //TODO: Change to a diffrent icon when inputting new task
-                    title: TitleField(
-                      textSize: 15,
-                      labelText: subTasks.isNotEmpty ? "Next step" : "Add step",
-                      labelStyle: TextStyle(
-                        color: Colors.white.withValues(alpha: 0.5), 
-                        fontSize: 15
-                        ),
-                      onChange: (subTitle) async {
-                        
-                        // Adding a new sub task to database
-                        await db.insertTask(
-                          parentID: parentTask.id,
-                          listID: parentTask.listsId!,
-                          title: subTitle,
-                          position: 0,
-                        );
-                        
-                      },
-                      // inputValue: subTask!.isEmpty ? "Add step" : "Next Step"
+                          }
+                
+                          
+                        },
+                      ),
+                      title: TitleField(
+                        fontWeight: FontWeight.bold,
+                        completed: parentTask.isDone!,
+                        inputValue: parentTask.title,
+                        onChange: (value) {
+                          //TODO: update database
+                          // Now would be a good use of a stream, no? instead of sending the database manually to here.
+                          // task["title"] = value;
+                          
+                        },
+                      ),
                     ),
-                    // title: inputNewSubTask ? taskTitle :
-                    //   subTask!.isEmpty ? Text("Add step", style: subTaskTextStyle) : Text("Next Step", style: subTaskTextStyle,), //! Titlefield - take from above in listview
-                  ),
-                  SizedBox(height: 10),
-                  ListTile(
-                    title:Text("Add to My Day"),
-                    tileColor: Colors.grey.shade800.withValues(alpha: 0.2),
-                  ),
-                  SizedBox(height: 10),
-                  ListTile(
-                    title:Text("Remind Me"),
-                    tileColor: Colors.grey.shade800.withValues(alpha: 0.2),
-                  ),
-                  ListTile(
-                    title:Text("Due Date"),
-                    tileColor: Colors.grey.shade800.withValues(alpha: 0.2),
-                  ),
-                  ListTile(
-                    title:Text("Repeat"),
-                    tileColor: Colors.grey.shade800.withValues(alpha: 0.2),
-                  ),
-                  SizedBox(height: 10,),
-                  ListTile(
-                    title:Text("Notes"),
-                    tileColor: Colors.grey.shade800.withValues(alpha: 0.2),
-                  ),
-                ]
+                    //MARK: SUBTASK
+                    if (subTasks.isNotEmpty)
+                    //TODO: Make this into a separate class?
+                    ListView.builder(
+                      shrinkWrap: true,
+                      physics: NeverScrollableScrollPhysics(),
+                      itemCount: subTasks.length,
+                      itemBuilder: (context, index) {
+                
+                        final subTask = subTasks[index];
+                
+                        return ListTile(
+                          splashColor: Colors.transparent,
+                          tileColor: Colors.grey.shade800.withValues(alpha: 0.2),
+                          // hoverColor: Colors.grey.shade800,
+                          //TODO: Change color of the checkbox, to white
+                          //! might not need this. maybe Do this in titleField.
+                          leading: Checkbox(
+                            value: subTask.isDone,
+                            onChanged: (isDone) async {
+                
+                              await db.updateTask(
+                                subTask.id,
+                                isDone: Value(isDone!),
+                                parentID: parentTask.id //updating parent task - updated_at
+                              );
+                              
+                            },
+                          ),
+                          title: TitleField(
+                            textSize: 15,
+                            completed: subTask.isDone!,
+                            inputValue: subTask.title,
+                            onChange: (title) async {
+                
+                              await db.updateTask(
+                                subTask.id,
+                                title: Value(title),
+                                parentID: parentTask.id, //Updating parent task - updated_at
+                              );
+                
+                            },
+                          ),
+                        );
+                      },
+                    ),
+                    //! Show if there is no subtasks  
+                    ListTile(
+                      splashColor: Colors.transparent,
+                      tileColor: Colors.grey.shade800.withValues(alpha: 0.2),
+                      leading: Icon(Icons.add, size: 25), //TODO: Change to a diffrent icon when inputting new task
+                      title: TitleField(
+                        textSize: 15,
+                        labelText: subTasks.isNotEmpty ? "Next step" : "Add step",
+                        labelStyle: TextStyle(
+                          color: Colors.white.withValues(alpha: 0.5), 
+                          fontSize: 15
+                          ),
+                        onChange: (subTitle) async {
+                          
+                          // Adding a new sub task to database
+                          await db.insertTask(
+                            parentID: parentTask.id,
+                            listID: parentTask.listsId!,
+                            title: subTitle,
+                            position: 0,
+                          );
+                          
+                        },
+                        // inputValue: subTask!.isEmpty ? "Add step" : "Next Step"
+                      ),
+                      // title: inputNewSubTask ? taskTitle :
+                      //   subTask!.isEmpty ? Text("Add step", style: subTaskTextStyle) : Text("Next Step", style: subTaskTextStyle,), //! Titlefield - take from above in listview
+                    ),
+                    SizedBox(height: 10),
+                    ListTile(
+                      title:Text("Add to My Day"),
+                      tileColor: Colors.grey.shade800.withValues(alpha: 0.2),
+                    ),
+                    SizedBox(height: 10),
+                    ListTile(
+                      title:Text("Remind Me"),
+                      tileColor: Colors.grey.shade800.withValues(alpha: 0.2),
+                    ),
+                    ListTile(
+                      title:Text("Due Date"),
+                      tileColor: Colors.grey.shade800.withValues(alpha: 0.2),
+                    ),
+                    ListTile(
+                      title:Text("Repeat"),
+                      tileColor: Colors.grey.shade800.withValues(alpha: 0.2),
+                    ),
+                    SizedBox(height: 10,),
+                    ListTile(
+                      title:Text("Notes"),
+                      tileColor: Colors.grey.shade800.withValues(alpha: 0.2),
+                    ),
+                  ]
+                ),
               ),
             ),
           ),
