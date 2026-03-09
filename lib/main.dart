@@ -71,16 +71,8 @@ class ParentPage extends StatefulWidget {
 
 class _ParentPageState extends State<ParentPage> {
 
-  final bool showLeftPanel = true;
-  
-  // int selectedIndex = 2;
-
-
   @override
   Widget build(BuildContext context) {
-
-    final showTaskInfoPanel = context.select<NavController, bool>((b) => b.showTaskInfoPanel);
-    final currentTaskID = context.select<NavController, int>((i) => i.currentTaskID);
 
     return Scaffold(
       body: Row(
@@ -91,9 +83,7 @@ class _ParentPageState extends State<ParentPage> {
           MainPage(
           ),
           //RightSidePanel/TaskInfo
-          TaskInfo(
-            // taskID: currentTaskID,
-            // showPanel: showTaskInfoPanel, 
+          TaskInfo( 
           ),
         ]
       )
@@ -209,7 +199,7 @@ class _NavigationPanel2State extends State<NavigationPanel2> {
   }
 }
 
-//MARK: Custom listtile
+//MARK: Custom/Common listtile
 //TODO: maybe changethe name later
 class CommonListTile extends StatefulWidget {
   const CommonListTile({
@@ -412,8 +402,7 @@ class MainPage extends StatefulWidget {
     this.onTap,
   });
 
-  final Function()? onTap;
-  // final int selectedListIndex;
+  final Function()? onTap; //! What is this for? Am I using it? Cant seems to find it.
 
   @override
   State<MainPage> createState() => _MainPageState();
@@ -421,21 +410,14 @@ class MainPage extends StatefulWidget {
 
 class _MainPageState extends State<MainPage> {
 
-  // this is should handle by provider/riverpod
-  // bool showPanel = false; 
-
-  // int currentTaskID = 0;  //! DO I need this?
-  
 
   @override
   Widget build(BuildContext context) {
 
     final db = context.read<AppDB>();
     final navIndex = context.select<NavController, int>((i) => i.index);
-    // final taskPanelState = context.select<NavController, bool>((b) => b.showTaskInfoPanel);
-    // final currentTaskID = context.select<NavController, int>((i) => i.currentTaskID);
-    final taskPanelState = context.watch<NavController>().showTaskInfoPanel;
-    final currentTaskID = context.watch<NavController>().currentTaskID;
+    final taskPanelState = context.select<NavController, bool>((b) => b.showTaskInfoPanel);
+    final currentTaskID = context.select<NavController, int>((i) => i.currentTaskID);
 
     return Expanded(
       child: CustomPanel(
@@ -553,10 +535,10 @@ class _MainPageState extends State<MainPage> {
                     splashColor: Colors.transparent,
                     title: Text(taskTitle),
                     onTap: () {
-        
+    
                       //! Could probably do this differently or better than what i'm doing now.
                       if (taskPanelState == true && currentTaskID == task.id) {
-                        
+          
                         //! pretty slow to open panel with this. the first time
                         //! Needed to do something about prefetching or something(claude).
                         context.read<NavController>().togglePanel(
@@ -565,7 +547,7 @@ class _MainPageState extends State<MainPage> {
                         );
                       }
                       else {
-
+                        
                         context.read<NavController>().togglePanel(
                           state: true,
                           whichPanel: "right",
