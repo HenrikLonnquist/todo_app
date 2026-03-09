@@ -117,15 +117,24 @@ class TaskInfo extends StatelessWidget {
         if (snapshot.data!.isEmpty) return SizedBox.shrink();
 
         if (snapshot.hasError) {
-          print("error");
-          // TODO: if this happens, then let the user try to refresh or something.
           return CustomPanel(
             child: Center(
-              child: Text(
-                "Error: ${snapshot.error}",
-                style: TextStyle(
-                  color: Colors.black,
-                ),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    "Error: ${snapshot.error}",
+                    style: TextStyle(
+                      color: Colors.white.withAlpha(200),
+                    ),
+                  ),
+                  IconButton(
+                    onPressed: (){
+                      //TODO: refresh streambuilder. class?
+                    },
+                    icon: Icon(Icons.refresh),
+                  ),
+                ],
               ),
             ),
           );
