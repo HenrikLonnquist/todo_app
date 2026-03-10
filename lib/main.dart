@@ -247,7 +247,7 @@ class _CommonListTileState extends State<CommonListTile> {
 
         final offset = detail.globalPosition;
         
-        // TODO: might wanna create something my own. Can't really customize this as much.
+        // TODO: need a good name for this.
         //! Not able to right click another item while menu is showing. You can do this in MS Todo tho.
         //! BUG: Does not appear outside of the program, constrained to the size of the app. 
         showMenu(
@@ -278,7 +278,7 @@ class _CommonListTileState extends State<CommonListTile> {
 
             // Share List
             PopupMenuItem(
-              child: Text("item 2")
+              child: Text("Share List")
             ),
 
             //DIVIDER
@@ -291,27 +291,27 @@ class _CommonListTileState extends State<CommonListTile> {
 
             // Move list to... >
             PopupMenuItem(
-              child: Text("item 3")
+              child: Text("Move List to... >")
             ),
             
             // Print List
             PopupMenuItem(
-              child: Text("item 4")
+              child: Text("Print List")
             ),
             
             // Email List
             PopupMenuItem(
-              child: Text("item 5")
+              child: Text("Email List")
             ),
             
             // Pin start
             PopupMenuItem(
-              child: Text("item 6")
+              child: Text("Pin Start")
             ),
             
             // Duplicate List
             PopupMenuItem(
-              child: Text("item 7")
+              child: Text("Duplicate List")
             ),
             
             // Remove List
