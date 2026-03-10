@@ -79,7 +79,7 @@ class _TitleFieldState extends State<TitleField> {
 
         },
         focusNode: focusNode,
-        selectAllOnFocus: false,
+        // selectAllOnFocus: false, 
         mouseCursor: widget.mouseCursor,
         enabled: widget.requestFocus,
         controller: _titleController,

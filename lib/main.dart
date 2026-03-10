@@ -423,19 +423,20 @@ class _MainPageState extends State<MainPage> {
               children: [
                 Icon(Icons.home),
                 
-                //TODO Change to titlefield
-                // Text("Main Page $navIndex"),
+                //TODO: add a onHover effect?
                 TitleField(
                   inputValue: "MainPage $navIndex",
+                  mouseCursor: SystemMouseCursors.basic,
                 ), 
                 Spacer(),
                 Icon(Icons.swap_vert),
                 Icon(Icons.lightbulb),
                 //TODO: Very slow, how can I fix it? I guess make my own no need to make it complicated, just a window and a list of items.
+                //try overriding the animation for this widget, is that even possible?
                 DropdownButton2(
                   customButton: const Icon(
                     Icons.more_vert
-                    ),
+                  ),
                   onChanged: (value) {
                     
                   },
