@@ -144,9 +144,9 @@ class _NavigationPanel2State extends State<NavigationPanel2> {
           child: Column(
             children: [
 
-              CommonListTile(title: "My Day", index: 0, selectedIndex: selectedIndex),
-              CommonListTile(title: "Important", index: 1, selectedIndex: selectedIndex),
-              CommonListTile(title: "Tasks", index: 2, selectedIndex: selectedIndex),
+              CommonListTile(title: "My Day", index: 1, selectedIndex: selectedIndex),
+              CommonListTile(title: "Important", index: 2, selectedIndex: selectedIndex),
+              CommonListTile(title: "Tasks", index: 3, selectedIndex: selectedIndex),
               
               Divider(),
 
@@ -357,7 +357,7 @@ class _CommonListTileState extends State<CommonListTile> {
           textSize: 16,
           requestFocus: listRename,
           inputValue: widget.title,
-          // TODO: need something for tapping outside
+          // TODO: need something for tapping outside, why?
           onChange: (value) async {
         
             // skip if the value has not changed.
@@ -412,7 +412,6 @@ class _MainPageState extends State<MainPage> {
     final db = context.read<AppDB>();
     final navIndex = context.select<NavController, int>((i) => i.index);
     final taskPanelState = context.select<NavController, bool>((b) => b.showTaskPanel);
-    final currentTaskID = context.select<NavController, int>((i) => i.currentTaskID);
 
     return Expanded(
       child: CustomPanel(
@@ -423,7 +422,12 @@ class _MainPageState extends State<MainPage> {
             Row(
               children: [
                 Icon(Icons.home),
-                Text("Main Page $navIndex"), //TODO Change to titlefield
+                
+                //TODO Change to titlefield
+                // Text("Main Page $navIndex"),
+                TitleField(
+                  inputValue: "MainPage $navIndex",
+                ), 
                 Spacer(),
                 Icon(Icons.swap_vert),
                 Icon(Icons.lightbulb),
@@ -454,7 +458,7 @@ class _MainPageState extends State<MainPage> {
                 )
               ],
             ),
-            if (navIndex == 0) Text("Current Date"), //TODO: Change to actual current Date and change when it's an new day
+            if (navIndex == 1) Text("Current Date"), //TODO: Change to actual current Date and change when it's an new day
           ],
         ),
         bottomBar: AddTask(
@@ -482,13 +486,6 @@ class _MainPageState extends State<MainPage> {
         child: StreamBuilder(
           stream: db.watchTasksByListId(navIndex),
           builder: (context, snapshot) {
-        
-            // debugPrint(
-            //   'StreamBuilder rebuild — '
-            //   'hasData=${snapshot.hasData} '
-            //   'len=${snapshot.data?.length} '
-            //   'connectionState=${snapshot.connectionState}',
-            // );
             
             if (snapshot.hasError) {
               return Center(

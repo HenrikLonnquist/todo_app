@@ -3,7 +3,7 @@ import 'package:path/path.dart';
 
 class NavController extends ChangeNotifier {
 
-  int index = 2;
+  int index = 3;
 
   bool showTaskPanel = false;
 
