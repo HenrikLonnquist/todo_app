@@ -105,7 +105,7 @@ class TaskInfo extends StatelessWidget {
 
     final db = context.read<AppDB>();
     final taskID = context.watch<NavController>().currentTaskID;
-    final isPanelOpen = context.watch<NavController>().showTaskInfoPanel;
+    final isPanelOpen = context.watch<NavController>().showTaskPanel;
 
 
     return StreamBuilder(

@@ -5,50 +5,52 @@ class NavController extends ChangeNotifier {
 
   int index = 2;
 
-  bool showTaskInfoPanel = false;
+  bool showTaskPanel = false;
 
   int currentTaskID = 1;
 
   bool showNavPanel = true;
 
   void setindex(int i) {
+    
     index = i;
+    showTaskPanel = false; // in case right side panel is open
+
     notifyListeners();
   }
 
 
-  void togglePanel(
+  void toggleRightPanel(
     {
       bool state = false,
-      String? whichPanel, 
       int taskID = 0
     }) {
 
-      // print("$currentTaskID $taskID $showTaskInfoPanel $state");
+      // print("panel: $showTaskPanel $state | task: $currentTaskID $taskID");
 
-      // Avoid unnecessary rebuilds if state hasn't changed
-      if (showTaskInfoPanel == state) {
+      // Open panel
+      if (showTaskPanel == false) {
 
-        // Updates task info
-        if (taskID != currentTaskID) {
+        if (currentTaskID != taskID) {
           currentTaskID = taskID;
-          notifyListeners();
-        } 
-        return; 
-      }
 
-      //TODO: need to pre-fetch currenttaskid. Look for answer in claude chat.
+        }
+        showTaskPanel = state;  
+        
 
-      // Could've done a bool instead of a string to discern which panel to show/hide
-      // in case of adding more. I think this setup is better.
-      if (whichPanel == "left") {
-        showNavPanel = state;
       }
-      else {
-        currentTaskID = taskID;
-        showTaskInfoPanel = state;
-      }
+      // Close panel/Change task info
+      else if (showTaskPanel == true) {
 
+        if (currentTaskID == taskID) {
+          showTaskPanel = state;
+        }
+        else {
+          currentTaskID = taskID;
+        }
+
+      }
+      
       notifyListeners();
     
   }

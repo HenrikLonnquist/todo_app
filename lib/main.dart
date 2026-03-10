@@ -382,12 +382,6 @@ class _CommonListTileState extends State<CommonListTile> {
 
           // notify provider on tab change / new list
           context.read<NavController>().setindex(widget.index);
-          
-          // in case the panel is open
-          context.read<NavController>().togglePanel(
-            state: false,
-            whichPanel: "right",            
-          );
             
         },
       ),
@@ -417,7 +411,7 @@ class _MainPageState extends State<MainPage> {
 
     final db = context.read<AppDB>();
     final navIndex = context.select<NavController, int>((i) => i.index);
-    final taskPanelState = context.select<NavController, bool>((b) => b.showTaskInfoPanel);
+    final taskPanelState = context.select<NavController, bool>((b) => b.showTaskPanel);
     final currentTaskID = context.select<NavController, int>((i) => i.currentTaskID);
 
     return Expanded(
@@ -536,25 +530,11 @@ class _MainPageState extends State<MainPage> {
                     splashColor: Colors.transparent,
                     title: Text(taskTitle),
                     onTap: () {
-    
-                      //! Could probably do this differently or better than what i'm doing now.
-                      if (taskPanelState == true && currentTaskID == task.id) {
-          
-                        //! pretty slow to open panel with this. the first time
-                        //! Needed to do something about prefetching or something(claude).
-                        context.read<NavController>().togglePanel(
-                          state: false,
-                          whichPanel:"right",
-                        );
-                      }
-                      else {
-                        
-                        context.read<NavController>().togglePanel(
-                          state: true,
-                          whichPanel: "right",
-                          taskID: task.id
-                        );
-                      }
+
+                      context.read<NavController>().toggleRightPanel(
+                        state: !taskPanelState,
+                        taskID: task.id,
+                      );
         
                     },
                     trailing: IconButton(
