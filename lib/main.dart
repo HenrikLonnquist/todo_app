@@ -12,6 +12,10 @@ import 'package:todo_app/nav_controller.dart';
 
 
 void main() async {
+
+  //! Splash screen - cant find one for linux or desktop.
+  //! There exists one for ios, android and web tho.
+
   runApp(
     MultiProvider(
       providers: [
@@ -200,7 +204,7 @@ class _NavigationPanel2State extends State<NavigationPanel2> {
   }
 }
 
-//MARK: Custom/Common listtile
+//MARK: Custom/Common listtile for nav
 //TODO: maybe changethe name later
 class CommonListTile extends StatefulWidget {
   const CommonListTile({
@@ -243,6 +247,8 @@ class _CommonListTileState extends State<CommonListTile> {
 
     return GestureDetector(
       key: ValueKey(widget.index),
+
+      //! BUG: a small delay the first time it runs. Maybe use something like visibility widget
       onSecondaryTapDown: !widget.isUserList ? null : (detail) async {
 
         final offset = detail.globalPosition;
