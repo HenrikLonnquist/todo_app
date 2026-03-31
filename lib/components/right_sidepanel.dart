@@ -331,33 +331,66 @@ class PanelBottomBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final date = taskDateLastModified;
-    return Row(
+    return Column(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        ElevatedButton(
-          onPressed: hidePanel,
-          child: const Icon(Icons.arrow_forward_ios), 
-        ),
-        Expanded(
-          child: Center(
-            child: Text(
-              // "Created on Wed. 19 Jun 2025",
-              "Created on "
-              "${DateFormat("E").format(date!)}. "
-              "${date.day} "
-              "${DateFormat("MMM").format(date)} "
-              "${date.year}",
-              overflow: TextOverflow.ellipsis,
-              maxLines: 1,
-              style: TextStyle(
-                color: Colors.white,
-              )
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: [
+
+            // Close panel
+            ElevatedButton(
+              onPressed: () {
+
+                context.read<NavController>().toggleRightPanel();
+
+              },
+              child: const Icon(Icons.arrow_forward_ios)
             ),
-          ),
+            
+            // Delete Task and close panel
+            ElevatedButton(
+              onPressed: () async {
+                
+                final db = context.read<AppDB>();
+                final taskID = context.read<NavController>().currentTaskID;
+
+                context.read<NavController>().toggleRightPanel();
+
+                await (db.delete(db.tasks)..where((t) => t.id.equals(taskID))).go().then((value){
+                  
+
+                });
+                
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.white,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(5)
+                ),
+                padding: EdgeInsets.symmetric(vertical: 10, horizontal: 24),
+              ),
+              child: const Text(
+                "Delete Task"
+              ),
+            ),
+        
+          ],
         ),
-        ElevatedButton(
-          onPressed: deleteTask,
-          child: const Icon(Icons.delete),
+        Center(
+          child: Text(
+            // "Created on Wed. 19 Jun 2025",
+            "Created on "
+            "${DateFormat("E").format(date!)}. "
+            "${date.day} "
+            "${DateFormat("MMM").format(date)} "
+            "${date.year}",
+            overflow: TextOverflow.ellipsis,
+            maxLines: 1,
+            style: TextStyle(
+              color: Colors.white,
+            )
+          ),
         ),
       ],
     );
