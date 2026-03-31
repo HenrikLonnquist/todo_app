@@ -248,23 +248,31 @@ class _CommonListTileState extends State<CommonListTile> {
     return GestureDetector(
       key: ValueKey(widget.index),
 
-      //! BUG: a small delay the first time it runs. Maybe use something like visibility widget
-      onSecondaryTapDown: !widget.isUserList ? null : (detail) async {
+      //* Dont worry about the delay, only happens in debug mode.
+      onSecondaryTapDown: (detail) {
 
-        final offset = detail.globalPosition;
+        final Offset offset = detail.globalPosition;
+
+        final double dx = offset.dx;
+        final double dy = offset.dy;
+        
+        final double width = MediaQuery.of(context).size.width;
+        final double height = MediaQuery.of(context).size.height;
+
         
         // TODO: need a good name for this.
         //! Not able to right click another item while menu is showing. You can do this in MS Todo tho.
         //! BUG: Does not appear outside of the program, constrained to the size of the app. 
+
         showMenu(
           menuPadding: EdgeInsets.all(0),
           color: Colors.grey.shade800,
           context: context,
           position: RelativeRect.fromLTRB(
-            offset.dx,
-            offset.dy,
-            MediaQuery.of(context).size.width - offset.dx,
-            MediaQuery.of(context).size.height - offset.dy,
+            dx,
+            dy,
+            width - dx,
+            height - dy,
           ),
           popUpAnimationStyle: AnimationStyle(duration: Duration(milliseconds: 5)),
           items: [
