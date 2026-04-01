@@ -439,7 +439,13 @@ class _MainPageState extends State<MainPage> {
                 
                 //TODO: add a onHover effect?
                 TitleField(
-                  inputValue: "MainPage $navIndex",
+                  //! need to add name of the list from db, but how should i get the db list name?
+                  //! Do i wrap this with streambuilder or something else?
+                  inputValue: navIndex <= 3 ? "MainPage $navIndex" : "",
+                  disableTextEditing: navIndex <= 3 ? true : false,
+                  onChange: (value) {
+
+                  },
                   mouseCursor: SystemMouseCursors.basic,
                 ), 
                 Spacer(),
@@ -481,6 +487,13 @@ class _MainPageState extends State<MainPage> {
         
             await db.tasks.count().get().then((value) async {
               
+              //! Issue?: (test)position value being equal to the last item in db when adding a new one
+              //! if deleting a task and then adding back again. 
+              // task 1 pos 1000 | task 2 pos 2000 | task 3 pos 3000 |
+              // tasks: 3 total > delete task 2 > 2 total > add > 3 total
+              // task 1 pos 1000 | task 3 pos 3000 | task 4 pos 3000
+              //! Will this be a problem need to test this. I dont think so and depends on how
+              //! I retrieve them. Is it ordered by ID and then have to sort according to pos. That would be great.
               final size = value[0];
               final pos = size > 0 ? size * 1000 : 1000;
                 

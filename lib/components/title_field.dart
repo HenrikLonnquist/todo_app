@@ -16,9 +16,11 @@ class TitleField extends StatefulWidget {
     this.labelStyle,
     this.mouseCursor,
     this.onTapOutside,
+    this.disableTextEditing = false,
   });
 
   final bool? requestFocus;
+  final bool disableTextEditing;
   final MouseCursor? mouseCursor;
   final Function(String)? onChange; //TODO: rename to something more fitting
   final String inputValue;
@@ -79,7 +81,8 @@ class _TitleFieldState extends State<TitleField> {
 
         },
         focusNode: focusNode,
-        // selectAllOnFocus: false, 
+        // selectAllOnFocus: false,
+        readOnly: widget.disableTextEditing,
         mouseCursor: widget.mouseCursor,
         enabled: widget.requestFocus,
         controller: _titleController,
