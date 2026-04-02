@@ -251,6 +251,8 @@ class _CommonListTileState extends State<CommonListTile> {
       //* Dont worry about the delay, only happens in debug mode.
       onSecondaryTapDown: (detail) {
 
+        if (!widget.isUserList) return; 
+
         final Offset offset = detail.globalPosition;
 
         final double dx = offset.dx;
@@ -562,14 +564,9 @@ class _MainPageState extends State<MainPage> {
                       );
         
                     },
-                    trailing: IconButton(
-                      icon: Icon(Icons.dangerous),
-                      onPressed: () {
-                        
-                        //TODO: have a popup in case of one wants to undo it. Or just add it to history list.
-                        (db.delete(db.tasks)..where((t) => t.id.equals(task.id) | t.parentId.equals(task.id))).go();
-                        
-                      },
+                    trailing: Icon(
+                      Icons.arrow_forward_ios_sharp,
+                      color: Colors.white,
                     ),
                   );
                 },
