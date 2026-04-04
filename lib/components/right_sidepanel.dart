@@ -178,11 +178,12 @@ class TaskInfo extends StatelessWidget {
                       leading: Checkbox(
                         value: parentTask.isDone,
                         //TODO: Change color of the checkbox, to white
-                        onChanged: (isDone) {
-                          // isChecked = value;
-                
+                        onChanged: (isDone) async {
+                          
+                          //! Why would it be null? Is this check even needed? There are only two states it
+                          //! can have, no?
                           if (isDone != null) {
-                            db.updateTask(
+                            await db.updateTask(
                               taskID, 
                               isDone: Value(isDone),
                             );
@@ -195,10 +196,12 @@ class TaskInfo extends StatelessWidget {
                         fontWeight: FontWeight.bold,
                         completed: parentTask.isDone!,
                         inputValue: parentTask.title,
-                        onChange: (value) {
-                          //TODO: update database
-                          // Now would be a good use of a stream, no? instead of sending the database manually to here.
-                          // task["title"] = value;
+                        onChange: (newTitle) async {
+
+                          await db.updateTask(
+                            parentTask.id,
+                            title: Value(newTitle),
+                          );
                           
                         },
                       ),
@@ -241,7 +244,7 @@ class TaskInfo extends StatelessWidget {
                               await db.updateTask(
                                 subTask.id,
                                 title: Value(title),
-                                parentID: parentTask.id, //Updating parent task - updated_at
+                                parentID: parentTask.id, //Updating parent task - updated_at "TIME"
                               );
                 
                             },
