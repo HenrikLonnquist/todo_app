@@ -117,7 +117,14 @@ class _NavigationPanel2State extends State<NavigationPanel2> {
   Widget build(BuildContext context) {
 
     final db = context.read<AppDB>();
-    final selectedIndex = context.select<NavController, int>((i) => i.index);
+    final selectedTabIndex = context.select<NavController, int>((i) => i.index);
+
+    // final tasksCount = db.select(db.tasks)..where((task) => task.listsId.equals(selectedTabIndex));
+
+    
+
+
+
 
     return CustomPanel(
       sidePanelWidth: 220,
@@ -142,63 +149,91 @@ class _NavigationPanel2State extends State<NavigationPanel2> {
           },
         ),
       ),
-      child: SingleChildScrollView(
-        child: Material(
-          type: MaterialType.transparency,
-          child: Column(
-            children: [
-
-              CommonListTile(title: "My Day", index: 1, selectedIndex: selectedIndex),
-              CommonListTile(title: "Important", index: 2, selectedIndex: selectedIndex),
-              CommonListTile(title: "Tasks", index: 3, selectedIndex: selectedIndex),
-              
-              Divider(),
-
-              //MARK: User Lists
-              StreamBuilder(
-                stream: db.watchUserLists(),
-                builder: (context, snapshot) {
-
-                  if (snapshot.hasError) {
-                    return Text("Error: ${snapshot.error}", style: TextStyle(color: Colors.white));
-                  }
+      child: StreamBuilder(
+        stream: db.watchTasks(),
+        builder: (context, snapshot) {
 
 
-                  final data = snapshot.data ?? [];
+                    
+          if (snapshot.hasError) {
+            return Text("Error: ${snapshot.error}", style: TextStyle(color: Colors.white));
+          }
 
-                  if (data.isEmpty) {
-                    return Center(
-                      child: Text(
-                        "Add a new list",
-                        style: TextStyle(
-                          color: Colors.white,
-                        ),
-                        ),
-                    );
-                  }
 
-                  return ListView.builder(
-                    key: listKey,
-                    shrinkWrap: true,
-                    physics: NeverScrollableScrollPhysics(),
-                    itemCount: data.length, 
-                    itemBuilder: (context, index) {
+          final data = snapshot.data ?? [];
+          final int taskCount;
 
-                      final userList = data[index];
+          if (data.isEmpty) {
+            // Do something
+          }
+          // else {
+          //   taskCount = data.length;
+          // }
 
-                      return CommonListTile(
-                        title: userList.name!, 
-                        index: userList.id, 
-                        selectedIndex: selectedIndex,
-                        isUserList: true,
+          // print(taskCount);
+
+          
+
+
+          return SingleChildScrollView(
+            child: Material(
+              type: MaterialType.transparency,
+              child: Column(
+                children: [
+          
+                  CommonListTile(title: "My Day", index: 1, selectedTabIndex: selectedTabIndex, taskCount: 1),
+                  CommonListTile(title: "Important", index: 2, selectedTabIndex: selectedTabIndex, taskCount: 2),
+                  CommonListTile(title: "Tasks", index: 3, selectedTabIndex: selectedTabIndex, taskCount: 3),
+                  
+                  Divider(),
+          
+                  //MARK: User Lists
+                  StreamBuilder(
+                    stream: db.watchUserLists(),
+                    builder: (context, snapshot) {
+          
+                      if (snapshot.hasError) {
+                        return Text("Error: ${snapshot.error}", style: TextStyle(color: Colors.white));
+                      }
+          
+          
+                      final data = snapshot.data ?? [];
+          
+                      if (data.isEmpty) {
+                        return Center(
+                          child: Text(
+                            "Add a new list",
+                            style: TextStyle(
+                              color: Colors.white,
+                            ),
+                            ),
+                        );
+                      }
+          
+                      return ListView.builder(
+                        key: listKey,
+                        shrinkWrap: true,
+                        physics: NeverScrollableScrollPhysics(),
+                        itemCount: data.length, 
+                        itemBuilder: (context, index) {
+          
+                          final userList = data[index];
+          
+                          return CommonListTile(
+                            title: userList.name!, 
+                            index: userList.id, 
+                            selectedTabIndex: selectedTabIndex,
+                            isUserList: true,
+                          );
+                        },
                       );
-                    },
-                  );
-                }
+                    }
+                  ),
+                ]
               ),
-            ]
-          ),
-        ),
+            ),
+          );
+        }
       ),
     );
   }
@@ -210,14 +245,16 @@ class CommonListTile extends StatefulWidget {
   const CommonListTile({
     super.key,
     required this.index,
-    required this.selectedIndex,
+    required this.selectedTabIndex,
     required this.title,
     this.isUserList = false,
+    this.taskCount = 0,
   });
 
 
   final int index; // listId
-  final int selectedIndex;
+  final int taskCount;
+  final int selectedTabIndex;
   final String title;
   final bool isUserList;
 
@@ -357,7 +394,7 @@ class _CommonListTileState extends State<CommonListTile> {
       child: ListTile(
         mouseCursor: SystemMouseCursors.basic,
         hoverColor: Colors.grey.shade800,
-        selected: widget.index == widget.selectedIndex,
+        selected: widget.index == widget.selectedTabIndex,
         splashColor: Colors.transparent,
         //TODO: need something for indicating its in "editable mode" > dotted-line border/underscore
         title: TitleField(
@@ -394,6 +431,7 @@ class _CommonListTileState extends State<CommonListTile> {
         
           },
         ),
+        trailing: Text("${widget.taskCount}"),
         onTap: listRename ? null : (){
 
           // notify provider on tab change / new list
