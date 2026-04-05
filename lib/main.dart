@@ -172,9 +172,9 @@ class _NavigationPanel2State extends State<NavigationPanel2> {
               child: Column(
                 children: [
           
-                  CommonListTile(title: "My Day", index: 1, selectedTabIndex: selectedTabIndex, taskCount: listTaskCount[1] ?? 0),
-                  CommonListTile(title: "Important", index: 2, selectedTabIndex: selectedTabIndex, taskCount: listTaskCount[2] ?? 0),
-                  CommonListTile(title: "Tasks", index: 3, selectedTabIndex: selectedTabIndex, taskCount: listTaskCount[3] ?? 0),
+                  NavListTile(title: "My Day", index: 1, selectedTabIndex: selectedTabIndex, taskCount: listTaskCount[1] ?? 0),
+                  NavListTile(title: "Important", index: 2, selectedTabIndex: selectedTabIndex, taskCount: listTaskCount[2] ?? 0),
+                  NavListTile(title: "Tasks", index: 3, selectedTabIndex: selectedTabIndex, taskCount: listTaskCount[3] ?? 0),
                   
                   Divider(),
           
@@ -210,7 +210,7 @@ class _NavigationPanel2State extends State<NavigationPanel2> {
           
                           final userList = data[index];
           
-                          return CommonListTile(
+                          return NavListTile(
                             title: userList.name!, 
                             index: userList.id, 
                             selectedTabIndex: selectedTabIndex,
@@ -233,8 +233,8 @@ class _NavigationPanel2State extends State<NavigationPanel2> {
 
 //MARK: Custom/Common listtile for nav
 //TODO: maybe changethe name later
-class CommonListTile extends StatefulWidget {
-  const CommonListTile({
+class NavListTile extends StatefulWidget {
+  const NavListTile({
     super.key,
     required this.index,
     required this.selectedTabIndex,
@@ -251,10 +251,10 @@ class CommonListTile extends StatefulWidget {
   final bool isUserList;
 
   @override
-  State<CommonListTile> createState() => _CommonListTileState();
+  State<NavListTile> createState() => _NavListTileState();
 }
 
-class _CommonListTileState extends State<CommonListTile> {
+class _NavListTileState extends State<NavListTile> {
 
   bool listRename = false;
 
