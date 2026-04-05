@@ -17,42 +17,6 @@ part 'database.g.dart';
 class AppDB extends _$AppDB{
   AppDB() : super(_openConnection());
 
-  
-  // Future<List<Task>> getAllTaskWithListID(int currentID) async {
-  //   return (select(tasks)..where((task) => task.listsId.equals(currentID))).get();
-  // }
-
-  Stream<List<Task>> watchListCount() {
-    
-    final Map listIDbyCount = <int, int>{};
-    final taskCount = select(tasks).get().then((value) {
-
-
-      for (var task in value) {
-        print(task.id);
-        if (listIDbyCount.) {
-
-        }
-      }
-    },
-    onError: (e) {
-      print(e);
-    });
-
-
-    /* How should I do this?
-    - I need list id 
-    - Filter the tasks > into the map:
-      MAP:
-        LISTID: COUNT
-        LISTID: COUNT
-    
-    */
-
-
-    return select(tasks)..where((task) =>  );
-
-  }
 
   Stream<List<TodoList>> watchUserLists() {
     return (select(todoLists)..where((t) => t.id.isBiggerThanValue(3))).watch();
