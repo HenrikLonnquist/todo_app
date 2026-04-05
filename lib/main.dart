@@ -163,6 +163,8 @@ class _NavigationPanel2State extends State<NavigationPanel2> {
             return Placeholder();
           }
 
+          print(listTaskCount);
+
           
 
 
@@ -172,9 +174,9 @@ class _NavigationPanel2State extends State<NavigationPanel2> {
               child: Column(
                 children: [
           
-                  NavListTile(title: "My Day", index: 1, selectedTabIndex: selectedTabIndex, taskCount: listTaskCount[1] ?? 0),
-                  NavListTile(title: "Important", index: 2, selectedTabIndex: selectedTabIndex, taskCount: listTaskCount[2] ?? 0),
-                  NavListTile(title: "Tasks", index: 3, selectedTabIndex: selectedTabIndex, taskCount: listTaskCount[3] ?? 0),
+                  NavListTile(title: "My Day", index: 1, selectedTabIndex: selectedTabIndex, taskCount: listTaskCount[1]),
+                  NavListTile(title: "Important", index: 2, selectedTabIndex: selectedTabIndex, taskCount: listTaskCount[2]),
+                  NavListTile(title: "Tasks", index: 3, selectedTabIndex: selectedTabIndex, taskCount: listTaskCount[3]),
                   
                   Divider(),
           
@@ -215,7 +217,7 @@ class _NavigationPanel2State extends State<NavigationPanel2> {
                             index: userList.id, 
                             selectedTabIndex: selectedTabIndex,
                             isUserList: true,
-                            taskCount: listTaskCount[userList.id] ?? 0,
+                            taskCount: listTaskCount[userList.id],
                           );
                         },
                       );
@@ -245,7 +247,7 @@ class NavListTile extends StatefulWidget {
 
 
   final int index; // listId
-  final int taskCount;
+  final int? taskCount;
   final int selectedTabIndex;
   final String title;
   final bool isUserList;
@@ -423,7 +425,7 @@ class _NavListTileState extends State<NavListTile> {
         
           },
         ),
-        trailing: Text("${widget.taskCount}"),
+        trailing: Text("${widget.taskCount ?? 0}"),
         onTap: listRename ? null : (){
 
           // notify provider on tab change / new list
