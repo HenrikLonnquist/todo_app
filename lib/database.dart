@@ -18,6 +18,22 @@ class AppDB extends _$AppDB{
   AppDB() : super(_openConnection());
 
 
+  Stream<Map<int, int>> watchTaskCountPerList() {
+    return select(tasks).watch().map((allTasks) {
+      
+      final Map<int, int> counts = {};
+
+      for (final task in allTasks) {
+        if (task.parentId != null) continue; // Skip subtasks
+        
+        counts[task.listsId!] = (counts[task.listsId] ?? 0) + 1;
+      }
+
+      return counts;
+    });
+  }
+
+
   Stream<List<TodoList>> watchUserLists() {
     return (select(todoLists)..where((t) => t.id.isBiggerThanValue(3))).watch();
   }
