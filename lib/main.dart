@@ -119,12 +119,6 @@ class _NavigationPanel2State extends State<NavigationPanel2> {
     final db = context.read<AppDB>();
     final selectedTabIndex = context.select<NavController, int>((i) => i.index);
 
-    // final tasksCount = db.select(db.tasks)..where((task) => task.listsId.equals(selectedTabIndex));
-
-    
-
-
-
 
     return CustomPanel(
       sidePanelWidth: 220,
@@ -150,7 +144,7 @@ class _NavigationPanel2State extends State<NavigationPanel2> {
         ),
       ),
       child: StreamBuilder(
-        stream: db.watchTasks(),
+        stream: db.watchTaskCountPerList(),
         builder: (context, snapshot) {
 
 
@@ -160,17 +154,14 @@ class _NavigationPanel2State extends State<NavigationPanel2> {
           }
 
 
-          final data = snapshot.data ?? [];
-          final int taskCount;
+          final Map listTaskCount = snapshot.data ?? {};
 
-          if (data.isEmpty) {
+          if (listTaskCount.isEmpty) {
             // Do something
+            print("DATA is empty");
+            //! Fix: change to something better than the placeholder.
+            return Placeholder();
           }
-          // else {
-          //   taskCount = data.length;
-          // }
-
-          // print(taskCount);
 
           
 
@@ -181,9 +172,9 @@ class _NavigationPanel2State extends State<NavigationPanel2> {
               child: Column(
                 children: [
           
-                  CommonListTile(title: "My Day", index: 1, selectedTabIndex: selectedTabIndex, taskCount: 1),
-                  CommonListTile(title: "Important", index: 2, selectedTabIndex: selectedTabIndex, taskCount: 2),
-                  CommonListTile(title: "Tasks", index: 3, selectedTabIndex: selectedTabIndex, taskCount: 3),
+                  CommonListTile(title: "My Day", index: 1, selectedTabIndex: selectedTabIndex, taskCount: listTaskCount[1] ?? 0),
+                  CommonListTile(title: "Important", index: 2, selectedTabIndex: selectedTabIndex, taskCount: listTaskCount[2] ?? 0),
+                  CommonListTile(title: "Tasks", index: 3, selectedTabIndex: selectedTabIndex, taskCount: listTaskCount[3] ?? 0),
                   
                   Divider(),
           
@@ -224,6 +215,7 @@ class _NavigationPanel2State extends State<NavigationPanel2> {
                             index: userList.id, 
                             selectedTabIndex: selectedTabIndex,
                             isUserList: true,
+                            taskCount: listTaskCount[userList.id] ?? 0,
                           );
                         },
                       );
