@@ -117,7 +117,7 @@ class _NavigationPanel2State extends State<NavigationPanel2> {
   Widget build(BuildContext context) {
 
     final db = context.read<AppDB>();
-    final selectedTabIndex = context.select<NavController, int>((i) => i.index);
+    final selectedTabIndex = context.select<NavController, int>((i) => i.navIndex);
 
 
     return CustomPanel(
@@ -429,7 +429,10 @@ class _NavListTileState extends State<NavListTile> {
         onTap: listRename ? null : (){
 
           // notify provider on tab change / new list
-          context.read<NavController>().setindex(widget.index);
+          context.read<NavController>().setNavIndex(widget.index);
+
+          // Change nav/list name in main page
+          context.read<NavController>().setListName(widget.title);
             
         },
       ),
@@ -458,7 +461,8 @@ class _MainPageState extends State<MainPage> {
   Widget build(BuildContext context) {
 
     final db = context.read<AppDB>();
-    final navIndex = context.select<NavController, int>((i) => i.index);
+    final navIndex = context.select<NavController, int>((i) => i.navIndex);
+    final navListName = context.select<NavController, String>((s) => s.navListName);
     final taskPanelState = context.select<NavController, bool>((b) => b.showTaskPanel);
 
     return Expanded(
@@ -475,7 +479,7 @@ class _MainPageState extends State<MainPage> {
                 TitleField(
                   //! need to add name of the list from db, but how should i get the db list name?
                   //! Do i wrap this with streambuilder or something else?
-                  inputValue: navIndex <= 3 ? "MainPage $navIndex" : "",
+                  inputValue: navListName,
                   disableTextEditing: navIndex <= 3 ? true : false,
                   onChange: (value) {
 

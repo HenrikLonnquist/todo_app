@@ -1,19 +1,30 @@
 import 'package:flutter/material.dart';
-import 'package:path/path.dart';
+// import 'package:path/path.dart';
 
 class NavController extends ChangeNotifier {
 
-  int index = 3;
+  //! Should probably make them not hard-coded. Then what?
+  int navIndex = 3; // start index - corresponds to todo_lists id in DB.
+  String navListName = "Tasks"; // Needs to match navIndex title/name in DB.
 
   bool showTaskPanel = false;
 
-  int currentTaskID = 1;
+  int currentTaskID = 1; 
 
   bool showNavPanel = true;
 
-  void setindex(int i) {
+  
+  void setListName(String name) {
     
-    index = i;
+    navListName = name;
+    showTaskPanel = false; // in case right side panel is open
+
+    notifyListeners();
+  }
+
+  void setNavIndex(int i) {
+    
+    navIndex = i;
     showTaskPanel = false; // in case right side panel is open
 
     notifyListeners();
