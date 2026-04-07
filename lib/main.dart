@@ -156,18 +156,6 @@ class _NavigationPanel2State extends State<NavigationPanel2> {
 
           final Map listTaskCount = snapshot.data ?? {};
 
-          if (listTaskCount.isEmpty) {
-            // Do something
-            print("DATA is empty");
-            //! Fix: change to something better than the placeholder.
-            return Placeholder();
-          }
-
-          print(listTaskCount);
-
-          
-
-
           return SingleChildScrollView(
             child: Material(
               type: MaterialType.transparency,
