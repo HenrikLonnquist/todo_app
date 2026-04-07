@@ -453,8 +453,10 @@ class _MainPageState extends State<MainPage> {
   Widget build(BuildContext context) {
 
     final db = context.read<AppDB>();
+
     final navIndex = context.select<NavController, int>((i) => i.navIndex);
     final navListName = context.select<NavController, String>((s) => s.navListName);
+
     final taskPanelState = context.select<NavController, bool>((b) => b.showTaskPanel);
 
     return Expanded(
@@ -592,6 +594,23 @@ class _MainPageState extends State<MainPage> {
                       );
         
                     },
+                    leading: Checkbox(
+                        value: task.isDone,
+                        //TODO: Change color of the checkbox, to white
+                        onChanged: (value) async {
+                          
+                          // just in case something happens and the value is null. 
+                          if (value != null) {
+
+                            //! feels a slow when checking and unchecking.
+                            await db.updateTask(
+                              task.id, 
+                              isDone: Value(value),
+                            );
+                          }
+                          
+                        },
+                      ),
                     trailing: Icon(
                       Icons.arrow_forward_ios_sharp,
                       color: Colors.white,
