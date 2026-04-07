@@ -448,6 +448,8 @@ class MainPage extends StatefulWidget {
 
 class _MainPageState extends State<MainPage> {
 
+  bool taskDone = false;
+
 
   @override
   Widget build(BuildContext context) {
@@ -594,23 +596,18 @@ class _MainPageState extends State<MainPage> {
                       );
         
                     },
-                    leading: Checkbox(
-                        value: task.isDone,
-                        //TODO: Change color of the checkbox, to white
-                        onChanged: (value) async {
-                          
-                          // just in case something happens and the value is null. 
-                          if (value != null) {
-
-                            //! feels a slow when checking and unchecking.
-                            await db.updateTask(
-                              task.id, 
-                              isDone: Value(value),
-                            );
-                          }
-                          
-                        },
-                      ),
+                    //TODO: switching to something else? Or try to make this work.
+                    leading: Checkbox(                      
+                      value: task.isDone,
+                      onChanged: (value) async {
+                        
+                        await db.updateTask(
+                          task.id, 
+                          isDone: Value(value!),
+                        );
+                        
+                      },
+                    ),
                     trailing: Icon(
                       Icons.arrow_forward_ios_sharp,
                       color: Colors.white,
