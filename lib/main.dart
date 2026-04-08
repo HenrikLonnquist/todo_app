@@ -448,9 +448,6 @@ class MainPage extends StatefulWidget {
 
 class _MainPageState extends State<MainPage> {
 
-  bool taskDone = false;
-
-
   @override
   Widget build(BuildContext context) {
 
@@ -545,84 +542,152 @@ class _MainPageState extends State<MainPage> {
           },
         ),
         //MARK: Task List
-        child: StreamBuilder(
-          stream: db.watchTasksByListId(navIndex),
-          builder: (context, snapshot) {
-            
-            if (snapshot.hasError) {
-              return Center(
-                child: Text(
-                  "Error: ${snapshot.error}",
-                  style: TextStyle(
-                    color: Colors.white,
+        child: Material(
+          type: MaterialType.transparency,
+          child: StreamBuilder(
+            stream: db.watchTasksByListId(navIndex),
+            builder: (context, snapshot) {
+              
+              if (snapshot.hasError) {
+                return Center(
+                  child: Text(
+                    "Error: ${snapshot.error}",
+                    style: TextStyle(
+                      color: Colors.white,
+                    ),
                   ),
-                ),
-              );
-            }
-        
-            final data = snapshot.data ?? [];
-        
-            if (data.isEmpty) {
-              return Center(
-                child: Text(
-                  "No tasks found. Add tasks to the list!",
-                  style: TextStyle(
-                    color: Colors.white,
-                  ),
-                  ),
-              );
-            }
-        
-            return Material(
-              type: MaterialType.transparency,
-              child: ListView.separated(
+                );
+              }
+          
+              final data = snapshot.data ?? [];
+          
+              if (data.isEmpty) {
+                return Center(
+                  child: Text(
+                    "No tasks found. Add tasks to the list!",
+                    style: TextStyle(
+                      color: Colors.white,
+                    ),
+                    ),
+                );
+              }
+          
+              return ListView.separated(
                 itemCount: data.length,
                 itemBuilder: (context, index) {
                 
-                  final task = data[index];
-                  final taskTitle = task.title;
+                  final Task task = data[index];
+                  final bool isSelected = context.watch<NavController>().currentTaskID == task.id;
                 
-                  return ListTile(
-                    mouseCursor: SystemMouseCursors.basic,
-                    tileColor: Colors.grey.shade900,
-                    hoverColor: Colors.grey.shade800,
-                    splashColor: Colors.transparent,
-                    title: Text(taskTitle),
-                    onTap: () {
-
-                      context.read<NavController>().toggleRightPanel(
-                        state: !taskPanelState,
-                        taskID: task.id,
-                      );
-        
-                    },
-                    //TODO: switching to something else? Or try to make this work.
-                    leading: Checkbox(                      
-                      value: task.isDone,
-                      onChanged: (value) async {
-                        
-                        await db.updateTask(
-                          task.id, 
-                          isDone: Value(value!),
-                        );
-                        
-                      },
-                    ),
-                    trailing: Icon(
-                      Icons.arrow_forward_ios_sharp,
-                      color: Colors.white,
-                    ),
+                  return TaskListItem(
+                    task: task,
+                    isSelected: isSelected,
+                    taskPanelState: taskPanelState,
+                    db: db,
                   );
                 },
                 separatorBuilder: (context, index) {
                   return SizedBox(height: 8,);
                 },
-              ),
-            );
-          }
+              );
+            }
+          ),
         ),
       ),
     );
   }
 }
 
+
+
+
+class TaskListItem extends StatefulWidget {
+  const TaskListItem({
+    super.key,
+    required this.task,
+    required this.isSelected,
+    required this.taskPanelState,
+    required this.db,
+    });
+
+  final Task task;
+  final bool isSelected;
+  final bool taskPanelState;
+  final AppDB db;
+  
+
+  @override
+  State<TaskListItem> createState() => _TaskListItemState();
+}
+
+class _TaskListItemState extends State<TaskListItem> {
+
+  bool hovered = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return MouseRegion(
+      onEnter: (_) => setState(() {
+        hovered = true;
+      }),
+      onExit: (_) {
+        setState(() {
+          hovered = false;
+        });
+      },
+      child: Container(
+        color: widget.isSelected && widget.taskPanelState ? Colors.grey.shade700 : 
+          hovered ? Colors.grey.shade800 : Colors.grey.shade900,
+        child: Row(
+          children: [
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 8.0),
+              child: Checkbox(       
+                value: widget.task.isDone,
+                hoverColor: Colors.transparent, //! not really working for the icon inside.
+                splashRadius: 0,
+                focusColor: Colors.transparent,
+                onChanged: (value) async {
+                  
+                  await widget.db.updateTask(
+                    widget.task.id, 
+                    isDone: Value(value!),
+                  );
+                  
+                }
+              ),
+            ),
+            Expanded(
+              child: GestureDetector(
+                behavior: HitTestBehavior.opaque,
+                onTap: () {
+              
+                  context.read<NavController>().toggleRightPanel(
+                    state: !widget.taskPanelState,
+                    taskID: widget.task.id,
+                  );
+                      
+                },
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  // padding: const EdgeInsets.fromLTRB(240, 16, 0, 16),
+                  child: Text(
+                    widget.task.title,
+                    style: TextStyle(
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+            Icon(
+              Icons.arrow_forward_ios_sharp,
+              color: Colors.white,
+              
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
