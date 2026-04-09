@@ -15,6 +15,8 @@ class NavController extends ChangeNotifier {
 
   
   void setListName(String name) {
+
+    if (navListName == name) return;
     
     navListName = name;
     showTaskPanel = false; // in case right side panel is open
@@ -23,6 +25,8 @@ class NavController extends ChangeNotifier {
   }
 
   void setNavIndex(int i) {
+
+    if (navIndex == i) return;
     
     navIndex = i;
     showTaskPanel = false; // in case right side panel is open
