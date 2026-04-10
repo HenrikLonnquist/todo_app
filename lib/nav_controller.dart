@@ -11,15 +11,21 @@ class NavController extends ChangeNotifier {
 
   int currentTaskID = 1; 
 
-  bool showNavPanel = true;
+  // bool showNavPanel = true; // feature for later
 
   
-  void setListName(String name) {
+  void setListName(String name, {
+    // In-case we want to let the current state be, 
+    // like when we're changing the navlist name we can set the.
+    bool showPanel = false, 
+    }) {
 
     if (navListName == name) return;
-    
+
     navListName = name;
-    showTaskPanel = false; // in case right side panel is open
+    
+    showTaskPanel = showPanel; 
+    
 
     notifyListeners();
   }
