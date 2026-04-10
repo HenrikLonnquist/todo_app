@@ -112,7 +112,6 @@ class _NavigationPanel2State extends State<NavigationPanel2> {
   final listKey = GlobalKey();
 
 
-  //MARK: Nav tab
   @override
   Widget build(BuildContext context) {
 
@@ -225,8 +224,7 @@ class _NavigationPanel2State extends State<NavigationPanel2> {
   }
 }
 
-//MARK: Custom/Common listtile for nav
-//TODO: maybe changethe name later
+//MARK: Nav List Tile
 class NavListTile extends StatefulWidget {
   const NavListTile({
     super.key,
@@ -268,6 +266,7 @@ class _NavListTileState extends State<NavListTile> {
   @override
   Widget build(BuildContext context) {
 
+    //MARK: dropdown list
     return GestureDetector(
       key: ValueKey(widget.index),
 
@@ -376,6 +375,7 @@ class _NavListTileState extends State<NavListTile> {
         );
         
       },
+      //MARK: Nav list item
       //! HIDE OR Show no info when the object is being dragged.
       child: ListTile(
         mouseCursor: SystemMouseCursors.basic,
@@ -383,7 +383,7 @@ class _NavListTileState extends State<NavListTile> {
         selected: widget.index == widget.selectedTabIndex,
         splashColor: Colors.transparent,
         //TODO: need something for indicating its in "editable mode" > dotted-line border/underscore
-        title: TitleField(
+        title: listRename ? TitleField(
 
           onTapOutside: (event) {
         
@@ -392,11 +392,9 @@ class _NavListTileState extends State<NavListTile> {
             });
         
           },
-          mouseCursor: listRename ? null : SystemMouseCursors.basic,
-          textSize: 16,
           requestFocus: listRename,
           inputValue: widget.title,
-          // TODO: need something for tapping outside, why?
+          textSize: 16,
           onChange: (value) async {
         
             // skip if the value has not changed.
@@ -416,11 +414,18 @@ class _NavListTileState extends State<NavListTile> {
             });
         
           },
+        ) : Text(
+          widget.title,
+          style: TextStyle(
+            fontSize: 16,
+            color: Colors.white,
+            overflow: TextOverflow.ellipsis,
+          ),
         ),
         trailing: Text("${widget.taskCount ?? 0}"),
         onTap: listRename ? null : (){
 
-          // notify provider on tab change / new list
+          // notify provider on tab change
           context.read<NavController>().setNavIndex(widget.index);
 
           // Change nav/list name in main page
@@ -448,6 +453,8 @@ class MainPage extends StatefulWidget {
 
 class _MainPageState extends State<MainPage> {
 
+  bool editName = false;
+
   @override
   Widget build(BuildContext context) {
 
@@ -468,17 +475,36 @@ class _MainPageState extends State<MainPage> {
               children: [
                 Icon(Icons.home),
                 
-                //TODO: add a onHover effect?
-                TitleField(
-                  //! need to add name of the list from db, but how should i get the db list name?
-                  //! Do i wrap this with streambuilder or something else?
-                  inputValue: navListName,
-                  disableTextEditing: navIndex <= 3 ? true : false,
-                  onChange: (value) {
+                //TODO: add a onHover effect. Shows that it is selectable
+                // Show this if its an user list.
+                if (navIndex > 3)
+                  TitleField(
+                    inputValue: navListName,
+                    selectAllOnFocus: true,
+                    onChange: (newName) async {
+                      
+                      // Update NavController variable - currentListName
+                      context.read<NavController>().setListName(newName, showPanel: taskPanelState);
 
-                  },
-                  mouseCursor: SystemMouseCursors.basic,
-                ), 
+                      // Update the db with the new list name.
+                      await db.updateList(
+                        navIndex,
+                        name: Value(newName),
+                      );
+
+                    },
+                  )
+                else 
+                  Text(
+                    navListName,
+                    style: TextStyle(
+                      fontSize: 26,
+                      color: Colors.white,
+                    ),
+                  ),
+                
+
+
                 Spacer(),
                 Icon(Icons.swap_vert),
                 Icon(Icons.lightbulb),
@@ -600,7 +626,7 @@ class _MainPageState extends State<MainPage> {
 
 
 
-
+//MARK: Task List Item
 class TaskListItem extends StatefulWidget {
   const TaskListItem({
     super.key,

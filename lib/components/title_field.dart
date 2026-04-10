@@ -17,6 +17,8 @@ class TitleField extends StatefulWidget {
     this.mouseCursor,
     this.onTapOutside,
     this.disableTextEditing = false,
+    this.selectAllOnFocus = true,
+    this.onTap,
   });
 
   final bool? requestFocus;
@@ -29,7 +31,9 @@ class TitleField extends StatefulWidget {
   final String? labelText;
   final TextStyle? labelStyle;
   final FontWeight? fontWeight;
-  final Function(PointerEvent)? onTapOutside;
+  final void Function(PointerEvent)? onTapOutside;
+  final bool selectAllOnFocus;
+  final void Function()? onTap;
 
   @override
   State<TitleField> createState() => _TitleFieldState();
@@ -41,17 +45,32 @@ class _TitleFieldState extends State<TitleField> {
   
   late FocusNode focusNode;
 
+  bool _wasFocused = false;
+
 
   @override
   void initState() {
     super.initState();
 
     focusNode = FocusNode();
+
+    // Properly applies selectAllOnFocus with this, without it causes a small delay
+    focusNode.addListener(() {
+
+      if (focusNode.hasFocus && widget.selectAllOnFocus) {
+        _titleController.selection = TextSelection(baseOffset: 0, extentOffset: _titleController.text.length);
+        _wasFocused = true;
+      }
+      else {
+        _wasFocused = false;
+      }
+    });
   }
 
   @override
   void dispose() {
     _titleController.dispose();
+    focusNode.dispose();
     super.dispose();
   }
   
@@ -74,22 +93,36 @@ class _TitleFieldState extends State<TitleField> {
 
     return IntrinsicWidth(
       child: TextField(
-        onTapOutside: (event) {
-          
-          focusNode.unfocus();
-          widget.onTapOutside?.call(event);
+        onTap: () {
 
+          // Adds focus and selects all
+          if (!_wasFocused && widget.selectAllOnFocus) {
+            setState(() {
+              focusNode.requestFocus();
+            });
+          }
+          print("here2");
+          widget.onTap?.call();
+        },
+        onTapOutside: (event) {
+          focusNode.unfocus();
+          _wasFocused = false;
+          widget.onTapOutside?.call(event);
         },
         focusNode: focusNode,
-        // selectAllOnFocus: false,
         readOnly: widget.disableTextEditing,
+        selectAllOnFocus: widget.selectAllOnFocus,
         mouseCursor: widget.mouseCursor,
         enabled: widget.requestFocus,
         controller: _titleController,
         onSubmitted: (value) {
           _titleController.text = value;
+          
           //Todo: need to remove empty space after the text if there is any.
-          widget.onChange!.call(value);
+          //! might be to do the trimming right before updating db or notifying the provider.
+          
+          widget.onChange!.call(value); 
+
         },
         style: TextStyle(
           fontSize: widget.textSize,
@@ -104,9 +137,11 @@ class _TitleFieldState extends State<TitleField> {
           isCollapsed: true, //This fixed the gap above input line from labeltext
           labelText: widget.inputValue == "" ? widget.labelText : null,
           labelStyle: widget.labelStyle,
+
           floatingLabelBehavior: FloatingLabelBehavior.never,
+          
         ),
-      ),
+      )
     );
   }
 }
