@@ -57,40 +57,19 @@ class MyApp extends StatelessWidget {
       ),
       // home: NavigationPanel(database: database),
       //MARK: MAIN?
-      home: ParentPage(),
-      
-    );
-  }
-}
-
-//! Is this necessary? Maybe remove.
-class ParentPage extends StatefulWidget {
-  const ParentPage({
-    super.key,
-  });
-
-  @override
-  State<ParentPage> createState() => _ParentPageState();
-}
-
-class _ParentPageState extends State<ParentPage> {
-
-
-  @override
-  Widget build(BuildContext context) {
-
-    return Scaffold(
-      body: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          NavigationPanel2(
-          ),
-          MainPage(
-          ),
-          //RightSidePanel/TaskInfo
-          TaskInfo( 
-          ),
-        ]
+      home: Scaffold(
+        body: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            NavigationPanel2(
+            ),
+            MainPage(
+            ),
+            //RightSidePanel/TaskInfo
+            TaskInfo( 
+            ),
+          ]
+        )      
       )
     );
   }
@@ -393,8 +372,9 @@ class _NavListTileState extends State<NavListTile> {
             });
         
           },
-          requestFocus: listRename, // Need comment this if you dont want selectall, immediately onfocus.
-          selectAllOnFocus: true, // on tap only
+          // Need to comment this if you dont want selectall immediately 
+          // when tapping "Rename List" from secondray tap.
+          requestFocus: listRename, 
           inputValue: widget.title,
           textSize: 16,
           onChange: (value) async {
@@ -448,7 +428,7 @@ class MainPage extends StatefulWidget {
 
 class _MainPageState extends State<MainPage> {
 
-  bool editName = false;
+  bool hideCompleted = false;
 
   @override
   Widget build(BuildContext context) {
@@ -562,11 +542,11 @@ class _MainPageState extends State<MainPage> {
         
           },
         ),
-        //MARK: Task List
+        //MARK: Task items
         child: Material(
           type: MaterialType.transparency,
           child: StreamBuilder(
-            stream: db.watchTasksByListId(navIndex),
+            stream: db.watchTasksByListId(navIndex).map((tasks) => tasks.separateCompleted()),
             builder: (context, snapshot) {
               
               if (snapshot.hasError) {
@@ -580,7 +560,7 @@ class _MainPageState extends State<MainPage> {
                 );
               }
           
-              final data = snapshot.data ?? [];
+              final Map<String, List<Task>> data = snapshot.data ?? {};
           
               if (data.isEmpty) {
                 return Center(
@@ -592,24 +572,79 @@ class _MainPageState extends State<MainPage> {
                     ),
                 );
               }
-          
-              return ListView.separated(
-                itemCount: data.length,
-                itemBuilder: (context, index) {
-                
-                  final Task task = data[index];
-                  final bool isSelected = context.watch<NavController>().currentTaskID == task.id;
-                
-                  return TaskListItem(
-                    task: task,
-                    isSelected: isSelected,
-                    taskPanelState: taskPanelState,
-                    db: db,
-                  );
-                },
-                separatorBuilder: (context, index) {
-                  return SizedBox(height: 8,);
-                },
+
+              final List<Task> dataTasks = data["tasks"] ?? [];
+              final List<Task> dataCompletedTasks = data["completedTasks"] ?? [];
+
+              return SingleChildScrollView(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    ListView.separated(
+                      shrinkWrap: true,
+                      physics: NeverScrollableScrollPhysics(),
+                      itemCount: dataTasks.length,
+                      itemBuilder: (context, index) {
+                      
+                        final Task task = dataTasks[index];
+                        final bool isSelected = context.watch<NavController>().currentTaskID == task.id;
+                      
+                        return TaskListItem(
+                          task: task,
+                          isSelected: isSelected,
+                          taskPanelState: taskPanelState,
+                          db: db,
+                        );
+                      },
+                      separatorBuilder: (context, index) {
+                        return SizedBox(height: 8,);
+                      },
+                    ),
+
+                    //TODO: Need to remember if to hide or show completed per list. Save to user settings(will have that later)
+                    ElevatedButton(
+                      onPressed: () {
+                        setState(() {
+                          hideCompleted = !hideCompleted;
+                        });
+                      },
+                      style: ElevatedButton.styleFrom(
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadiusGeometry.circular(7),
+                        ),
+                      ),
+                      child: Text("Completed ${dataCompletedTasks.length}"),
+                    ),
+                    //! BUG: why is it flickering when unchecking tasks? It is because the 
+                    //! "MouseRegion" widget in taskListitem.
+                    //! weird that it doesnt happen when checking the items. 
+                    //! What is there an difference between the two lists(completed and non-completed)
+                    // Is it because visibility widget?
+                    Visibility(
+                      visible: hideCompleted,
+                      child: ListView.separated(
+                        shrinkWrap: true,
+                        physics: NeverScrollableScrollPhysics(),
+                        itemCount: dataCompletedTasks.length,
+                        itemBuilder: (context, index) {
+                        
+                          final Task task = dataCompletedTasks[index];
+                          final bool isSelected = context.watch<NavController>().currentTaskID == task.id;
+                        
+                          return TaskListItem(
+                            task: task,
+                            isSelected: isSelected,
+                            taskPanelState: taskPanelState,
+                            db: db,
+                          );
+                        },
+                        separatorBuilder: (context, index) {
+                          return SizedBox(height: 8,);
+                        },
+                      ),
+                    ),
+                  ],
+                ),
               );
             }
           ),
@@ -656,57 +691,79 @@ class _TaskListItemState extends State<TaskListItem> {
           hovered = false;
         });
       },
-      child: Container(
-        color: widget.isSelected && widget.taskPanelState ? Colors.grey.shade700 : 
-          hovered ? Colors.grey.shade800 : Colors.grey.shade900,
-        child: Row(
-          children: [
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 8.0),
-              child: Checkbox(       
-                value: widget.task.isDone,
-                hoverColor: Colors.transparent, //! not really working for the icon inside.
-                splashRadius: 0,
-                focusColor: Colors.transparent,
-                onChanged: (value) async {
-                  
-                  await widget.db.updateTask(
-                    widget.task.id, 
-                    isDone: Value(value!),
-                  );
-                  
-                }
+      child: GestureDetector(
+        behavior: HitTestBehavior.deferToChild,
+        onSecondaryTapDown: (detail) {
+
+
+          // globalposition
+          // offset
+          // current app size(height and width) - mediaquery
+          // dx, dy
+
+
+          showMenu(
+            position: RelativeRect.fromLTRB(0, 0, 50, 50),
+            context: context,
+            items: [
+              PopupMenuItem(
+                child: Text("Delete Task")
               ),
-            ),
-            Expanded(
-              child: GestureDetector(
-                behavior: HitTestBehavior.opaque,
-                onTap: () {
-              
-                  context.read<NavController>().toggleRightPanel(
-                    state: !widget.taskPanelState,
-                    taskID: widget.task.id,
-                  );
-                      
-                },
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  // padding: const EdgeInsets.fromLTRB(240, 16, 0, 16),
-                  child: Text(
-                    widget.task.title,
-                    style: TextStyle(
-                      color: Colors.white,
+            ]
+          );
+        },
+        child: Container(
+          color: widget.isSelected && widget.taskPanelState ? Colors.grey.shade700 : 
+            hovered ? Colors.grey.shade800 : Colors.grey.shade900,
+          child: Row(
+            children: [
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                child: Checkbox(       
+                  value: widget.task.isDone,
+                  hoverColor: Colors.transparent, //! not really working for the icon inside.
+                  splashRadius: 0,
+                  focusColor: Colors.transparent,
+                  onChanged: (value) async {
+                    
+                    await widget.db.updateTask(
+                      widget.task.id, 
+                      isDone: Value(value!),
+                    );
+                    
+                  }
+                ),
+              ),
+              Expanded(
+                child: GestureDetector(
+                  behavior: HitTestBehavior.opaque,
+                  onTap: () {
+                
+                    context.read<NavController>().toggleRightPanel(
+                      state: !widget.taskPanelState,
+                      taskID: widget.task.id,
+                    );
+                        
+                  },
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    // padding: const EdgeInsets.fromLTRB(240, 16, 0, 16),
+                    child: Text(
+                      widget.task.title,
+                      style: TextStyle(
+                        color: Colors.white,
+                      ),
                     ),
                   ),
                 ),
               ),
-            ),
-            Icon(
-              Icons.arrow_forward_ios_sharp,
-              color: Colors.white,
-              
-            ),
-          ],
+              Icon(
+                Icons.arrow_forward_ios_sharp,
+                color: Colors.white,
+                
+              ),
+            ],
+          ),
         ),
       ),
     );

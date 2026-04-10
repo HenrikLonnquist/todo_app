@@ -11,6 +11,15 @@ import 'package:path/path.dart' as p;
 
 part 'database.g.dart';
 
+
+// Splitting a task list into completed and non-completed tasks
+extension TaskPartition on List<Task> {
+  Map<String, List<Task>> separateCompleted() => {
+    "tasks": where((t) => !t.isDone!).toList(),
+    "completedTasks": where((t) => t.isDone!).toList(),
+  };
+}
+
 @DriftDatabase(
   include: {'tables.drift'}
 )
@@ -49,6 +58,8 @@ class AppDB extends _$AppDB{
   Stream<List<Task>> watchTaskByIdWithSubTasks(int id) {
     return (select(tasks)..where((t) => t.id.equals(id) | t.parentId.equals(id) )).watch();
   }
+
+
 
   Future<void> insertTask(
     {
