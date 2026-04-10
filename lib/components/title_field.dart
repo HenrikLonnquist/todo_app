@@ -92,7 +92,16 @@ class _TitleFieldState extends State<TitleField> {
 
 
     return IntrinsicWidth(
-      child: TextField(
+      child: widget.disableTextEditing ?
+      Text(
+        widget.inputValue,
+        style: TextStyle(
+          color: Colors.white,
+          fontSize: widget.textSize,
+          overflow: TextOverflow.ellipsis,
+        )
+      )
+      : TextField(
         onTap: () {
 
           // Adds focus and selects all
@@ -101,8 +110,8 @@ class _TitleFieldState extends State<TitleField> {
               focusNode.requestFocus();
             });
           }
-          print("here2");
           widget.onTap?.call();
+          
         },
         onTapOutside: (event) {
           focusNode.unfocus();
@@ -110,7 +119,7 @@ class _TitleFieldState extends State<TitleField> {
           widget.onTapOutside?.call(event);
         },
         focusNode: focusNode,
-        readOnly: widget.disableTextEditing,
+        // readOnly: widget.disableTextEditing, 
         selectAllOnFocus: widget.selectAllOnFocus,
         mouseCursor: widget.mouseCursor,
         enabled: widget.requestFocus,

@@ -382,9 +382,10 @@ class _NavListTileState extends State<NavListTile> {
         hoverColor: Colors.grey.shade800,
         selected: widget.index == widget.selectedTabIndex,
         splashColor: Colors.transparent,
-        //TODO: need something for indicating its in "editable mode" > dotted-line border/underscore
-        title: listRename ? TitleField(
-
+        // TODO: need something for indicating its in "editable mode" > dotted-line border/underscore
+        // something like a lighter/dakrer background color could also work.
+        title: TitleField(
+          disableTextEditing: !listRename,
           onTapOutside: (event) {
         
             setState(() {
@@ -392,7 +393,8 @@ class _NavListTileState extends State<NavListTile> {
             });
         
           },
-          requestFocus: listRename,
+          requestFocus: listRename, // Need comment this if you dont want selectall, immediately onfocus.
+          selectAllOnFocus: true, // on tap only
           inputValue: widget.title,
           textSize: 16,
           onChange: (value) async {
@@ -414,13 +416,6 @@ class _NavListTileState extends State<NavListTile> {
             });
         
           },
-        ) : Text(
-          widget.title,
-          style: TextStyle(
-            fontSize: 16,
-            color: Colors.white,
-            overflow: TextOverflow.ellipsis,
-          ),
         ),
         trailing: Text("${widget.taskCount ?? 0}"),
         onTap: listRename ? null : (){
