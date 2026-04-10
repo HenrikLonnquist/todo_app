@@ -196,6 +196,7 @@ class TaskInfo extends StatelessWidget {
                         fontWeight: FontWeight.bold,
                         completed: parentTask.isDone!,
                         inputValue: parentTask.title,
+                        selectAllOnFocus: false,
                         onChange: (newTitle) async {
 
                           await db.updateTask(
