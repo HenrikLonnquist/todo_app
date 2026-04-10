@@ -548,7 +548,7 @@ class _MainPageState extends State<MainPage> {
           child: StreamBuilder(
             stream: db.watchTasksByListId(navIndex).map((tasks) => tasks.separateCompleted()),
             builder: (context, snapshot) {
-              
+
               if (snapshot.hasError) {
                 return Center(
                   child: Text(
@@ -588,7 +588,7 @@ class _MainPageState extends State<MainPage> {
                       
                         final Task task = dataTasks[index];
                         final bool isSelected = context.watch<NavController>().currentTaskID == task.id;
-                      
+                
                         return TaskListItem(
                           task: task,
                           isSelected: isSelected,
@@ -600,26 +600,24 @@ class _MainPageState extends State<MainPage> {
                         return SizedBox(height: 8,);
                       },
                     ),
-
                     //TODO: Need to remember if to hide or show completed per list. Save to user settings(will have that later)
-                    ElevatedButton(
-                      onPressed: () {
-                        setState(() {
-                          hideCompleted = !hideCompleted;
-                        });
-                      },
-                      style: ElevatedButton.styleFrom(
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadiusGeometry.circular(7),
+                    Padding(
+                      padding: const EdgeInsets.all(4.0),
+                      child: ElevatedButton(
+                        onPressed: () {
+                          setState(() {
+                            hideCompleted = !hideCompleted;
+                          });
+                        },
+                        style: ElevatedButton.styleFrom(
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadiusGeometry.circular(7),
+                          ),
                         ),
+                        child: Text("Completed ${dataCompletedTasks.length}"),
                       ),
-                      child: Text("Completed ${dataCompletedTasks.length}"),
                     ),
-                    //! BUG: why is it flickering when unchecking tasks? It is because the 
-                    //! "MouseRegion" widget in taskListitem.
-                    //! weird that it doesnt happen when checking the items. 
-                    //! What is there an difference between the two lists(completed and non-completed)
-                    // Is it because visibility widget?
+                    //! BUG: why is it flickering when unchecking tasks? (Notion:BUG)
                     Visibility(
                       visible: hideCompleted,
                       child: ListView.separated(
@@ -697,16 +695,29 @@ class _TaskListItemState extends State<TaskListItem> {
 
 
           // globalposition
+          final Offset offset = detail.globalPosition;
           // offset
+          final double dx = offset.dx;
+          final double dy = offset.dy;
           // current app size(height and width) - mediaquery
-          // dx, dy
+          final double width = MediaQuery.of(context).size.width;
+          final double height = MediaQuery.of(context).size.height;
 
 
           showMenu(
-            position: RelativeRect.fromLTRB(0, 0, 50, 50),
+            position: RelativeRect.fromLTRB(
+              dx, 
+              dy, 
+              width - dx, 
+              height - dy,
+            ),
+            popUpAnimationStyle: AnimationStyle(duration: Duration.zero),
             context: context,
             items: [
               PopupMenuItem(
+                onTap: () {
+                  
+                },
                 child: Text("Delete Task")
               ),
             ]
