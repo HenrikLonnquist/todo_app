@@ -715,8 +715,9 @@ class _TaskListItemState extends State<TaskListItem> {
             context: context,
             items: [
               PopupMenuItem(
-                onTap: () {
-                  
+                onTap: () async {
+                  //delete task from db.
+                  await (widget.db.delete(widget.db.tasks)..where((task) => task.id.equals(widget.task.id))).go();
                 },
                 child: Text("Delete Task")
               ),
