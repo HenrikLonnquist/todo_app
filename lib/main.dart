@@ -613,7 +613,14 @@ class _MainPageState extends State<MainPage> {
                           borderRadius: BorderRadiusGeometry.circular(7),
                         ),
                       ),
-                      child: Text("Completed ${dataCompletedTasks.length}"),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          //! ISSUE: Remove the gap before the icon
+                          Icon(hideCompleted ? Icons.keyboard_arrow_down_outlined :  Icons.keyboard_arrow_right_outlined),
+                          Text("Completed ${dataCompletedTasks.length}"),
+                        ],
+                      ),
                     ),
                     //! BUG: why is it flickering when unchecking tasks? It is because the 
                     //! "MouseRegion" widget in taskListitem.
