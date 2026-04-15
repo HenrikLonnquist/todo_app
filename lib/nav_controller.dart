@@ -13,6 +13,20 @@ class NavController extends ChangeNotifier {
 
   // bool showNavPanel = true; // feature for later
 
+  void setNameAndIndex(String name, int index) {
+
+    // Different index and taskpanel open << dont close panel
+    // Same index task panel open << close panel
+    if (index == navIndex) {
+      showTaskPanel = false; 
+    }
+
+    navListName = name;
+    navIndex = index;
+
+    notifyListeners();
+  }
+
   
   void setListName(String name, {
     // In-case we want to let the current state be, 
