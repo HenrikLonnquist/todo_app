@@ -3,6 +3,7 @@
 import 'package:drift/drift.dart' hide Column;
 import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:flutter/material.dart';
+import 'package:path/path.dart';
 import 'package:provider/provider.dart';
 import 'package:todo_app/components/add_task_field.dart';
 import 'package:todo_app/components/right_sidepanel.dart';
@@ -111,9 +112,13 @@ class _NavigationPanel2State extends State<NavigationPanel2> {
             await db.todoLists.count().get().then((value) async {
               
               int size = value[0] - 3; // 3 default tabs("My day"..
-              int lastPos = size > 0 ? size * 1000 : 1000; 
+              //! if there is one in the list already then the second will have the same pos. Because of "count(1) * 1000" equals 1000
+              int newPosition = (size <= 1 ? size + 1 : size) * 1000; 
             
-              await db.into(db.todoLists).insert(TodoListsCompanion.insert(name: Value("Untitled list ${size + 1}"), position: Value(lastPos)));
+              await db.into(db.todoLists).insert(TodoListsCompanion.insert(
+                name: Value("Untitled list ${size + 1}"),
+                position: Value(newPosition)
+              ));
 
             },);
 
@@ -144,9 +149,9 @@ class _NavigationPanel2State extends State<NavigationPanel2> {
               child: Column(
                 children: [
           
-                  NavListTile(title: "My Day", index: 1, selectedTabIndex: selectedTabIndex, taskCount: listTaskCount[1]),
-                  NavListTile(title: "Important", index: 2, selectedTabIndex: selectedTabIndex, taskCount: listTaskCount[2]),
-                  NavListTile(title: "Tasks", index: 3, selectedTabIndex: selectedTabIndex, taskCount: listTaskCount[3]),
+                  NavListTile(title: "My Day", listID: 1, selectedTabIndex: selectedTabIndex, taskCount: listTaskCount[1]),
+                  NavListTile(title: "Important", listID: 2, selectedTabIndex: selectedTabIndex, taskCount: listTaskCount[2]),
+                  NavListTile(title: "Tasks", listID: 3, selectedTabIndex: selectedTabIndex, taskCount: listTaskCount[3]),
                   
                   Divider(),
           
@@ -184,7 +189,8 @@ class _NavigationPanel2State extends State<NavigationPanel2> {
           
                           return NavListTile(
                             title: userList.name!, 
-                            index: userList.id, 
+                            listID: userList.id, 
+                            userPos: userList.position,
                             selectedTabIndex: selectedTabIndex,
                             isUserList: true,
                             taskCount: listTaskCount[userList.id],
@@ -207,15 +213,17 @@ class _NavigationPanel2State extends State<NavigationPanel2> {
 class NavListTile extends StatefulWidget {
   const NavListTile({
     super.key,
-    required this.index,
+    required this.listID,
     required this.selectedTabIndex,
     required this.title,
     this.isUserList = false,
     this.taskCount = 0,
+    this.userPos,
   });
 
 
-  final int index; // listId
+  final int listID;
+  final int? userPos;
   final int? taskCount;
   final int selectedTabIndex;
   final String title;
@@ -242,12 +250,15 @@ class _NavListTileState extends State<NavListTile> {
 
   }
 
+
   @override
   Widget build(BuildContext context) {
 
+    final AppDB db = context.read<AppDB>();
+
     //MARK: dropdown list
     return GestureDetector(
-      key: ValueKey(widget.index),
+      key: ValueKey(widget.listID),
 
       //* Dont worry about the delay, only happens in debug mode.
       onSecondaryTapDown: (detail) {
@@ -321,32 +332,115 @@ class _NavListTileState extends State<NavListTile> {
               child: Text("Email List")
             ),
             
-            // Pin start
+            // Pin start //! What is this gonna do?
             PopupMenuItem(
               child: Text("Pin Start")
             ),
             
             // Duplicate List
-            PopupMenuItem(
-              child: Text("Duplicate List")
+            commonMenuItem(
+              title: "Duplicate List",
+              onTap: () async {
+
+                //! Could change it to somethiing like an customSelect: "SELECT TOP 1 * FROM todo_lists ORDER BY ID DESC"
+                //! which will choose the last item in the db.
+
+                // create new list
+                await db.into(db.todoLists).insert(TodoListsCompanion.insert(
+                  name: Value("${widget.title}(copy)"),
+                  position: Value(widget.userPos), 
+                ));
+
+                // find the new list id
+                final newList = await (db.select(db.todoLists)
+                    ..orderBy([(l) => OrderingTerm.desc(l.id)])
+                    ..limit(1))
+                    .getSingleOrNull();
+
+                // just in case it comes back null           
+                if (newList == null) return print("error: no list found");
+
+                // call the function to copy tasks to new list id.
+                await db.copyingTasksToList(
+                  fromListID: widget.listID,
+                  toListID: newList.id,
+                );
+                
+              },
             ),
-            
+
+
+            //! DEV: Remove leftover tasks 
+            // commonMenuItem(title: "DEV: Delete leftover tasks",
+            // onTap: () async {
+            //   await (db.delete(db.tasks)..where((task) => task.listsId.equals(33))).go();
+            // }
+            // ),
+
+            //! DEV: Remove all user lists
+            // commonMenuItem(
+            //   title: "DEV: Delete All User Lists",
+            //   onTap: () async {
+            //     await (db.delete(db.todoLists)..where((list) => list.id.isBiggerThanValue(3))).go();
+            //   }
+            // ),
+
             // Remove List
             commonMenuItem(
               title: "Delete List",
               onTap: () async {
 
-                // TODO: call db - should I delete or add it to history? 
-                // Obviouisly we need a popup that asks to confirm deletion.
+                // TODO: call db - should I delete or add it to history? Undo in case you regret or change your mind. 
+                //! Obviouisly we need a popup that asks to confirm deletion.
                 // Then a snackbar message that tells user that it got deleted, but still got a chance to 
                 // undo before the snackbar message goes away.
 
                 //Snackbar
                 //.then( delete list after confirmation)
 
-                final db = context.read<AppDB>();
-                await (db.delete(db.todoLists)..where((t) => t.id.equals(widget.index))).go();
+
+                // choose to switch to nearest user list first if available if not then Tasks tab(3) 
+                final availableLists = await (db.select(db.todoLists)
+                ..where((list) => list.id.isBiggerThanValue(3))
+                ..orderBy([(list) => OrderingTerm.asc(list.id)]))
+                .get();
+
+
+                TodoList? targetTabIndex;
+
+                if (availableLists.isNotEmpty) {
+                  final currentIndex = availableLists.indexWhere((e) => e.id == widget.listID);
+
+
+                  // Picks one neighbour: prefer the one after, fall back to the one before
+                  final neighbour = availableLists.elementAtOrNull(currentIndex + 1) ??
+                  (currentIndex > 0 ? availableLists.elementAtOrNull(currentIndex - 1) : null);
+
+
+                  if (neighbour != null) {
+                    targetTabIndex = neighbour;
+                  }
+                }
+
                 
+                // If no available tab, fall back to Tasks tab(3)
+                targetTabIndex ??= TodoList(id: 3, name: "Tasks"); 
+
+
+                // Switch to an available tab/list
+                if (!mounted) return print("not mounted");
+                context.read<NavController>().setNameAndIndex(targetTabIndex.name!, targetTabIndex.id);
+
+
+                // Deletes list and related tasks
+                try {
+                  await (db.delete(db.todoLists)..where((list) => list.id.equals(widget.listID))).go();
+                  await (db.delete(db.tasks)..where((task) => task.listsId.equals(widget.listID))).go();
+                } catch (e) {
+                  print("Delete failed: $e");
+                }
+
+
               },
             ),
           ],
@@ -358,8 +452,9 @@ class _NavListTileState extends State<NavListTile> {
       //! HIDE OR Show no info when the object is being dragged.
       child: ListTile(
         mouseCursor: SystemMouseCursors.basic,
-        hoverColor: Colors.grey.shade800,
-        selected: widget.index == widget.selectedTabIndex,
+        hoverColor: widget.listID == widget.selectedTabIndex ? Colors.grey.shade700 : Colors.grey.shade800,
+        selected: widget.listID == widget.selectedTabIndex,
+        selectedTileColor: Colors.grey.shade700,
         splashColor: Colors.transparent,
         // TODO: need something for indicating its in "editable mode" > dotted-line border/underscore
         // something like a lighter/dakrer background color could also work.
@@ -382,10 +477,8 @@ class _NavListTileState extends State<NavListTile> {
             // skip if the value has not changed.
             if (value != widget.title) {
         
-              final db = context.read<AppDB>();
-        
               await db.updateList(
-                widget.index, //listid
+                widget.listID,
                 name: Value(value),
               );
         
@@ -401,10 +494,7 @@ class _NavListTileState extends State<NavListTile> {
         onTap: listRename ? null : (){
 
           // notify provider on tab change
-          context.read<NavController>().setNavIndex(widget.index);
-
-          // Change nav/list name in main page
-          context.read<NavController>().setListName(widget.title);
+          context.read<NavController>().setNameAndIndex(widget.title ,widget.listID);
             
         },
       ),
@@ -435,10 +525,11 @@ class _MainPageState extends State<MainPage> {
 
     final db = context.read<AppDB>();
 
-    final navIndex = context.select<NavController, int>((i) => i.navIndex);
-    final navListName = context.select<NavController, String>((s) => s.navListName);
-
-    final taskPanelState = context.select<NavController, bool>((b) => b.showTaskPanel);
+    final (int, String, bool) nav = context.select<NavController, (int, String, bool)>((nav) => (nav.navIndex, nav.navListName, nav.showTaskPanel));
+    
+    final int navIndex = nav.$1;
+    final String navListName = nav.$2;
+    final bool taskPanelState = nav.$3;
 
     return Expanded(
       child: CustomPanel(
@@ -524,7 +615,7 @@ class _MainPageState extends State<MainPage> {
               // task 1 pos 1000 | task 2 pos 2000 | task 3 pos 3000 |
               // tasks: 3 total > delete task 2 > 2 total > add > 3 total
               // task 1 pos 1000 | task 3 pos 3000 | task 4 pos 3000
-              //! Will this be a problem need to test this. I dont think so and depends on how
+              //! Will this be a problem? Need to test this. I dont think so and depends on how
               //! I retrieve them. Is it ordered by ID and then have to sort according to pos. That would be great.
               final size = value[0];
               final pos = size > 0 ? size * 1000 : 1000;
