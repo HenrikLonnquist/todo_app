@@ -145,6 +145,36 @@ class AppDB extends _$AppDB{
           
   }
 
+  Future<void> copyingTasksToList({
+    required int fromListID,
+    required int toListID
+  }) async {
+
+    final List<Task> tasksToDuplicate = await (select(tasks)..where((task) => task.listsId.equals(fromListID))).get();
+
+    DateTime now = DateTime.now();
+
+
+    await batch((b) {
+      b.insertAll(
+        tasks,
+        tasksToDuplicate.map((row) => TasksCompanion.insert(
+          title: row.title,
+          listsId: Value(toListID),
+          isDone: Value(row.isDone),
+          reminder: Value(row.reminder),
+          dueDate: Value(row.dueDate),
+          repeat: Value(row.repeat),
+          notes: Value(row.notes),
+          position: Value(row.position),
+          createdAt: Value(now),
+          updatedAt: Value(now),
+        ))
+      );
+    });
+    
+  }
+
   Future<void> updateList(
     int id,{
     Value<String>? name,
