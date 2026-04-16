@@ -3,7 +3,6 @@
 import 'package:drift/drift.dart' hide Column;
 import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:flutter/material.dart';
-import 'package:path/path.dart';
 import 'package:provider/provider.dart';
 import 'package:todo_app/components/add_task_field.dart';
 import 'package:todo_app/components/right_sidepanel.dart';
@@ -48,6 +47,15 @@ class MyApp extends StatelessWidget {
           seedColor: Colors.deepPurple,
           primary: Colors.black,
           surface: Colors.white,
+        ),
+        textButtonTheme: TextButtonThemeData(
+          style: TextButton.styleFrom(splashFactory: NoSplash.splashFactory)
+        ),
+        elevatedButtonTheme: ElevatedButtonThemeData(
+          style: ElevatedButton.styleFrom(splashFactory: NoSplash.splashFactory)
+        ),
+        outlinedButtonTheme: OutlinedButtonThemeData(
+          style: OutlinedButton.styleFrom(splashFactory: NoSplash.splashFactory)
         ),
         listTileTheme: ListTileThemeData(
           selectedTileColor: Colors.grey.shade700.withValues(alpha: 0.5),
@@ -776,106 +784,148 @@ class _TaskListItemState extends State<TaskListItem> {
 
   bool hovered = false;
 
+  final MenuController _menuController = MenuController();
+  
+  final MenuController _subMenuController = MenuController();
+  
+  final FocusNode _subMenuFocusNode = FocusNode();
+
   @override
   Widget build(BuildContext context) {
-    return MouseRegion(
-      onEnter: (_) => setState(() {
-        hovered = true;
-      }),
-      onExit: (_) {
-        setState(() {
-          hovered = false;
-        });
-      },
-      child: GestureDetector(
-        behavior: HitTestBehavior.deferToChild,
-        onSecondaryTapDown: (detail) {
-
-
-          // globalposition
-          final Offset offset = detail.globalPosition;
-          // offset
-          final double dx = offset.dx;
-          final double dy = offset.dy;
-          // current app size(height and width) - mediaquery
-          final double width = MediaQuery.of(context).size.width;
-          final double height = MediaQuery.of(context).size.height;
-
-
-          showMenu(
-            position: RelativeRect.fromLTRB(
-              dx, 
-              dy, 
-              width - dx, 
-              height - dy,
-            ),
-            popUpAnimationStyle: AnimationStyle(duration: Duration.zero),
-            context: context,
-            items: [
-              PopupMenuItem(
-                onTap: () async {
-                  //delete task from db.
-                  await (widget.db.delete(widget.db.tasks)..where((task) => task.id.equals(widget.task.id))).go();
-                },
-                child: Text("Delete Task")
-              ),
-            ]
-          );
-        },
-        child: Container(
-          color: widget.isSelected && widget.taskPanelState ? Colors.grey.shade700 : 
-            hovered ? Colors.grey.shade800 : Colors.grey.shade900,
-          child: Row(
-            children: [
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                child: Checkbox(       
-                  value: widget.task.isDone,
-                  hoverColor: Colors.transparent, //! not really working for the icon inside.
-                  splashRadius: 0,
-                  focusColor: Colors.transparent,
-                  onChanged: (value) async {
-                    
-                    await widget.db.updateTask(
-                      widget.task.id, 
-                      isDone: Value(value!),
-                    );
-                    
-                  }
-                ),
-              ),
-              Expanded(
-                child: GestureDetector(
-                  behavior: HitTestBehavior.opaque,
-                  onTap: () {
-                
-                    context.read<NavController>().toggleRightPanel(
-                      state: !widget.taskPanelState,
-                      taskID: widget.task.id,
-                    );
+    return MenuAnchor(
+      controller: _menuController,
+      builder: (context, controller, child) {
+        return GestureDetector(
+          onSecondaryTapDown: (details) {
+            _menuController.open(position: details.localPosition);
+          },
+          child: MouseRegion(
+            onEnter: (_) {
+              setState(() {
+                hovered = true;
+              });
+            },
+            onExit: (_) {
+              setState(() {
+                hovered = false;
+              });
+            },
+            child: Container(
+              color: widget.isSelected ? Colors.grey.shade700 : 
+              hovered ? Colors.grey.shade800 : Colors.grey.shade900,
+              child: Row(
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                    child: Checkbox(       
+                      value: widget.task.isDone,
+                      hoverColor: Colors.transparent, //! not really working for the icon inside.
+                      splashRadius: 0,
+                      focusColor: Colors.transparent,
+                      onChanged: (value) async {
                         
-                  },
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                    // padding: const EdgeInsets.fromLTRB(240, 16, 0, 16),
-                    child: Text(
-                      widget.task.title,
-                      style: TextStyle(
-                        color: Colors.white,
+                        await widget.db.updateTask(
+                          widget.task.id, 
+                          isDone: Value(value!),
+                        );
+                        
+                      }
+                    ),
+                  ),
+                  Expanded(
+                    child: GestureDetector(
+                      behavior: HitTestBehavior.opaque,
+                      onTap: () {
+                    
+                        context.read<NavController>().toggleRightPanel(
+                          state: !widget.taskPanelState,
+                          taskID: widget.task.id,
+                        );
+                            
+                      },
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        // padding: const EdgeInsets.fromLTRB(240, 16, 0, 16),
+                        child: Text(
+                          widget.task.title,
+                          style: TextStyle(
+                            color: Colors.white,
+                          ),
+                        ),
                       ),
                     ),
                   ),
-                ),
+                  Icon(
+                    Icons.arrow_forward_ios_sharp,
+                    color: Colors.white,
+                    
+                  ),
+                ],
               ),
-              Icon(
-                Icons.arrow_forward_ios_sharp,
-                color: Colors.white,
-                
+            ),
+          ),
+        );
+      },
+      menuChildren: [
+        MenuItemButton(
+          style: ButtonStyle(
+            splashFactory: NoSplash.splashFactory
+          ),
+          onPressed: () {},
+          child: Text("TEST")
+        ),
+        MenuItemButton(
+          onPressed: () {},
+          child: Text("TEST")
+        ),
+        Focus(
+          onFocusChange: (hasFocus) {
+            if (!hasFocus) _subMenuController.close();
+          },
+          child: MenuAnchor(
+            controller: _subMenuController,
+            childFocusNode: _subMenuFocusNode,
+            builder: (context, controller, child) {
+              return MouseRegion(
+                onEnter: (event) => _subMenuFocusNode.requestFocus(),
+                child: TextButton(
+                  focusNode: _subMenuFocusNode,
+                  style: TextButton.styleFrom(
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadiusGeometry.circular(0)
+                    ),
+                    padding: EdgeInsetsDirectional.only(start: 4, end: 8),
+                    visualDensity: VisualDensity(vertical: 0.5),
+                  ),
+                  onPressed: () {
+                    controller.isOpen ? controller.close() : _subMenuController.open();
+                  },
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      const Icon(Icons.move_to_inbox_outlined, size: 24),
+                      const Text("  SubMenu "),
+                      SizedBox(width: 60),
+                      const Icon(Icons.arrow_right_outlined, size: 24),
+                    ],
+                  ),
+                ),
+              );
+            },
+            menuChildren: [
+              // List of tabs to choose
+              MenuItemButton(
+                onPressed: () {},
+                child: const Text("test"),
               ),
             ],
           ),
         ),
-      ),
+        MenuItemButton(
+          onPressed: () {},
+          child: Text("TEST")
+        ),
+      ],
     );
   }
 }
