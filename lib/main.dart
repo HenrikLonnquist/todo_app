@@ -245,6 +245,12 @@ class _NavListTileState extends State<NavListTile> {
 
   bool listRename = false;
 
+  final MenuController _menuController = MenuController();
+
+  final MenuController _subMenuController = MenuController();
+
+  final FocusNode _subMenuFocusNode = FocusNode();
+
   PopupMenuItem commonMenuItem({
     VoidCallback? onTap,
     required String title,
@@ -265,247 +271,298 @@ class _NavListTileState extends State<NavListTile> {
     final AppDB db = context.read<AppDB>();
 
     //MARK: dropdown list
-    return GestureDetector(
-      key: ValueKey(widget.listID),
-
+    return MenuAnchor(
+      controller: _menuController,
       //* Dont worry about the delay, only happens in debug mode.
-      onSecondaryTapDown: (detail) {
-
-        if (!widget.isUserList) return; 
-
-        final Offset offset = detail.globalPosition;
-
-        final double dx = offset.dx;
-        final double dy = offset.dy;
+      builder: (context, controller, child) {
         
-        final double width = MediaQuery.of(context).size.width;
-        final double height = MediaQuery.of(context).size.height;
-
-        
-        // TODO: need a good name for this.
-        //! Not able to right click another item while menu is showing. You can do this in MS Todo tho.
-        //! BUG: Does not appear outside of the program, constrained to the size of the app. 
-
-        showMenu(
-          menuPadding: EdgeInsets.all(0),
-          color: Colors.grey.shade800,
-          context: context,
-          position: RelativeRect.fromLTRB(
-            dx,
-            dy,
-            width - dx,
-            height - dy,
-          ),
-          popUpAnimationStyle: AnimationStyle(duration: Duration(milliseconds: 5)),
-          items: [
-            // Rename list
-            commonMenuItem(
-              title: "Rename List",
-              onTap: () {
-
+        return GestureDetector(
+          onSecondaryTapDown: (details) {
+            _menuController.open(position: details.localPosition);
+          },
+          child: ListTile(
+            mouseCursor: SystemMouseCursors.basic,
+            hoverColor: widget.listID == widget.selectedTabIndex ? Colors.grey.shade700 : Colors.grey.shade800,
+            selected: widget.listID == widget.selectedTabIndex,
+            selectedTileColor: Colors.grey.shade700,
+            splashColor: Colors.transparent,
+            // TODO: need something for indicating its in "editable mode" > dotted-line border/underscore
+            // something like a lighter/dakrer background color could also work.
+            title: TitleField(
+              disableTextEditing: !listRename,
+              onTapOutside: (event) {
+            
                 setState(() {
-
-                  listRename = true;
-
+                  _menuController.close();
+                  listRename = false;
                 });
-
+            
+              },
+              // Need to comment this if you dont want selectall immediately 
+              // when tapping "Rename List" from secondray tap.
+              requestFocus: listRename, 
+              inputValue: widget.title,
+              textSize: 16,
+              onChange: (value) async {
+            
+                // skip if the value has not changed.
+                if (value != widget.title) {
+            
+                  await db.updateList(
+                    widget.listID,
+                    name: Value(value),
+                  );
+            
+                } 
+            
+                setState(() {
+                  listRename = false;
+                });
+            
               },
             ),
-
-            // Share List
-            PopupMenuItem(
-              child: Text("Share List")
-            ),
-
-            //DIVIDER
-            PopupMenuItem(
-              height: 0,
-              enabled: false,
-              padding: EdgeInsets.all(0),
-              child: PopupMenuDivider(),
-            ),
-
-            // Move list to... >
-            PopupMenuItem(
-              child: Text("Move List to... >")
-            ),
-            
-            // Print List
-            PopupMenuItem(
-              child: Text("Print List")
-            ),
-            
-            // Email List
-            PopupMenuItem(
-              child: Text("Email List")
-            ),
-            
-            // Pin start //! What is this gonna do?
-            PopupMenuItem(
-              child: Text("Pin Start")
-            ),
-            
-            // Duplicate List
-            commonMenuItem(
-              title: "Duplicate List",
-              onTap: () async {
-
-                //! Could change it to somethiing like an customSelect: "SELECT TOP 1 * FROM todo_lists ORDER BY ID DESC"
-                //! which will choose the last item in the db.
-
-                // create new list
-                await db.into(db.todoLists).insert(TodoListsCompanion.insert(
-                  name: Value("${widget.title}(copy)"),
-                  position: Value(widget.userPos), 
-                ));
-
-                // find the new list id
-                final newList = await (db.select(db.todoLists)
-                    ..orderBy([(l) => OrderingTerm.desc(l.id)])
-                    ..limit(1))
-                    .getSingleOrNull();
-
-                // just in case it comes back null           
-                if (newList == null) return print("error: no list found");
-
-                // call the function to copy tasks to new list id.
-                await db.copyingTasksToList(
-                  fromListID: widget.listID,
-                  toListID: newList.id,
-                );
-                
-              },
-            ),
-
-
-            //! DEV: Remove leftover tasks 
-            // commonMenuItem(title: "DEV: Delete leftover tasks",
-            // onTap: () async {
-            //   await (db.delete(db.tasks)..where((task) => task.listsId.equals(33))).go();
-            // }
-            // ),
-
-            //! DEV: Remove all user lists
-            // commonMenuItem(
-            //   title: "DEV: Delete All User Lists",
-            //   onTap: () async {
-            //     await (db.delete(db.todoLists)..where((list) => list.id.isBiggerThanValue(3))).go();
-            //   }
-            // ),
-
-            // Remove List
-            commonMenuItem(
-              title: "Delete List",
-              onTap: () async {
-
-                // TODO: call db - should I delete or add it to history? Undo in case you regret or change your mind. 
-                //! Obviouisly we need a popup that asks to confirm deletion.
-                // Then a snackbar message that tells user that it got deleted, but still got a chance to 
-                // undo before the snackbar message goes away.
-
-                //Snackbar
-                //.then( delete list after confirmation)
-
-
-                // choose to switch to nearest user list first if available if not then Tasks tab(3) 
-                final availableLists = await (db.select(db.todoLists)
-                ..where((list) => list.id.isBiggerThanValue(3))
-                ..orderBy([(list) => OrderingTerm.asc(list.id)]))
-                .get();
-
-
-                TodoList? targetTabIndex;
-
-                if (availableLists.isNotEmpty) {
-                  final currentIndex = availableLists.indexWhere((e) => e.id == widget.listID);
-
-
-                  // Picks one neighbour: prefer the one after, fall back to the one before
-                  final neighbour = availableLists.elementAtOrNull(currentIndex + 1) ??
-                  (currentIndex > 0 ? availableLists.elementAtOrNull(currentIndex - 1) : null);
-
-
-                  if (neighbour != null) {
-                    targetTabIndex = neighbour;
-                  }
-                }
-
-                
-                // If no available tab, fall back to Tasks tab(3)
-                targetTabIndex ??= TodoList(id: 3, name: "Tasks"); 
-
-
-                // Switch to an available tab/list
-                if (!mounted) return print("not mounted");
-                context.read<NavController>().setNameAndIndex(targetTabIndex.name!, targetTabIndex.id);
-
-
-                // Deletes list and related tasks
-                try {
-                  await (db.delete(db.todoLists)..where((list) => list.id.equals(widget.listID))).go();
-                  await (db.delete(db.tasks)..where((task) => task.listsId.equals(widget.listID))).go();
-                } catch (e) {
-                  print("Delete failed: $e");
-                }
-
-
-              },
-            ),
-          ],
+            trailing: Text("${widget.taskCount ?? 0}"),
+            onTap: listRename ? null : (){
           
+              // notify provider on tab change
+              context.read<NavController>().setNameAndIndex(widget.title ,widget.listID);
+                
+            },
+          ),
         );
-        
+
       },
       //MARK: Nav list item
       //! HIDE OR Show no info when the object is being dragged.
-      child: ListTile(
-        mouseCursor: SystemMouseCursors.basic,
-        hoverColor: widget.listID == widget.selectedTabIndex ? Colors.grey.shade700 : Colors.grey.shade800,
-        selected: widget.listID == widget.selectedTabIndex,
-        selectedTileColor: Colors.grey.shade700,
-        splashColor: Colors.transparent,
-        // TODO: need something for indicating its in "editable mode" > dotted-line border/underscore
-        // something like a lighter/dakrer background color could also work.
-        title: TitleField(
-          disableTextEditing: !listRename,
-          onTapOutside: (event) {
-        
+      menuChildren: [
+
+        // Rename list
+        MenuItemButton(
+          child: Text("Rename List"),
+          onPressed: () {
             setState(() {
-              listRename = false;
+              listRename = true;
             });
-        
-          },
-          // Need to comment this if you dont want selectall immediately 
-          // when tapping "Rename List" from secondray tap.
-          requestFocus: listRename, 
-          inputValue: widget.title,
-          textSize: 16,
-          onChange: (value) async {
-        
-            // skip if the value has not changed.
-            if (value != widget.title) {
-        
-              await db.updateList(
-                widget.listID,
-                name: Value(value),
-              );
-        
-            } 
-        
-            setState(() {
-              listRename = false;
-            });
-        
           },
         ),
-        trailing: Text("${widget.taskCount ?? 0}"),
-        onTap: listRename ? null : (){
 
-          // notify provider on tab change
-          context.read<NavController>().setNameAndIndex(widget.title ,widget.listID);
+        // Share List
+        MenuItemButton(
+          child: Text("Share List"),
+          // onPressed: () {}
+        ),
+
+        Divider(),
+
+        // Move list to... >
+        Focus(
+          onFocusChange: (hasFocus) {
+            if (!hasFocus) _subMenuController.close();
+          },
+          child: MenuAnchor(
+            controller: _subMenuController,
+            childFocusNode: _subMenuFocusNode,
+            builder: (context, controller, child) {
+          
+              return MouseRegion(
+                onEnter: (_) => _subMenuFocusNode.requestFocus(),
+                child: TextButton(
+                  focusNode: _subMenuFocusNode,
+                  onPressed: () {
+                    controller.isOpen ? controller.close() : controller.open();
+                    
+                  },
+                  style: TextButton.styleFrom(
+                    padding: EdgeInsetsDirectional.only(start: 8),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadiusGeometry.circular(0)
+                    ),
+                    visualDensity: VisualDensity(vertical: 0.50),
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Text("Move list to.."),
+                      Padding(
+                        padding: const EdgeInsetsDirectional.only(start: 12),
+                        child: const Icon(Icons.arrow_right, size: 24),
+                      ),
+                    ],
+                  )
+                ),
+              );
+            },
+            menuChildren: [
+              // List of tabs to choose from.
+              MenuItemButton(
+                // style: 
+                child: const Text("test"),
+                onPressed: () {},
+              ),
+              MenuItemButton(
+                child: const Text("test"),
+                onPressed: () {},
+              ),
+            ],
+          ),
+        ),
+
+
+        // Print List
+        MenuItemButton(
+          child: Text("Print List"),
+          // onPressed: () {}
+        ),
+        
+        // Email List
+        MenuItemButton(
+          child: Text("Email List"),
+          // onPressed: () {}
+        ),
+        
+        // Pin start //! What is this gonna do?
+        MenuItemButton(
+          child: Text("Pin Start"),
+          // onPressed: () {}
+        ),
+        
+        // Duplicate List
+        MenuItemButton(
+          child: const Text("Duplicate List"),
+          onPressed: () async {
+
+            //! Could change it to somethiing like an customSelect: "SELECT TOP 1 * FROM todo_lists ORDER BY ID DESC"
+            //! which will choose the last item in the db.
+
+            // create new list
+            await db.into(db.todoLists).insert(TodoListsCompanion.insert(
+              name: Value("${widget.title}(copy)"),
+              position: Value(widget.userPos), 
+            ));
+
+            // find the new list id
+            final newList = await (db.select(db.todoLists)
+                ..orderBy([(l) => OrderingTerm.desc(l.id)])
+                ..limit(1))
+                .getSingleOrNull();
+
+            // just in case it comes back null           
+            if (newList == null) return print("error: no list found");
+
+            // call the function to copy tasks to new list id.
+            await db.copyingTasksToList(
+              fromListID: widget.listID,
+              toListID: newList.id,
+            );
             
-        },
-      ),
+          },
+        ),
+
+
+        //! DEV: Remove leftover tasks 
+        // commonMenuItem(title: "DEV: Delete leftover tasks",
+        // onTap: () async {
+        //   await (db.delete(db.tasks)..where((task) => task.listsId.equals(33))).go();
+        // }
+        // ),
+
+        //! DEV: Remove all user lists
+        // commonMenuItem(
+        //   title: "DEV: Delete All User Lists",
+        //   onTap: () async {
+        //     await (db.delete(db.todoLists)..where((list) => list.id.isBiggerThanValue(3))).go();
+        //   }
+        // ),
+
+        Divider(),
+
+        // Remove List
+        MenuItemButton(
+          child: Text("Delete List"),
+          onPressed: () async {
+
+            // TODO: call db - should I delete or add it to history? Undo in case you regret or change your mind. 
+
+            showDialog(
+              context: context,
+              builder: (BuildContext context) {
+                //! Issue: need to style it
+                return AlertDialog(
+                  title: Text("You want to delete: ${widget.title}?"),
+                  actions: [
+                    TextButton(
+                      style: TextButton.styleFrom(
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadiusGeometry.circular(5)
+                        )
+                      ),
+                      onPressed: () async {
+
+                        // choose to switch to nearest user list first if available if not then Tasks tab(3) 
+                        final availableLists = await (db.select(db.todoLists)
+                        ..where((list) => list.id.isBiggerThanValue(3))
+                        ..orderBy([(list) => OrderingTerm.asc(list.id)]))
+                        .get();
+
+
+                        TodoList? targetTabIndex;
+
+                        if (availableLists.isNotEmpty) {
+                          final currentIndex = availableLists.indexWhere((e) => e.id == widget.listID);
+
+
+                          // Picks one neighbour: prefer the one after, fall back to the one before
+                          final neighbour = availableLists.elementAtOrNull(currentIndex + 1) ??
+                          (currentIndex > 0 ? availableLists.elementAtOrNull(currentIndex - 1) : null);
+
+
+                          if (neighbour != null) {
+                            targetTabIndex = neighbour;
+                          }
+                        }
+
+                        
+                        // If no available tab, fall back to Tasks tab(3)
+                        targetTabIndex ??= TodoList(id: 3, name: "Tasks"); 
+
+
+                        // Switch to an available tab/list
+                        if (!mounted) return print("not mounted");
+                        context.read<NavController>().setNameAndIndex(targetTabIndex.name!, targetTabIndex.id);
+                        Navigator.of(context).pop();
+
+
+                        // Deletes list and related tasks
+                        try {
+                          await (db.delete(db.todoLists)..where((list) => list.id.equals(widget.listID))).go();
+                          await (db.delete(db.tasks)..where((task) => task.listsId.equals(widget.listID))).go();
+                        } catch (e) {
+                          print("Delete failed: $e");
+                        }
+
+
+                      },
+                      child: Text("Delete")
+                    ),
+                    TextButton(
+                      style: TextButton.styleFrom(
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadiusGeometry.circular(5)
+                        )
+                      ),
+                      onPressed: () => Navigator.of(context).pop(),
+                      child: Text("Cancel")
+                    ),
+                  ],
+                );
+              }
+            );
+
+
+          },
+        ),
+      ],
     );
   }
 }
