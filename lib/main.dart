@@ -332,20 +332,16 @@ class _NavListTileState extends State<NavListTile> {
         MenuItemButton(
           child: Text("Rename List"),
           onPressed: () {
-
             setState(() {
-
               listRename = true;
-
             });
-
           },
         ),
 
         // Share List
         MenuItemButton(
           child: Text("Share List"),
-          onPressed: () {}
+          // onPressed: () {}
         ),
 
         Divider(),
@@ -408,19 +404,19 @@ class _NavListTileState extends State<NavListTile> {
         // Print List
         MenuItemButton(
           child: Text("Print List"),
-          onPressed: () {}
+          // onPressed: () {}
         ),
         
         // Email List
         MenuItemButton(
           child: Text("Email List"),
-          onPressed: () {}
+          // onPressed: () {}
         ),
         
         // Pin start //! What is this gonna do?
         MenuItemButton(
           child: Text("Pin Start"),
-          onPressed: () {}
+          // onPressed: () {}
         ),
         
         // Duplicate List
@@ -479,54 +475,81 @@ class _NavListTileState extends State<NavListTile> {
           onPressed: () async {
 
             // TODO: call db - should I delete or add it to history? Undo in case you regret or change your mind. 
-            //! Obviouisly we need a popup that asks to confirm deletion.
-            // Then a snackbar message that tells user that it got deleted, but still got a chance to 
-            // undo before the snackbar message goes away.
 
-            //Snackbar
-            //.then( delete list after confirmation)
+            showDialog(
+              context: context,
+              builder: (BuildContext context) {
+                //! Issue: need to style it
+                return AlertDialog(
+                  title: Text("You want to delete: ${widget.title}?"),
+                  actions: [
+                    TextButton(
+                      style: TextButton.styleFrom(
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadiusGeometry.circular(5)
+                        )
+                      ),
+                      onPressed: () async {
 
-
-            // choose to switch to nearest user list first if available if not then Tasks tab(3) 
-            final availableLists = await (db.select(db.todoLists)
-            ..where((list) => list.id.isBiggerThanValue(3))
-            ..orderBy([(list) => OrderingTerm.asc(list.id)]))
-            .get();
-
-
-            TodoList? targetTabIndex;
-
-            if (availableLists.isNotEmpty) {
-              final currentIndex = availableLists.indexWhere((e) => e.id == widget.listID);
-
-
-              // Picks one neighbour: prefer the one after, fall back to the one before
-              final neighbour = availableLists.elementAtOrNull(currentIndex + 1) ??
-              (currentIndex > 0 ? availableLists.elementAtOrNull(currentIndex - 1) : null);
+                        // choose to switch to nearest user list first if available if not then Tasks tab(3) 
+                        final availableLists = await (db.select(db.todoLists)
+                        ..where((list) => list.id.isBiggerThanValue(3))
+                        ..orderBy([(list) => OrderingTerm.asc(list.id)]))
+                        .get();
 
 
-              if (neighbour != null) {
-                targetTabIndex = neighbour;
+                        TodoList? targetTabIndex;
+
+                        if (availableLists.isNotEmpty) {
+                          final currentIndex = availableLists.indexWhere((e) => e.id == widget.listID);
+
+
+                          // Picks one neighbour: prefer the one after, fall back to the one before
+                          final neighbour = availableLists.elementAtOrNull(currentIndex + 1) ??
+                          (currentIndex > 0 ? availableLists.elementAtOrNull(currentIndex - 1) : null);
+
+
+                          if (neighbour != null) {
+                            targetTabIndex = neighbour;
+                          }
+                        }
+
+                        
+                        // If no available tab, fall back to Tasks tab(3)
+                        targetTabIndex ??= TodoList(id: 3, name: "Tasks"); 
+
+
+                        // Switch to an available tab/list
+                        if (!mounted) return print("not mounted");
+                        context.read<NavController>().setNameAndIndex(targetTabIndex.name!, targetTabIndex.id);
+                        Navigator.of(context).pop();
+
+
+                        // Deletes list and related tasks
+                        try {
+                          await (db.delete(db.todoLists)..where((list) => list.id.equals(widget.listID))).go();
+                          await (db.delete(db.tasks)..where((task) => task.listsId.equals(widget.listID))).go();
+                        } catch (e) {
+                          print("Delete failed: $e");
+                        }
+
+
+                      },
+                      child: Text("Delete")
+                    ),
+                    TextButton(
+                      style: TextButton.styleFrom(
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadiusGeometry.circular(5)
+                        )
+                      ),
+                      onPressed: () => Navigator.of(context).pop(),
+                      child: Text("Cancel")
+                    ),
+                  ],
+                );
               }
-            }
-
-            
-            // If no available tab, fall back to Tasks tab(3)
-            targetTabIndex ??= TodoList(id: 3, name: "Tasks"); 
-
-
-            // Switch to an available tab/list
-            if (!mounted) return print("not mounted");
-            context.read<NavController>().setNameAndIndex(targetTabIndex.name!, targetTabIndex.id);
-
-
-            // Deletes list and related tasks
-            try {
-              await (db.delete(db.todoLists)..where((list) => list.id.equals(widget.listID))).go();
-              await (db.delete(db.tasks)..where((task) => task.listsId.equals(widget.listID))).go();
-            } catch (e) {
-              print("Delete failed: $e");
-            }
+            );
 
 
           },
