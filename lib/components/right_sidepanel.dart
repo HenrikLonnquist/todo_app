@@ -154,8 +154,45 @@ class TaskInfo extends StatelessWidget {
           child: CustomPanel(
             bottomBar: PanelBottomBar(
               taskDateLastModified: parentTask.updatedAt,
-              deleteTask: () {},
-              hidePanel: () {},
+              deleteTask: () async {
+
+                showDialog(
+                  context: context,
+                  builder: (BuildContext context) {
+                    return AlertDialog(
+                      content: Text('Do you want to delete "${parentTask.title}"?'),
+                      actions: [
+                        TextButton(
+                          onPressed: () async {
+
+                            context.read<NavController>().toggleRightPanel(
+                              state: false,
+                            );
+
+                            Navigator.of(context).pop();
+                            
+                            try {
+                              await (db.delete(db.tasks)..where((task) => task.id.equals(parentTask.id))).go();
+                            } catch (e) {
+                              print(e);
+                            }
+                          },
+                          child: const Text("Delete")
+                        ),
+                        TextButton(
+                          onPressed: () {
+
+                            Navigator.of(context).pop();
+
+                          },
+                          child: const Text("Cancel")
+                        ),
+                      ],
+                    );
+                  }
+                );
+
+              },
             ),
             child: SingleChildScrollView(
               child: Material(
@@ -320,8 +357,8 @@ class PanelBottomBar extends StatelessWidget {
 
   const PanelBottomBar({
     super.key, 
-    required this.hidePanel,
     required this.deleteTask,
+    this.hidePanel,
     this.taskDateLastModified,
     
     });
@@ -344,7 +381,7 @@ class PanelBottomBar extends StatelessWidget {
 
             // Close panel
             ElevatedButton(
-              onPressed: () {
+              onPressed: hidePanel ?? () {
 
                 context.read<NavController>().toggleRightPanel();
 
@@ -354,19 +391,7 @@ class PanelBottomBar extends StatelessWidget {
             
             // Delete Task and close panel
             ElevatedButton(
-              onPressed: () async {
-                
-                final db = context.read<AppDB>();
-                final taskID = context.read<NavController>().currentTaskID;
-
-                context.read<NavController>().toggleRightPanel();
-
-                await (db.delete(db.tasks)..where((t) => t.id.equals(taskID))).go().then((value){
-                  
-
-                });
-                
-              },
+              onPressed: deleteTask,
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.white,
                 shape: RoundedRectangleBorder(
