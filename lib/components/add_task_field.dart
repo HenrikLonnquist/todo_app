@@ -16,11 +16,13 @@ class AddTask extends StatefulWidget {
 
 class _AddTaskState extends State<AddTask> {
   
-  final TextEditingController _newTaskController = TextEditingController();
+  final TextEditingController _taskController = TextEditingController();
+
+  final FocusNode _focusNode = FocusNode();
 
   @override
   void dispose() {
-    _newTaskController.dispose();
+    _taskController.dispose();
     super.dispose();
   }
 
@@ -35,12 +37,14 @@ class _AddTaskState extends State<AddTask> {
             hintText: "Add new task",
             border: InputBorder.none,
           ),
-          controller: _newTaskController,
+          controller: _taskController,
+          focusNode: _focusNode,
           onSubmitted: (value) {
             if (value.trim().isNotEmpty) {
               widget.onSubmitted?.call(value.trim());
             }
-            _newTaskController.text = "";
+            _taskController.clear();
+            _focusNode.requestFocus();
             
           },
         )
