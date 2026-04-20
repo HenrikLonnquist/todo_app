@@ -9,6 +9,8 @@ import 'package:todo_app/components/right_sidepanel.dart';
 import 'package:todo_app/components/title_field.dart';
 import 'package:todo_app/database.dart';
 import 'package:todo_app/nav_controller.dart';
+import 'dart:math' as math;
+
 
 
 class SpecialLists {
@@ -590,6 +592,7 @@ class MainPage extends StatefulWidget {
 class _MainPageState extends State<MainPage> {
 
   bool hideCompleted = false;
+  
 
   Stream<Map<String, List<Task>>> getTaskStream(int listID, AppDB db) {
     switch (listID) {
@@ -601,7 +604,7 @@ class _MainPageState extends State<MainPage> {
 
   @override
   Widget build(BuildContext context) {
-
+    
     final db = context.read<AppDB>();
 
     final (int, String, bool) nav = context.select<NavController, (int, String, bool)>((nav) => (nav.navIndex, nav.navListName, nav.showTaskPanel));
@@ -622,7 +625,7 @@ class _MainPageState extends State<MainPage> {
                 Icon(Icons.home),
                 
                 //TODO: add a onHover effect. Shows that it is selectable
-                // Show this if its an user list.
+                // ID from database > 3 == user lists.
                 if (navIndex > 3)
                   TitleField(
                     inputValue: navListName,
@@ -751,25 +754,37 @@ class _MainPageState extends State<MainPage> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    ListView.separated(
+                    ReorderableListView.builder(
+                      onReorder: (oldIndex, newIndex) {
+                        
+                      },
                       shrinkWrap: true,
                       physics: NeverScrollableScrollPhysics(),
-                      itemCount: dataTasks.length,
+                      itemCount: math.max(0, dataTasks.length * 2 - 1),
                       itemBuilder: (context, index) {
                       
-                        final Task task = dataTasks[index];
+                        final key = GlobalKey();
+
+                        // Separator between the tasks
+                        if (index.isOdd) {
+                            return SizedBox(key: key, height: 8,);
+                        }
+
+                        final itemIndex = index ~/2;
+                        final Task task = dataTasks[itemIndex];
                         final bool isSelected = context.watch<NavController>().currentTaskID == task.id;
+
+
                 
                         return TaskListItem(
+                          key: key,
                           task: task,
                           isSelected: isSelected,
                           taskPanelState: taskPanelState,
                           db: db,
                         );
                       },
-                      separatorBuilder: (context, index) {
-                        return SizedBox(height: 8,);
-                      },
+
                     ),
                     //TODO: Need to remember if to hide or show completed per list. Save to user settings(will have that later)
                     Padding(
