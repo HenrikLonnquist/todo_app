@@ -51,9 +51,21 @@ class AppDB extends _$AppDB{
     return select(tasks).watch();
   }
 
+  // "Regular"" List
   Stream<List<Task>> watchTasksByListId(int listId) {
     return (select(tasks)..where((t) => t.listsId.equals(listId) & t.parentId.isNull() )).watch();
   }
+
+  // MyDay
+  Stream<List<Task>> watchMyDayTasks() {
+    return (select(tasks)..where((t) => t.addedToMyDay.equals(true) & t.parentId.isNull() )).watch();
+  }
+
+  // Important/Starred
+  Stream<List<Task>> watchStarredTasks() {
+    return (select(tasks)..where((t) => t.isStarred.equals(true) & t.parentId.isNull() )).watch();
+  }
+
 
   Stream<List<Task>> watchTaskByIdWithSubTasks(int id) {
     return (select(tasks)..where((t) => t.id.equals(id) | t.parentId.equals(id) )).watch();
