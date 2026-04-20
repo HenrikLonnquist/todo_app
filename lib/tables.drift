@@ -13,6 +13,8 @@ CREATE TABLE tasks(
     parent_id INT REFERENCES tasks(id) ON DELETE CASCADE,
     title TEXT NOT NULL,
     is_done BOOLEAN DEFAULT 0,
+    added_to_my_day BOOLEAN DEFAULT 0,
+    is_starred BOOLEAN DEFAULT 0,
     reminder DATETIME,
     due_date DATETIME,
     repeat TEXT CHECK(repeat IN('daily', 'weekly', 'monthly')), 

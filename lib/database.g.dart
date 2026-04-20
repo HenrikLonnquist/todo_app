@@ -24,10 +24,10 @@ class TodoLists extends Table with TableInfo<TodoLists, TodoList> {
   static const VerificationMeta _positionMeta =
       const VerificationMeta('position');
   late final GeneratedColumn<int> position = GeneratedColumn<int>(
-      'position', aliasedName, true,
+      'position', aliasedName, false,
       type: DriftSqlType.int,
-      requiredDuringInsert: false,
-      $customConstraints: '');
+      requiredDuringInsert: true,
+      $customConstraints: 'NOT NULL');
   @override
   List<GeneratedColumn> get $columns => [id, name, position];
   @override
@@ -50,6 +50,8 @@ class TodoLists extends Table with TableInfo<TodoLists, TodoList> {
     if (data.containsKey('position')) {
       context.handle(_positionMeta,
           position.isAcceptableOrUnknown(data['position']!, _positionMeta));
+    } else if (isInserting) {
+      context.missing(_positionMeta);
     }
     return context;
   }
@@ -65,7 +67,7 @@ class TodoLists extends Table with TableInfo<TodoLists, TodoList> {
       name: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}name']),
       position: attachedDatabase.typeMapping
-          .read(DriftSqlType.int, data['${effectivePrefix}position']),
+          .read(DriftSqlType.int, data['${effectivePrefix}position'])!,
     );
   }
 
@@ -81,8 +83,8 @@ class TodoLists extends Table with TableInfo<TodoLists, TodoList> {
 class TodoList extends DataClass implements Insertable<TodoList> {
   final int id;
   final String? name;
-  final int? position;
-  const TodoList({required this.id, this.name, this.position});
+  final int position;
+  const TodoList({required this.id, this.name, required this.position});
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
@@ -90,9 +92,7 @@ class TodoList extends DataClass implements Insertable<TodoList> {
     if (!nullToAbsent || name != null) {
       map['name'] = Variable<String>(name);
     }
-    if (!nullToAbsent || position != null) {
-      map['position'] = Variable<int>(position);
-    }
+    map['position'] = Variable<int>(position);
     return map;
   }
 
@@ -100,9 +100,7 @@ class TodoList extends DataClass implements Insertable<TodoList> {
     return TodoListsCompanion(
       id: Value(id),
       name: name == null && nullToAbsent ? const Value.absent() : Value(name),
-      position: position == null && nullToAbsent
-          ? const Value.absent()
-          : Value(position),
+      position: Value(position),
     );
   }
 
@@ -112,7 +110,7 @@ class TodoList extends DataClass implements Insertable<TodoList> {
     return TodoList(
       id: serializer.fromJson<int>(json['id']),
       name: serializer.fromJson<String?>(json['name']),
-      position: serializer.fromJson<int?>(json['position']),
+      position: serializer.fromJson<int>(json['position']),
     );
   }
   @override
@@ -121,18 +119,18 @@ class TodoList extends DataClass implements Insertable<TodoList> {
     return <String, dynamic>{
       'id': serializer.toJson<int>(id),
       'name': serializer.toJson<String?>(name),
-      'position': serializer.toJson<int?>(position),
+      'position': serializer.toJson<int>(position),
     };
   }
 
   TodoList copyWith(
           {int? id,
           Value<String?> name = const Value.absent(),
-          Value<int?> position = const Value.absent()}) =>
+          int? position}) =>
       TodoList(
         id: id ?? this.id,
         name: name.present ? name.value : this.name,
-        position: position.present ? position.value : this.position,
+        position: position ?? this.position,
       );
   TodoList copyWithCompanion(TodoListsCompanion data) {
     return TodoList(
@@ -166,7 +164,7 @@ class TodoList extends DataClass implements Insertable<TodoList> {
 class TodoListsCompanion extends UpdateCompanion<TodoList> {
   final Value<int> id;
   final Value<String?> name;
-  final Value<int?> position;
+  final Value<int> position;
   const TodoListsCompanion({
     this.id = const Value.absent(),
     this.name = const Value.absent(),
@@ -175,8 +173,8 @@ class TodoListsCompanion extends UpdateCompanion<TodoList> {
   TodoListsCompanion.insert({
     this.id = const Value.absent(),
     this.name = const Value.absent(),
-    this.position = const Value.absent(),
-  });
+    required int position,
+  }) : position = Value(position);
   static Insertable<TodoList> custom({
     Expression<int>? id,
     Expression<String>? name,
@@ -190,7 +188,7 @@ class TodoListsCompanion extends UpdateCompanion<TodoList> {
   }
 
   TodoListsCompanion copyWith(
-      {Value<int>? id, Value<String?>? name, Value<int?>? position}) {
+      {Value<int>? id, Value<String?>? name, Value<int>? position}) {
     return TodoListsCompanion(
       id: id ?? this.id,
       name: name ?? this.name,
@@ -263,6 +261,22 @@ class Tasks extends Table with TableInfo<Tasks, Task> {
       requiredDuringInsert: false,
       $customConstraints: 'DEFAULT 0',
       defaultValue: const CustomExpression('0'));
+  static const VerificationMeta _addedToMyDayMeta =
+      const VerificationMeta('addedToMyDay');
+  late final GeneratedColumn<bool> addedToMyDay = GeneratedColumn<bool>(
+      'added_to_my_day', aliasedName, true,
+      type: DriftSqlType.bool,
+      requiredDuringInsert: false,
+      $customConstraints: 'DEFAULT 0',
+      defaultValue: const CustomExpression('0'));
+  static const VerificationMeta _isStarredMeta =
+      const VerificationMeta('isStarred');
+  late final GeneratedColumn<bool> isStarred = GeneratedColumn<bool>(
+      'is_starred', aliasedName, true,
+      type: DriftSqlType.bool,
+      requiredDuringInsert: false,
+      $customConstraints: 'DEFAULT 0',
+      defaultValue: const CustomExpression('0'));
   static const VerificationMeta _reminderMeta =
       const VerificationMeta('reminder');
   late final GeneratedColumn<DateTime> reminder = GeneratedColumn<DateTime>(
@@ -293,10 +307,10 @@ class Tasks extends Table with TableInfo<Tasks, Task> {
   static const VerificationMeta _positionMeta =
       const VerificationMeta('position');
   late final GeneratedColumn<int> position = GeneratedColumn<int>(
-      'position', aliasedName, true,
+      'position', aliasedName, false,
       type: DriftSqlType.int,
-      requiredDuringInsert: false,
-      $customConstraints: '');
+      requiredDuringInsert: true,
+      $customConstraints: 'NOT NULL');
   static const VerificationMeta _createdAtMeta =
       const VerificationMeta('createdAt');
   late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
@@ -318,6 +332,8 @@ class Tasks extends Table with TableInfo<Tasks, Task> {
         parentId,
         title,
         isDone,
+        addedToMyDay,
+        isStarred,
         reminder,
         dueDate,
         repeat,
@@ -357,6 +373,16 @@ class Tasks extends Table with TableInfo<Tasks, Task> {
       context.handle(_isDoneMeta,
           isDone.isAcceptableOrUnknown(data['is_done']!, _isDoneMeta));
     }
+    if (data.containsKey('added_to_my_day')) {
+      context.handle(
+          _addedToMyDayMeta,
+          addedToMyDay.isAcceptableOrUnknown(
+              data['added_to_my_day']!, _addedToMyDayMeta));
+    }
+    if (data.containsKey('is_starred')) {
+      context.handle(_isStarredMeta,
+          isStarred.isAcceptableOrUnknown(data['is_starred']!, _isStarredMeta));
+    }
     if (data.containsKey('reminder')) {
       context.handle(_reminderMeta,
           reminder.isAcceptableOrUnknown(data['reminder']!, _reminderMeta));
@@ -376,6 +402,8 @@ class Tasks extends Table with TableInfo<Tasks, Task> {
     if (data.containsKey('position')) {
       context.handle(_positionMeta,
           position.isAcceptableOrUnknown(data['position']!, _positionMeta));
+    } else if (isInserting) {
+      context.missing(_positionMeta);
     }
     if (data.containsKey('created_at')) {
       context.handle(_createdAtMeta,
@@ -404,6 +432,10 @@ class Tasks extends Table with TableInfo<Tasks, Task> {
           .read(DriftSqlType.string, data['${effectivePrefix}title'])!,
       isDone: attachedDatabase.typeMapping
           .read(DriftSqlType.bool, data['${effectivePrefix}is_done']),
+      addedToMyDay: attachedDatabase.typeMapping
+          .read(DriftSqlType.bool, data['${effectivePrefix}added_to_my_day']),
+      isStarred: attachedDatabase.typeMapping
+          .read(DriftSqlType.bool, data['${effectivePrefix}is_starred']),
       reminder: attachedDatabase.typeMapping
           .read(DriftSqlType.dateTime, data['${effectivePrefix}reminder']),
       dueDate: attachedDatabase.typeMapping
@@ -413,7 +445,7 @@ class Tasks extends Table with TableInfo<Tasks, Task> {
       notes: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}notes']),
       position: attachedDatabase.typeMapping
-          .read(DriftSqlType.int, data['${effectivePrefix}position']),
+          .read(DriftSqlType.int, data['${effectivePrefix}position'])!,
       createdAt: attachedDatabase.typeMapping
           .read(DriftSqlType.dateTime, data['${effectivePrefix}created_at']),
       updatedAt: attachedDatabase.typeMapping
@@ -436,11 +468,13 @@ class Task extends DataClass implements Insertable<Task> {
   final int? parentId;
   final String title;
   final bool? isDone;
+  final bool? addedToMyDay;
+  final bool? isStarred;
   final DateTime? reminder;
   final DateTime? dueDate;
   final String? repeat;
   final String? notes;
-  final int? position;
+  final int position;
 
   ///sorting within list
   final DateTime? createdAt;
@@ -453,11 +487,13 @@ class Task extends DataClass implements Insertable<Task> {
       this.parentId,
       required this.title,
       this.isDone,
+      this.addedToMyDay,
+      this.isStarred,
       this.reminder,
       this.dueDate,
       this.repeat,
       this.notes,
-      this.position,
+      required this.position,
       this.createdAt,
       this.updatedAt});
   @override
@@ -474,6 +510,12 @@ class Task extends DataClass implements Insertable<Task> {
     if (!nullToAbsent || isDone != null) {
       map['is_done'] = Variable<bool>(isDone);
     }
+    if (!nullToAbsent || addedToMyDay != null) {
+      map['added_to_my_day'] = Variable<bool>(addedToMyDay);
+    }
+    if (!nullToAbsent || isStarred != null) {
+      map['is_starred'] = Variable<bool>(isStarred);
+    }
     if (!nullToAbsent || reminder != null) {
       map['reminder'] = Variable<DateTime>(reminder);
     }
@@ -486,9 +528,7 @@ class Task extends DataClass implements Insertable<Task> {
     if (!nullToAbsent || notes != null) {
       map['notes'] = Variable<String>(notes);
     }
-    if (!nullToAbsent || position != null) {
-      map['position'] = Variable<int>(position);
-    }
+    map['position'] = Variable<int>(position);
     if (!nullToAbsent || createdAt != null) {
       map['created_at'] = Variable<DateTime>(createdAt);
     }
@@ -510,6 +550,12 @@ class Task extends DataClass implements Insertable<Task> {
       title: Value(title),
       isDone:
           isDone == null && nullToAbsent ? const Value.absent() : Value(isDone),
+      addedToMyDay: addedToMyDay == null && nullToAbsent
+          ? const Value.absent()
+          : Value(addedToMyDay),
+      isStarred: isStarred == null && nullToAbsent
+          ? const Value.absent()
+          : Value(isStarred),
       reminder: reminder == null && nullToAbsent
           ? const Value.absent()
           : Value(reminder),
@@ -520,9 +566,7 @@ class Task extends DataClass implements Insertable<Task> {
           repeat == null && nullToAbsent ? const Value.absent() : Value(repeat),
       notes:
           notes == null && nullToAbsent ? const Value.absent() : Value(notes),
-      position: position == null && nullToAbsent
-          ? const Value.absent()
-          : Value(position),
+      position: Value(position),
       createdAt: createdAt == null && nullToAbsent
           ? const Value.absent()
           : Value(createdAt),
@@ -541,11 +585,13 @@ class Task extends DataClass implements Insertable<Task> {
       parentId: serializer.fromJson<int?>(json['parent_id']),
       title: serializer.fromJson<String>(json['title']),
       isDone: serializer.fromJson<bool?>(json['is_done']),
+      addedToMyDay: serializer.fromJson<bool?>(json['added_to_my_day']),
+      isStarred: serializer.fromJson<bool?>(json['is_starred']),
       reminder: serializer.fromJson<DateTime?>(json['reminder']),
       dueDate: serializer.fromJson<DateTime?>(json['due_date']),
       repeat: serializer.fromJson<String?>(json['repeat']),
       notes: serializer.fromJson<String?>(json['notes']),
-      position: serializer.fromJson<int?>(json['position']),
+      position: serializer.fromJson<int>(json['position']),
       createdAt: serializer.fromJson<DateTime?>(json['created_at']),
       updatedAt: serializer.fromJson<DateTime?>(json['updated_at']),
     );
@@ -559,11 +605,13 @@ class Task extends DataClass implements Insertable<Task> {
       'parent_id': serializer.toJson<int?>(parentId),
       'title': serializer.toJson<String>(title),
       'is_done': serializer.toJson<bool?>(isDone),
+      'added_to_my_day': serializer.toJson<bool?>(addedToMyDay),
+      'is_starred': serializer.toJson<bool?>(isStarred),
       'reminder': serializer.toJson<DateTime?>(reminder),
       'due_date': serializer.toJson<DateTime?>(dueDate),
       'repeat': serializer.toJson<String?>(repeat),
       'notes': serializer.toJson<String?>(notes),
-      'position': serializer.toJson<int?>(position),
+      'position': serializer.toJson<int>(position),
       'created_at': serializer.toJson<DateTime?>(createdAt),
       'updated_at': serializer.toJson<DateTime?>(updatedAt),
     };
@@ -575,11 +623,13 @@ class Task extends DataClass implements Insertable<Task> {
           Value<int?> parentId = const Value.absent(),
           String? title,
           Value<bool?> isDone = const Value.absent(),
+          Value<bool?> addedToMyDay = const Value.absent(),
+          Value<bool?> isStarred = const Value.absent(),
           Value<DateTime?> reminder = const Value.absent(),
           Value<DateTime?> dueDate = const Value.absent(),
           Value<String?> repeat = const Value.absent(),
           Value<String?> notes = const Value.absent(),
-          Value<int?> position = const Value.absent(),
+          int? position,
           Value<DateTime?> createdAt = const Value.absent(),
           Value<DateTime?> updatedAt = const Value.absent()}) =>
       Task(
@@ -588,11 +638,14 @@ class Task extends DataClass implements Insertable<Task> {
         parentId: parentId.present ? parentId.value : this.parentId,
         title: title ?? this.title,
         isDone: isDone.present ? isDone.value : this.isDone,
+        addedToMyDay:
+            addedToMyDay.present ? addedToMyDay.value : this.addedToMyDay,
+        isStarred: isStarred.present ? isStarred.value : this.isStarred,
         reminder: reminder.present ? reminder.value : this.reminder,
         dueDate: dueDate.present ? dueDate.value : this.dueDate,
         repeat: repeat.present ? repeat.value : this.repeat,
         notes: notes.present ? notes.value : this.notes,
-        position: position.present ? position.value : this.position,
+        position: position ?? this.position,
         createdAt: createdAt.present ? createdAt.value : this.createdAt,
         updatedAt: updatedAt.present ? updatedAt.value : this.updatedAt,
       );
@@ -603,6 +656,10 @@ class Task extends DataClass implements Insertable<Task> {
       parentId: data.parentId.present ? data.parentId.value : this.parentId,
       title: data.title.present ? data.title.value : this.title,
       isDone: data.isDone.present ? data.isDone.value : this.isDone,
+      addedToMyDay: data.addedToMyDay.present
+          ? data.addedToMyDay.value
+          : this.addedToMyDay,
+      isStarred: data.isStarred.present ? data.isStarred.value : this.isStarred,
       reminder: data.reminder.present ? data.reminder.value : this.reminder,
       dueDate: data.dueDate.present ? data.dueDate.value : this.dueDate,
       repeat: data.repeat.present ? data.repeat.value : this.repeat,
@@ -621,6 +678,8 @@ class Task extends DataClass implements Insertable<Task> {
           ..write('parentId: $parentId, ')
           ..write('title: $title, ')
           ..write('isDone: $isDone, ')
+          ..write('addedToMyDay: $addedToMyDay, ')
+          ..write('isStarred: $isStarred, ')
           ..write('reminder: $reminder, ')
           ..write('dueDate: $dueDate, ')
           ..write('repeat: $repeat, ')
@@ -633,8 +692,21 @@ class Task extends DataClass implements Insertable<Task> {
   }
 
   @override
-  int get hashCode => Object.hash(id, listsId, parentId, title, isDone,
-      reminder, dueDate, repeat, notes, position, createdAt, updatedAt);
+  int get hashCode => Object.hash(
+      id,
+      listsId,
+      parentId,
+      title,
+      isDone,
+      addedToMyDay,
+      isStarred,
+      reminder,
+      dueDate,
+      repeat,
+      notes,
+      position,
+      createdAt,
+      updatedAt);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -644,6 +716,8 @@ class Task extends DataClass implements Insertable<Task> {
           other.parentId == this.parentId &&
           other.title == this.title &&
           other.isDone == this.isDone &&
+          other.addedToMyDay == this.addedToMyDay &&
+          other.isStarred == this.isStarred &&
           other.reminder == this.reminder &&
           other.dueDate == this.dueDate &&
           other.repeat == this.repeat &&
@@ -659,11 +733,13 @@ class TasksCompanion extends UpdateCompanion<Task> {
   final Value<int?> parentId;
   final Value<String> title;
   final Value<bool?> isDone;
+  final Value<bool?> addedToMyDay;
+  final Value<bool?> isStarred;
   final Value<DateTime?> reminder;
   final Value<DateTime?> dueDate;
   final Value<String?> repeat;
   final Value<String?> notes;
-  final Value<int?> position;
+  final Value<int> position;
   final Value<DateTime?> createdAt;
   final Value<DateTime?> updatedAt;
   const TasksCompanion({
@@ -672,6 +748,8 @@ class TasksCompanion extends UpdateCompanion<Task> {
     this.parentId = const Value.absent(),
     this.title = const Value.absent(),
     this.isDone = const Value.absent(),
+    this.addedToMyDay = const Value.absent(),
+    this.isStarred = const Value.absent(),
     this.reminder = const Value.absent(),
     this.dueDate = const Value.absent(),
     this.repeat = const Value.absent(),
@@ -686,20 +764,25 @@ class TasksCompanion extends UpdateCompanion<Task> {
     this.parentId = const Value.absent(),
     required String title,
     this.isDone = const Value.absent(),
+    this.addedToMyDay = const Value.absent(),
+    this.isStarred = const Value.absent(),
     this.reminder = const Value.absent(),
     this.dueDate = const Value.absent(),
     this.repeat = const Value.absent(),
     this.notes = const Value.absent(),
-    this.position = const Value.absent(),
+    required int position,
     this.createdAt = const Value.absent(),
     this.updatedAt = const Value.absent(),
-  }) : title = Value(title);
+  })  : title = Value(title),
+        position = Value(position);
   static Insertable<Task> custom({
     Expression<int>? id,
     Expression<int>? listsId,
     Expression<int>? parentId,
     Expression<String>? title,
     Expression<bool>? isDone,
+    Expression<bool>? addedToMyDay,
+    Expression<bool>? isStarred,
     Expression<DateTime>? reminder,
     Expression<DateTime>? dueDate,
     Expression<String>? repeat,
@@ -714,6 +797,8 @@ class TasksCompanion extends UpdateCompanion<Task> {
       if (parentId != null) 'parent_id': parentId,
       if (title != null) 'title': title,
       if (isDone != null) 'is_done': isDone,
+      if (addedToMyDay != null) 'added_to_my_day': addedToMyDay,
+      if (isStarred != null) 'is_starred': isStarred,
       if (reminder != null) 'reminder': reminder,
       if (dueDate != null) 'due_date': dueDate,
       if (repeat != null) 'repeat': repeat,
@@ -730,11 +815,13 @@ class TasksCompanion extends UpdateCompanion<Task> {
       Value<int?>? parentId,
       Value<String>? title,
       Value<bool?>? isDone,
+      Value<bool?>? addedToMyDay,
+      Value<bool?>? isStarred,
       Value<DateTime?>? reminder,
       Value<DateTime?>? dueDate,
       Value<String?>? repeat,
       Value<String?>? notes,
-      Value<int?>? position,
+      Value<int>? position,
       Value<DateTime?>? createdAt,
       Value<DateTime?>? updatedAt}) {
     return TasksCompanion(
@@ -743,6 +830,8 @@ class TasksCompanion extends UpdateCompanion<Task> {
       parentId: parentId ?? this.parentId,
       title: title ?? this.title,
       isDone: isDone ?? this.isDone,
+      addedToMyDay: addedToMyDay ?? this.addedToMyDay,
+      isStarred: isStarred ?? this.isStarred,
       reminder: reminder ?? this.reminder,
       dueDate: dueDate ?? this.dueDate,
       repeat: repeat ?? this.repeat,
@@ -770,6 +859,12 @@ class TasksCompanion extends UpdateCompanion<Task> {
     }
     if (isDone.present) {
       map['is_done'] = Variable<bool>(isDone.value);
+    }
+    if (addedToMyDay.present) {
+      map['added_to_my_day'] = Variable<bool>(addedToMyDay.value);
+    }
+    if (isStarred.present) {
+      map['is_starred'] = Variable<bool>(isStarred.value);
     }
     if (reminder.present) {
       map['reminder'] = Variable<DateTime>(reminder.value);
@@ -803,6 +898,8 @@ class TasksCompanion extends UpdateCompanion<Task> {
           ..write('parentId: $parentId, ')
           ..write('title: $title, ')
           ..write('isDone: $isDone, ')
+          ..write('addedToMyDay: $addedToMyDay, ')
+          ..write('isStarred: $isStarred, ')
           ..write('reminder: $reminder, ')
           ..write('dueDate: $dueDate, ')
           ..write('repeat: $repeat, ')
@@ -1036,12 +1133,12 @@ abstract class _$AppDB extends GeneratedDatabase {
 typedef $TodoListsCreateCompanionBuilder = TodoListsCompanion Function({
   Value<int> id,
   Value<String?> name,
-  Value<int?> position,
+  required int position,
 });
 typedef $TodoListsUpdateCompanionBuilder = TodoListsCompanion Function({
   Value<int> id,
   Value<String?> name,
-  Value<int?> position,
+  Value<int> position,
 });
 
 final class $TodoListsReferences
@@ -1183,7 +1280,7 @@ class $TodoListsTableManager extends RootTableManager<
           updateCompanionCallback: ({
             Value<int> id = const Value.absent(),
             Value<String?> name = const Value.absent(),
-            Value<int?> position = const Value.absent(),
+            Value<int> position = const Value.absent(),
           }) =>
               TodoListsCompanion(
             id: id,
@@ -1193,7 +1290,7 @@ class $TodoListsTableManager extends RootTableManager<
           createCompanionCallback: ({
             Value<int> id = const Value.absent(),
             Value<String?> name = const Value.absent(),
-            Value<int?> position = const Value.absent(),
+            required int position,
           }) =>
               TodoListsCompanion.insert(
             id: id,
@@ -1247,11 +1344,13 @@ typedef $TasksCreateCompanionBuilder = TasksCompanion Function({
   Value<int?> parentId,
   required String title,
   Value<bool?> isDone,
+  Value<bool?> addedToMyDay,
+  Value<bool?> isStarred,
   Value<DateTime?> reminder,
   Value<DateTime?> dueDate,
   Value<String?> repeat,
   Value<String?> notes,
-  Value<int?> position,
+  required int position,
   Value<DateTime?> createdAt,
   Value<DateTime?> updatedAt,
 });
@@ -1261,11 +1360,13 @@ typedef $TasksUpdateCompanionBuilder = TasksCompanion Function({
   Value<int?> parentId,
   Value<String> title,
   Value<bool?> isDone,
+  Value<bool?> addedToMyDay,
+  Value<bool?> isStarred,
   Value<DateTime?> reminder,
   Value<DateTime?> dueDate,
   Value<String?> repeat,
   Value<String?> notes,
-  Value<int?> position,
+  Value<int> position,
   Value<DateTime?> createdAt,
   Value<DateTime?> updatedAt,
 });
@@ -1321,6 +1422,12 @@ class $TasksFilterComposer extends Composer<_$AppDB, Tasks> {
 
   ColumnFilters<bool> get isDone => $composableBuilder(
       column: $table.isDone, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<bool> get addedToMyDay => $composableBuilder(
+      column: $table.addedToMyDay, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<bool> get isStarred => $composableBuilder(
+      column: $table.isStarred, builder: (column) => ColumnFilters(column));
 
   ColumnFilters<DateTime> get reminder => $composableBuilder(
       column: $table.reminder, builder: (column) => ColumnFilters(column));
@@ -1405,6 +1512,13 @@ class $TasksOrderingComposer extends Composer<_$AppDB, Tasks> {
   ColumnOrderings<bool> get isDone => $composableBuilder(
       column: $table.isDone, builder: (column) => ColumnOrderings(column));
 
+  ColumnOrderings<bool> get addedToMyDay => $composableBuilder(
+      column: $table.addedToMyDay,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<bool> get isStarred => $composableBuilder(
+      column: $table.isStarred, builder: (column) => ColumnOrderings(column));
+
   ColumnOrderings<DateTime> get reminder => $composableBuilder(
       column: $table.reminder, builder: (column) => ColumnOrderings(column));
 
@@ -1466,6 +1580,12 @@ class $TasksAnnotationComposer extends Composer<_$AppDB, Tasks> {
 
   GeneratedColumn<bool> get isDone =>
       $composableBuilder(column: $table.isDone, builder: (column) => column);
+
+  GeneratedColumn<bool> get addedToMyDay => $composableBuilder(
+      column: $table.addedToMyDay, builder: (column) => column);
+
+  GeneratedColumn<bool> get isStarred =>
+      $composableBuilder(column: $table.isStarred, builder: (column) => column);
 
   GeneratedColumn<DateTime> get reminder =>
       $composableBuilder(column: $table.reminder, builder: (column) => column);
@@ -1558,11 +1678,13 @@ class $TasksTableManager extends RootTableManager<
             Value<int?> parentId = const Value.absent(),
             Value<String> title = const Value.absent(),
             Value<bool?> isDone = const Value.absent(),
+            Value<bool?> addedToMyDay = const Value.absent(),
+            Value<bool?> isStarred = const Value.absent(),
             Value<DateTime?> reminder = const Value.absent(),
             Value<DateTime?> dueDate = const Value.absent(),
             Value<String?> repeat = const Value.absent(),
             Value<String?> notes = const Value.absent(),
-            Value<int?> position = const Value.absent(),
+            Value<int> position = const Value.absent(),
             Value<DateTime?> createdAt = const Value.absent(),
             Value<DateTime?> updatedAt = const Value.absent(),
           }) =>
@@ -1572,6 +1694,8 @@ class $TasksTableManager extends RootTableManager<
             parentId: parentId,
             title: title,
             isDone: isDone,
+            addedToMyDay: addedToMyDay,
+            isStarred: isStarred,
             reminder: reminder,
             dueDate: dueDate,
             repeat: repeat,
@@ -1586,11 +1710,13 @@ class $TasksTableManager extends RootTableManager<
             Value<int?> parentId = const Value.absent(),
             required String title,
             Value<bool?> isDone = const Value.absent(),
+            Value<bool?> addedToMyDay = const Value.absent(),
+            Value<bool?> isStarred = const Value.absent(),
             Value<DateTime?> reminder = const Value.absent(),
             Value<DateTime?> dueDate = const Value.absent(),
             Value<String?> repeat = const Value.absent(),
             Value<String?> notes = const Value.absent(),
-            Value<int?> position = const Value.absent(),
+            required int position,
             Value<DateTime?> createdAt = const Value.absent(),
             Value<DateTime?> updatedAt = const Value.absent(),
           }) =>
@@ -1600,6 +1726,8 @@ class $TasksTableManager extends RootTableManager<
             parentId: parentId,
             title: title,
             isDone: isDone,
+            addedToMyDay: addedToMyDay,
+            isStarred: isStarred,
             reminder: reminder,
             dueDate: dueDate,
             repeat: repeat,

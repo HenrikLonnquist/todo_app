@@ -63,9 +63,11 @@ class AppDB extends _$AppDB{
 
   Future<void> insertTask(
     {
-      required int listID,
+      required int listID, //! Maybe just default to "Tasks" if none were specified
       required String title,
       required int position,
+      bool? addedToMyDay, // in case we are adding from "My Day".
+      bool? isStarred, // in case we are adding from "Important".
       int? parentID, //NULL == parent task
     }
 
@@ -79,6 +81,8 @@ class AppDB extends _$AppDB{
           TasksCompanion(
             listsId: Value(listID),
             title: Value(title),
+            addedToMyDay: Value(addedToMyDay),
+            isStarred: Value(isStarred),
             position: Value(position),
             parentId: Value(parentID),
             createdAt: Value(now),
@@ -106,13 +110,15 @@ class AppDB extends _$AppDB{
       Value<int>? listID,
       Value<String>? title,
       Value<bool>? isDone,
+      Value<bool>? addedToMyDay,
+      Value<bool>? isStarred,
       Value<DateTime>? reminder,
       Value<DateTime>? dueDate,
       Value<String>? repeat,
       Value<String>? notes,
       Value<int>? position,
       Value<DateTime>? createdAt,
-      Value<DateTime>? updatedAT
+      Value<DateTime>? updatedAT,
     }) async {
       
       final now = DateTime.now();
@@ -122,6 +128,8 @@ class AppDB extends _$AppDB{
           TasksCompanion(
             title: title ?? const Value.absent(),
             isDone: isDone ?? const Value.absent(),
+            addedToMyDay: addedToMyDay ?? const Value.absent(),
+            isStarred: isStarred ?? const Value.absent(),
             reminder: reminder ?? const Value.absent(),
             dueDate: dueDate ?? const Value.absent(),
             repeat: repeat ?? const Value.absent(),
@@ -162,11 +170,13 @@ class AppDB extends _$AppDB{
           title: row.title,
           listsId: Value(toListID),
           isDone: Value(row.isDone),
+          addedToMyDay: Value(row.addedToMyDay),
+          isStarred: Value(row.isStarred),
           reminder: Value(row.reminder),
           dueDate: Value(row.dueDate),
           repeat: Value(row.repeat),
           notes: Value(row.notes),
-          position: Value(row.position),
+          position: row.position,
           createdAt: Value(now),
           updatedAt: Value(now),
         ))
@@ -203,9 +213,9 @@ class AppDB extends _$AppDB{
 
         await batch((b) {
           b.insertAll(todoLists, [
-            TodoListsCompanion.insert(name: Value("Myday")),
-            TodoListsCompanion.insert(name: Value("Important")),
-            TodoListsCompanion.insert(name: Value("Tasks")),
+            TodoListsCompanion.insert(name: Value("Myday"), position: 1),
+            TodoListsCompanion.insert(name: Value("Important"), position: 2),
+            TodoListsCompanion.insert(name: Value("Tasks"), position: 3),
           ]);
         });
       },
