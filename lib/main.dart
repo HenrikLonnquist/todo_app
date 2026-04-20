@@ -959,7 +959,7 @@ class _TaskListItemState extends State<TaskListItem> {
         );
       },
 
-      //MARK: Task secondary tap - options
+      //MARK: Task menuanchor - options
       menuChildren: [
         
         // Add to My day (copy task to here I guess) (If created in my day tab then copy it to Tasks as well)
@@ -967,7 +967,7 @@ class _TaskListItemState extends State<TaskListItem> {
           leadingIcon: Icon(Icons.wb_sunny_outlined),
           onPressed: () async {
 
-            widget.db.updateTask(
+            await widget.db.updateTask(
               widget.task.id, 
               addedToMyDay: Value(true)
             );
@@ -982,7 +982,7 @@ class _TaskListItemState extends State<TaskListItem> {
           leadingIcon: Icon(Icons.star_border),
           onPressed: () async {
             
-            widget.db.updateTask(
+            await widget.db.updateTask(
               widget.task.id,
               isStarred: Value(true),
             );
@@ -993,8 +993,13 @@ class _TaskListItemState extends State<TaskListItem> {
         // Mark as completed
         MenuItemButton(
           leadingIcon: Icon(Icons.check_circle_outline_outlined),
-          onPressed: () {},
-          child: const Text("Mark as Completed")
+          onPressed: () async {
+            await widget.db.updateTask(
+              widget.task.id,
+              isDone: Value(!widget.task.isDone!)
+            );
+          },
+          child: Text("Mark as ${ widget.task.isDone! ?"Not Completed" : "Completed"}")
         ),
         
         Divider(),
