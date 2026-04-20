@@ -166,8 +166,8 @@ class _NavigationPanel2State extends State<NavigationPanel2> {
               child: Column(
                 children: [
           
-                  NavListTile(title: "My Day", listID: 1, selectedTabIndex: selectedTabIndex, taskCount: listTaskCount[1]),
-                  NavListTile(title: "Important", listID: 2, selectedTabIndex: selectedTabIndex, taskCount: listTaskCount[2]),
+                  NavListTile(title: "My Day", listID: 1, selectedTabIndex: selectedTabIndex, taskCount: listTaskCount["myday"]),
+                  NavListTile(title: "Important", listID: 2, selectedTabIndex: selectedTabIndex, taskCount: listTaskCount["starred"]),
                   NavListTile(title: "Tasks", listID: 3, selectedTabIndex: selectedTabIndex, taskCount: listTaskCount[3]),
                   
                   Divider(),
@@ -705,7 +705,9 @@ class _MainPageState extends State<MainPage> {
                 
               await db.insertTask(
                 title: title,
-                listID: navIndex,
+                listID: navIndex < SpecialLists.tasks ? SpecialLists.tasks : navIndex,
+                addedToMyDay: navIndex == SpecialLists.myDay ? true : false,
+                isStarred: navIndex == SpecialLists.important ? true : false,
                 position: pos,
               );
             },

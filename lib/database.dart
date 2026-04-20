@@ -27,13 +27,24 @@ class AppDB extends _$AppDB{
   AppDB() : super(_openConnection());
 
 
-  Stream<Map<int, int>> watchTaskCountPerList() {
+  Stream<Map<dynamic, int>> watchTaskCountPerList() {
     return select(tasks).watch().map((allTasks) {
       
-      final Map<int, int> counts = {};
+      final Map<dynamic, int> counts = {};
 
       for (final task in allTasks) {
         if (task.parentId != null) continue; // Skip subtasks
+
+        final inMyDay = task.addedToMyDay ?? false;
+        final starred = task.isStarred ?? false;
+
+        if (inMyDay || task.listsId == 1) {
+          counts["myday"] = (counts["myday"] ?? 0) + 1;
+        }
+
+        if (starred || task.listsId == 2) {
+          counts["starred"] = (counts["starred"] ?? 0) + 1;
+        }
         
         counts[task.listsId!] = (counts[task.listsId] ?? 0) + 1;
       }
