@@ -858,9 +858,11 @@ class _TaskListItemState extends State<TaskListItem> {
 
   final MenuController _menuController = MenuController();
   
-  final MenuController _subMenuController = MenuController();
+  final MenuController _moveTaskSubMenuController = MenuController();
+  final MenuController _copyTaskSubMenuController = MenuController();
   
-  final FocusNode _subMenuFocusNode = FocusNode();
+  final FocusNode _moveTaskSubMenuFocusNode = FocusNode();
+  final FocusNode _copyTaskSubMenuFocusNode = FocusNode();
 
   @override
   Widget build(BuildContext context) {
@@ -938,30 +940,75 @@ class _TaskListItemState extends State<TaskListItem> {
           ),
         );
       },
+
+      //MARK: Task secondary tap - options
       menuChildren: [
+        
+        // Add to My day (copy task to here I guess) (If created in my day tab then copy it to Tasks as well)
         MenuItemButton(
-          style: ButtonStyle(
-            splashFactory: NoSplash.splashFactory
-          ),
+          leadingIcon: Icon(Icons.wb_sunny_outlined),
           onPressed: () {},
-          child: Text("TEST")
+          child: const Text("Add to My Day")
         ),
+
+        // Mark as Important (copy task)
         MenuItemButton(
+          leadingIcon: Icon(Icons.star_border),
           onPressed: () {},
-          child: Text("TEST")
+          child: const Text("Mark as Important")
         ),
+
+        // Mark as completed
+        MenuItemButton(
+          leadingIcon: Icon(Icons.check_circle_outline_outlined),
+          onPressed: () {},
+          child: const Text("Mark as Completed")
+        ),
+        
+        Divider(),
+        
+        // Due Today - Add todays date and copy to myday
+        MenuItemButton(
+          leadingIcon: Icon(Icons.today_outlined),
+          onPressed: () {},
+          child: const Text("Due Today")
+        ),
+        // Due Tomorrow - Add tomorrows date
+        MenuItemButton(
+          leadingIcon: Icon(Icons.next_week_outlined),
+          onPressed: () {},
+          child: const Text("Due Tomorrow")
+        ),
+        // Remove Due Date - Remove due date if true
+        MenuItemButton(
+          leadingIcon: Icon(Icons.event_busy_outlined),
+          onPressed: () {},
+          child: const Text("Remove Due Date")
+        ),
+
+        
+        Divider(),
+        
+        // Create new list from this task - create new list then move the task to it.
+        MenuItemButton(
+          leadingIcon: Icon(Icons.format_list_bulleted_add),
+          onPressed: () {},
+          child: const Text("Create new list from this task")
+        ),
+
+        // Move task to..  - show a list of lists to move to.
         Focus(
           onFocusChange: (hasFocus) {
-            if (!hasFocus) _subMenuController.close();
+            if (!hasFocus) _moveTaskSubMenuController.close();
           },
           child: MenuAnchor(
-            controller: _subMenuController,
-            childFocusNode: _subMenuFocusNode,
+            controller: _moveTaskSubMenuController,
+            childFocusNode: _moveTaskSubMenuFocusNode,
             builder: (context, controller, child) {
               return MouseRegion(
-                onEnter: (event) => _subMenuFocusNode.requestFocus(),
+                onEnter: (event) => _moveTaskSubMenuFocusNode.requestFocus(),
                 child: TextButton(
-                  focusNode: _subMenuFocusNode,
+                  focusNode: _moveTaskSubMenuFocusNode,
                   style: TextButton.styleFrom(
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadiusGeometry.circular(0)
@@ -970,13 +1017,13 @@ class _TaskListItemState extends State<TaskListItem> {
                     visualDensity: VisualDensity(vertical: 0.5),
                   ),
                   onPressed: () {
-                    controller.isOpen ? controller.close() : _subMenuController.open();
+                    controller.isOpen ? controller.close() : _moveTaskSubMenuController.open();
                   },
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
-                      const Icon(Icons.move_to_inbox_outlined, size: 24),
-                      const Text("  SubMenu "),
+                      const Icon(Icons.move_up_outlined, size: 24),
+                      const Text("  Move task to.. "),
                       SizedBox(width: 60),
                       const Icon(Icons.arrow_right_outlined, size: 24),
                     ],
@@ -985,17 +1032,124 @@ class _TaskListItemState extends State<TaskListItem> {
               );
             },
             menuChildren: [
+              //TODO: populate with db lists
               // List of tabs to choose
               MenuItemButton(
                 onPressed: () {},
-                child: const Text("test"),
+                child: const Text("List"),
               ),
             ],
           ),
         ),
+
+        // Copy task to..  - show a list of lists to copy to.
+        Focus(
+          onFocusChange: (hasFocus) {
+            if (!hasFocus) _copyTaskSubMenuController.close();
+          },
+          child: MenuAnchor(
+            controller: _copyTaskSubMenuController,
+            childFocusNode: _copyTaskSubMenuFocusNode,
+            builder: (context, controller, child) {
+              return MouseRegion(
+                onEnter: (event) => _copyTaskSubMenuFocusNode.requestFocus(),
+                child: TextButton(
+                  focusNode: _copyTaskSubMenuFocusNode,
+                  style: TextButton.styleFrom(
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadiusGeometry.circular(0)
+                    ),
+                    padding: EdgeInsetsDirectional.only(start: 4, end: 8),
+                    visualDensity: VisualDensity(vertical: 0.5),
+                  ),
+                  onPressed: () {
+                    controller.isOpen ? controller.close() : _copyTaskSubMenuController.open();
+                  },
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      const Icon(Icons.copy, size: 24),
+                      const Text("  Copy task to.. "),
+                      SizedBox(width: 60),
+                      const Icon(Icons.arrow_right_outlined, size: 24),
+                    ],
+                  ),
+                ),
+              );
+            },
+            menuChildren: [
+              //TODO: populate with db lists
+              // List of tabs to choose
+              MenuItemButton(
+                onPressed: () {},
+                child: const Text("List"),
+              ),
+            ],
+          ),
+        ),
+        
+        Divider(),
+        // Delete task
         MenuItemButton(
-          onPressed: () {},
-          child: Text("TEST")
+          style: ButtonStyle(
+            splashFactory: NoSplash.splashFactory,
+          ),
+          leadingIcon: Icon(Icons.delete_outline),
+          onPressed: () {
+            
+            //TOOD: Make this into a widget/function
+            showDialog(
+              context: context,
+              builder: (BuildContext context) {
+                return AlertDialog(
+                  content: Text("You want to delete: ${widget.task.title}?", style: TextStyle(color: Colors.white)),
+                  backgroundColor: Colors.grey.shade900,
+                  actions: [
+                    TextButton(
+                      style: TextButton.styleFrom(
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadiusGeometry.circular(4)
+                        ),
+                        backgroundColor: Colors.red,
+                      ),
+                      onPressed: () async {
+                        final AppDB db = widget.db;
+
+                        context.read<NavController>().toggleRightPanel(
+                          state: false,
+                        );
+
+                        Navigator.of(context).pop();
+                        
+                        try {
+                          await (db.delete(db.tasks)..where((task) => task.id.equals(widget.task.id))).go();
+                        } catch (e) {
+                          print(e);
+                        }
+                      },
+                      child: const Text("Delete", style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white))
+                    ),
+                    TextButton(
+                      style: TextButton.styleFrom(
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadiusGeometry.circular(4)
+                        ),
+                        backgroundColor: Colors.grey
+                      ),
+                      onPressed: () {
+
+                        Navigator.of(context).pop();
+
+                      },
+                      child: const Text("Cancel", style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white))
+                    ),
+                  ],
+                );
+              }
+            );
+
+          },
+          child: Text("Delete Task")
         ),
       ],
     );
