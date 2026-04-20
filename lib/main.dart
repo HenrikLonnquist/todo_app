@@ -11,6 +11,13 @@ import 'package:todo_app/database.dart';
 import 'package:todo_app/nav_controller.dart';
 
 
+class SpecialLists {
+  static const int myDay = 1;
+  static const int important = 2;
+  static const int tasks = 3;
+}
+
+
 void main() async {
 
   //! Splash screen - cant find one for linux or desktop.
@@ -125,7 +132,7 @@ class _NavigationPanel2State extends State<NavigationPanel2> {
             
               await db.into(db.todoLists).insert(TodoListsCompanion.insert(
                 name: Value("Untitled list ${size + 1}"),
-                position: Value(newPosition)
+                position: newPosition,
               ));
 
             },);
@@ -270,12 +277,12 @@ class _NavListTileState extends State<NavListTile> {
 
     final AppDB db = context.read<AppDB>();
 
-    //MARK: dropdown list
+    //MARK: Nav list item
     return MenuAnchor(
       controller: _menuController,
       //* Dont worry about the delay, only happens in debug mode.
       builder: (context, controller, child) {
-        
+
         return GestureDetector(
           onSecondaryTapDown: (details) {
             _menuController.open(position: details.localPosition);
@@ -325,15 +332,14 @@ class _NavListTileState extends State<NavListTile> {
             onTap: listRename ? null : (){
           
               // notify provider on tab change
-              context.read<NavController>().setNameAndIndex(widget.title ,widget.listID);
+              context.read<NavController>().setNavListNameAndIndex(widget.title ,widget.listID);
                 
             },
           ),
         );
 
       },
-      //MARK: Nav list item
-      //! HIDE OR Show no info when the object is being dragged.
+      //MARK: dropdown list 
       menuChildren: [
 
         // Rename list
@@ -438,7 +444,7 @@ class _NavListTileState extends State<NavListTile> {
             // create new list
             await db.into(db.todoLists).insert(TodoListsCompanion.insert(
               name: Value("${widget.title}(copy)"),
-              position: Value(widget.userPos), 
+              position: widget.userPos!, 
             ));
 
             // find the new list id
@@ -524,12 +530,12 @@ class _NavListTileState extends State<NavListTile> {
 
                         
                         // If no available tab, fall back to Tasks tab(3)
-                        targetTabIndex ??= TodoList(id: 3, name: "Tasks"); 
+                        targetTabIndex ??= TodoList(id: 3, name: "Tasks", position: 0); 
 
 
                         // Switch to an available tab/list
                         if (!mounted) return print("not mounted");
-                        context.read<NavController>().setNameAndIndex(targetTabIndex.name!, targetTabIndex.id);
+                        context.read<NavController>().setNavListNameAndIndex(targetTabIndex.name!, targetTabIndex.id);
                         Navigator.of(context).pop();
 
 
@@ -585,6 +591,14 @@ class _MainPageState extends State<MainPage> {
 
   bool hideCompleted = false;
 
+  Stream<Map<String, List<Task>>> getTaskStream(int listID, AppDB db) {
+    switch (listID) {
+      case SpecialLists.myDay: return db.watchMyDayTasks().map((tasks) => tasks.separateCompleted() );
+      case SpecialLists.important: return db.watchStarredTasks().map((tasks) => tasks.separateCompleted() );
+      default: return db.watchTasksByListId(listID).map((tasks) => tasks.separateCompleted() );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
 
@@ -596,6 +610,7 @@ class _MainPageState extends State<MainPage> {
     final String navListName = nav.$2;
     final bool taskPanelState = nav.$3;
 
+  
     return Expanded(
       child: CustomPanel(
         bgColorPanel: Colors.black,
@@ -615,7 +630,7 @@ class _MainPageState extends State<MainPage> {
                     onChange: (newName) async {
                       
                       // Update NavController variable - currentListName
-                      context.read<NavController>().setListName(newName, showPanel: taskPanelState);
+                      context.read<NavController>().setListName(newName);
 
                       // Update the db with the new list name.
                       await db.updateList(
@@ -702,7 +717,7 @@ class _MainPageState extends State<MainPage> {
         child: Material(
           type: MaterialType.transparency,
           child: StreamBuilder(
-            stream: db.watchTasksByListId(navIndex).map((tasks) => tasks.separateCompleted()),
+            stream: getTaskStream(navIndex, db),
             builder: (context, snapshot) {
 
               if (snapshot.hasError) {
@@ -715,9 +730,9 @@ class _MainPageState extends State<MainPage> {
                   ),
                 );
               }
-          
+
               final Map<String, List<Task>> data = snapshot.data ?? {};
-          
+
               if (data.isEmpty) {
                 return Center(
                   child: Text(
@@ -791,10 +806,11 @@ class _MainPageState extends State<MainPage> {
                         
                           final Task task = dataCompletedTasks[index];
                           final bool isSelected = context.watch<NavController>().currentTaskID == task.id;
+
                         
                           return TaskListItem(
                             task: task,
-                            isSelected: isSelected,
+                            isSelected: isSelected, 
                             taskPanelState: taskPanelState,
                             db: db,
                           );
@@ -870,7 +886,7 @@ class _TaskListItemState extends State<TaskListItem> {
               });
             },
             child: Container(
-              color: widget.isSelected ? Colors.grey.shade700 : 
+              color: widget.isSelected && widget.taskPanelState ? Colors.grey.shade700 : 
               hovered ? Colors.grey.shade800 : Colors.grey.shade900,
               child: Row(
                 children: [
@@ -932,14 +948,28 @@ class _TaskListItemState extends State<TaskListItem> {
         // Add to My day (copy task to here I guess) (If created in my day tab then copy it to Tasks as well)
         MenuItemButton(
           leadingIcon: Icon(Icons.wb_sunny_outlined),
-          onPressed: () {},
+          onPressed: () async {
+
+            widget.db.updateTask(
+              widget.task.id, 
+              addedToMyDay: Value(true)
+            );
+
+          },
           child: const Text("Add to My Day")
         ),
 
         // Mark as Important (copy task)
+        //! Issue: Might need another column in DB for Important.
         MenuItemButton(
           leadingIcon: Icon(Icons.star_border),
-          onPressed: () {},
+          onPressed: () async {
+            
+            widget.db.updateTask(
+              widget.task.id,
+              isStarred: Value(true),
+            );
+          },
           child: const Text("Mark as Important")
         ),
 
@@ -952,7 +982,7 @@ class _TaskListItemState extends State<TaskListItem> {
         
         Divider(),
         
-        // Due Today - Add todays date and copy to myday
+        // Due Today - Add todays date and flag the column for "myday" of the task
         MenuItemButton(
           leadingIcon: Icon(Icons.today_outlined),
           onPressed: () {},
@@ -982,6 +1012,7 @@ class _TaskListItemState extends State<TaskListItem> {
         ),
 
         // Move task to..  - show a list of lists to move to.
+        //TODO: on hover and hold for 3-5 seconds open list.
         Focus(
           onFocusChange: (hasFocus) {
             if (!hasFocus) _moveTaskSubMenuController.close();
