@@ -1061,25 +1061,66 @@ class _TaskListItemState extends State<TaskListItem> {
           leadingIcon: Icon(Icons.today_outlined),
           onPressed: () async {
 
+            final taskDate = widget.task.dueDate;
+            final today = DateTime.now();
+            
+            if (taskDate != null && taskDate.day == today.day) return;
+
             await widget.db.updateTask(
               widget.task.id,
               addedToMyDay: Value(true),
-              dueDate: Value(DateTime.now()),
+              dueDate: Value(today),
             );
             
           },
           child: const Text("Due Today")
         ),
+
         // Due Tomorrow - Add tomorrows date
         MenuItemButton(
           leadingIcon: Icon(Icons.next_week_outlined),
-          onPressed: () {},
+          onPressed: () async {
+
+            final taskDate = widget.task.dueDate;
+            final DateTime tomorrow = DateTime.now().add(Duration(days: 1));
+
+            if (taskDate != null && taskDate.day == tomorrow.day) return;
+
+            await widget.db.updateTask(
+              widget.task.id,
+              dueDate: Value(tomorrow),
+            );
+          },
           child: const Text("Due Tomorrow")
         ),
-        // Remove Due Date - Remove due date if true
+
+        // Remove Due Date - show if due date exist
+        if (widget.task.dueDate != null)
         MenuItemButton(
           leadingIcon: Icon(Icons.event_busy_outlined),
-          onPressed: () {},
+          onPressed: () async {
+            
+            final taskDate = widget.task.dueDate;
+            final today = DateTime.now();
+
+            // remove from myday if due date is today else leave it
+            final removeFromMyDay = taskDate!.day == today.day ? Value(false) : null;
+
+            //! what kind of behaviour do I want?
+            /*
+            * Remove it regardless?
+            * (For now) Remove it from myday only if the due date is the same as today.
+            * Popup that ask if you want to remove it from myday as well if its in there.
+            */
+
+
+            await widget.db.updateTask(
+              widget.task.id,
+              addedToMyDay: removeFromMyDay,
+              dueDate: Value(null)
+            );
+
+          },
           child: const Text("Remove Due Date")
         ),
 
