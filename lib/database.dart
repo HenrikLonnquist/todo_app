@@ -33,7 +33,9 @@ class AppDB extends _$AppDB{
       final Map<dynamic, int> counts = {};
 
       for (final task in allTasks) {
-        if (task.parentId != null) continue; // Skip subtasks
+        // Skip subtasks and completed tasks
+        if (task.parentId != null || task.isDone == null || task.isDone!) continue; 
+        
 
         final inMyDay = task.addedToMyDay ?? false;
         final starred = task.isStarred ?? false;

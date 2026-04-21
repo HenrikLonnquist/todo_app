@@ -541,7 +541,7 @@ class _NavListTileState extends State<NavListTile> {
                         Navigator.of(context).pop();
 
 
-                        // Deletes list and related tasks
+                        // Delete list and related tasks
                         try {
                           await (db.delete(db.todoLists)..where((list) => list.id.equals(widget.listID))).go();
                           await (db.delete(db.tasks)..where((task) => task.listsId.equals(widget.listID))).go();
