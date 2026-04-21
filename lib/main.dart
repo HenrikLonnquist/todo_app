@@ -1135,7 +1135,40 @@ class _TaskListItemState extends State<TaskListItem> {
         // Create new list from this task - create new list then move the task to it.
         MenuItemButton(
           leadingIcon: Icon(Icons.format_list_bulleted_add),
-          onPressed: () {},
+          onPressed: () async {
+
+
+            //! Kinda a slow with all these await and fetching from DB.
+            await widget.db.todoLists.count().get().then((value) async {
+              
+              int size = value[0] - 3; // 3 default tabs("My day"..
+              //! if there is one in the list already then the second will have the same pos. Because of "count(1) * 1000" equals 1000
+              int newPosition = (size <= 1 ? size + 1 : size) * 1000; 
+            
+              await widget.db.into(widget.db.todoLists).insert(TodoListsCompanion.insert(
+                name: Value("Untitled list ${size + 1}"),
+                position: newPosition,
+              ));
+
+            },);
+
+
+            // find the new list id
+            final newList = await (widget.db.select(widget.db.todoLists)
+                ..orderBy([(l) => OrderingTerm.desc(l.id)])
+                ..limit(1))
+                .getSingleOrNull();
+
+
+            await widget.db.updateTask(
+              widget.task.id,
+              listID: Value(newList!.id),
+            );
+
+            if (!mounted) return print("not mounted: create new list from this task");
+            context.read<NavController>().setNavListNameAndIndex(newList.name!, newList.id);
+
+          },
           child: const Text("Create new list from this task")
         ),
 
