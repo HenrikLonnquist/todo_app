@@ -151,6 +151,7 @@ class AppDB extends _$AppDB{
           TasksCompanion(
             title: title ?? const Value.absent(),
             isDone: isDone ?? const Value.absent(),
+            listsId: listID ?? const Value.absent(),
             addedToMyDay: addedToMyDay ?? const Value.absent(),
             isStarred: isStarred ?? const Value.absent(),
             reminder: reminder ?? const Value.absent(),
@@ -174,6 +175,35 @@ class AppDB extends _$AppDB{
 
       });
           
+  }
+
+  Future<void> copyTaskToList({
+    required int taskID,
+    int? toListID,
+  }) async {
+
+    final Task duplicatedTask = await (select(tasks)..where((task) => task.id.equals(taskID))).getSingle();
+
+    DateTime now = DateTime.now();
+
+
+    await into(tasks).insert(
+      TasksCompanion(
+          title: Value(duplicatedTask.title),
+          listsId: Value(toListID ?? duplicatedTask.listsId),
+          isDone: Value(duplicatedTask.isDone),
+          addedToMyDay: Value(duplicatedTask.addedToMyDay),
+          isStarred: Value(duplicatedTask.isStarred),
+          reminder: Value(duplicatedTask.reminder),
+          dueDate: Value(duplicatedTask.dueDate),
+          repeat: Value(duplicatedTask.repeat),
+          notes: Value(duplicatedTask.notes),
+          position: Value(duplicatedTask.position),
+          createdAt: Value(now),
+          updatedAt: Value(now),
+        )
+      );
+    
   }
 
   Future<void> copyingTasksToList({
