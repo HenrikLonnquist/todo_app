@@ -757,6 +757,7 @@ class _MainPageState extends State<MainPage> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     ReorderableListView.builder(
+                      buildDefaultDragHandles: false,
                       onReorder: (oldIndex, newIndex) {
                         
                       },
@@ -935,15 +936,66 @@ class _TaskListItemState extends State<TaskListItem> {
                         );
                             
                       },
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                        // padding: const EdgeInsets.fromLTRB(240, 16, 0, 16),
-                        child: Text(
-                          widget.task.title,
-                          style: TextStyle(
-                            color: Colors.white,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          
+                          // Title
+                          Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 4),
+                            // padding: const EdgeInsets.fromLTRB(240, 16, 0, 16),
+                            child: Text(
+                              widget.task.title,
+                              style: TextStyle(
+                                fontSize: 16,
+                                color: Colors.white,
+                              ),
+                            ),
                           ),
-                        ),
+
+                          // Subtitles 
+                          Row(
+                            //TODO: fix the gap between the subtitles.
+                            children: [
+                              
+                              // Nav List Name
+                              Text(
+                                "${widget.task.listsId}",
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: Colors.white,
+                                ),
+                              ),
+                              
+                              //TODO: Need an more inituitive way to implement the divider, maybe I should use an indexbuilder.
+                              //Divider
+                              Icon(Icons.circle_rounded, size: 4, color: Colors.white),
+
+                              // Subtitle - Due Date 
+                              //TODO: an calendar icon as well
+                              if (widget.task.dueDate != null)
+                              Text(
+                                "${widget.task.dueDate}",
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: Colors.white,
+                                ),
+                              ),
+                              
+                              // Subtitle - Repeat
+                              Icon(Icons.repeat_outlined, size: 16, color: Colors.white,),
+                              
+                              // Subtitle - Reminder 
+                              Icon(Icons.notifications_none_outlined, size: 16, color: Colors.white),
+
+                              // Subtitle - Notes 
+                              Icon(Icons.note_outlined, size: 16, color: Colors.white),
+
+                              // Subtitle - Tags 
+                            ],
+                          ),
+                  
+                        ],
                       ),
                     ),
                   ),
@@ -1004,10 +1056,18 @@ class _TaskListItemState extends State<TaskListItem> {
         
         Divider(),
         
-        // Due Today - Add todays date and flag the column for "myday" of the task
+        // Due Today - Add todays date and add to myday
         MenuItemButton(
           leadingIcon: Icon(Icons.today_outlined),
-          onPressed: () {},
+          onPressed: () async {
+
+            await widget.db.updateTask(
+              widget.task.id,
+              addedToMyDay: Value(true),
+              dueDate: Value(DateTime.now()),
+            );
+            
+          },
           child: const Text("Due Today")
         ),
         // Due Tomorrow - Add tomorrows date
