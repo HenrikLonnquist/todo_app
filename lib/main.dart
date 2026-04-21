@@ -883,8 +883,13 @@ class _TaskListItemState extends State<TaskListItem> {
   final FocusNode _moveTaskSubMenuFocusNode = FocusNode();
   final FocusNode _copyTaskSubMenuFocusNode = FocusNode();
 
+  List<TodoList> copyToList = [];
+  List<TodoList> moveToList = [];
+
   @override
   Widget build(BuildContext context) {
+
+
     return MenuAnchor(
       controller: _menuController,
       builder: (context, controller, child) {
@@ -1155,8 +1160,11 @@ class _TaskListItemState extends State<TaskListItem> {
                     padding: EdgeInsetsDirectional.only(start: 4, end: 8),
                     visualDensity: VisualDensity(vertical: 0.5),
                   ),
-                  onPressed: () {
-                    controller.isOpen ? controller.close() : _moveTaskSubMenuController.open();
+                  onPressed: () async {
+                    moveToList = await (widget.db.select(widget.db.todoLists)..where((list) => list.id.isBiggerOrEqualValue(3))).get();
+                    setState(() {
+                      controller.isOpen ? controller.close() : _moveTaskSubMenuController.open();
+                    });
                   },
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -1173,10 +1181,20 @@ class _TaskListItemState extends State<TaskListItem> {
             menuChildren: [
               //TODO: populate with db lists
               // List of tabs to choose
-              MenuItemButton(
-                onPressed: () {},
-                child: const Text("List"),
+
+              for (var list in moveToList) 
+              if (list.id != widget.task.listsId) MenuItemButton(
+                onPressed: () async {
+                  
+                  await widget.db.updateTask(
+                    widget.task.id,
+                    listID: Value(list.id),
+                  );
+
+                },
+                child: Text("${list.name}"),
               ),
+
             ],
           ),
         ),
@@ -1201,8 +1219,13 @@ class _TaskListItemState extends State<TaskListItem> {
                     padding: EdgeInsetsDirectional.only(start: 4, end: 8),
                     visualDensity: VisualDensity(vertical: 0.5),
                   ),
-                  onPressed: () {
-                    controller.isOpen ? controller.close() : _copyTaskSubMenuController.open();
+                  onPressed: () async {
+
+                    copyToList = await (widget.db.select(widget.db.todoLists)..where((list) => list.id.isBiggerOrEqualValue(3))).get();
+                    setState(() {
+                      controller.isOpen ? controller.close() : _copyTaskSubMenuController.open();
+                    });
+                    
                   },
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -1219,10 +1242,18 @@ class _TaskListItemState extends State<TaskListItem> {
             menuChildren: [
               //TODO: populate with db lists
               // List of tabs to choose
-              MenuItemButton(
-                onPressed: () {},
-                child: const Text("List"),
+
+              for (var list in copyToList) MenuItemButton(
+                onPressed: () async {
+                  
+                  await widget.db.copyTaskToList(
+                    taskID: widget.task.id,
+                  );
+
+                },
+                child: Text("${list.name}"),
               ),
+
             ],
           ),
         ),
