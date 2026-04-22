@@ -85,6 +85,27 @@ class AppDB extends _$AppDB{
   }
 
 
+  Future<({int count, int maxPos})> getMaxPositionAndCountTaskOrList(
+    {
+      bool? getListMaxPos,
+      bool? getTaskMaxPos
+    }
+  ) async {
+
+    final String current = getListMaxPos != null ? "todo_lists" : "tasks";
+    final dynamic currentReadsFrom = getListMaxPos != null ? todoLists : tasks;
+    
+    final maxPos = await customSelect(
+      'SELECT COALESCE(MAX(position), 0) AS max_pos, COUNT(*) AS cnt FROM $current',
+      readsFrom: {currentReadsFrom},
+    ).map((row) => (
+      maxPos: row.read<int>('max_pos'),
+      count: row.read<int>('cnt'),
+    )).getSingle(); 
+
+    return maxPos;
+
+  }
 
   Future<void> insertTask(
     {
@@ -149,6 +170,7 @@ class AppDB extends _$AppDB{
       final now = DateTime.now();
 
       await transaction(() async {
+        
         await (update(tasks)..where((t) => t.id.equals(id))).write(
           TasksCompanion(
             title: title ?? const Value.absent(),
@@ -184,27 +206,30 @@ class AppDB extends _$AppDB{
     int? toListID,
   }) async {
 
-    final Task duplicatedTask = await (select(tasks)..where((task) => task.id.equals(taskID))).getSingle();
-
     DateTime now = DateTime.now();
 
+    await transaction(() async {
 
-    await into(tasks).insert(
-      TasksCompanion(
-          title: Value(duplicatedTask.title),
-          listsId: Value(toListID ?? duplicatedTask.listsId),
-          isDone: Value(duplicatedTask.isDone),
-          addedToMyDay: Value(duplicatedTask.addedToMyDay),
-          isStarred: Value(duplicatedTask.isStarred),
-          reminder: Value(duplicatedTask.reminder),
-          dueDate: Value(duplicatedTask.dueDate),
-          repeat: Value(duplicatedTask.repeat),
-          notes: Value(duplicatedTask.notes),
-          position: Value(duplicatedTask.position),
-          createdAt: Value(now),
-          updatedAt: Value(now),
-        )
-      );
+      final Task duplicatedTask = await (select(tasks)..where((task) => task.id.equals(taskID))).getSingle();
+
+      await into(tasks).insert(
+        TasksCompanion(
+            title: Value(duplicatedTask.title),
+            listsId: Value(toListID ?? duplicatedTask.listsId),
+            isDone: Value(duplicatedTask.isDone),
+            addedToMyDay: Value(duplicatedTask.addedToMyDay),
+            isStarred: Value(duplicatedTask.isStarred),
+            reminder: Value(duplicatedTask.reminder),
+            dueDate: Value(duplicatedTask.dueDate),
+            repeat: Value(duplicatedTask.repeat),
+            notes: Value(duplicatedTask.notes),
+            position: Value(duplicatedTask.position),
+            createdAt: Value(now),
+            updatedAt: Value(now),
+          )
+        );
+
+    });
     
   }
 
@@ -213,30 +238,34 @@ class AppDB extends _$AppDB{
     required int toListID
   }) async {
 
-    final List<Task> tasksToDuplicate = await (select(tasks)..where((task) => task.listsId.equals(fromListID))).get();
-
     DateTime now = DateTime.now();
 
+    await transaction(() async {
+      
+      final List<Task> tasksToDuplicate = await (select(tasks)..where((task) => task.listsId.equals(fromListID))).get();
 
-    await batch((b) {
-      b.insertAll(
-        tasks,
-        tasksToDuplicate.map((row) => TasksCompanion.insert(
-          title: row.title,
-          listsId: Value(toListID),
-          isDone: Value(row.isDone),
-          addedToMyDay: Value(row.addedToMyDay),
-          isStarred: Value(row.isStarred),
-          reminder: Value(row.reminder),
-          dueDate: Value(row.dueDate),
-          repeat: Value(row.repeat),
-          notes: Value(row.notes),
-          position: row.position,
-          createdAt: Value(now),
-          updatedAt: Value(now),
-        ))
-      );
-    });
+      await batch((b) {
+        b.insertAll(
+          tasks,
+          tasksToDuplicate.map((row) => TasksCompanion.insert(
+            title: row.title,
+            listsId: Value(toListID),
+            isDone: Value(row.isDone),
+            addedToMyDay: Value(row.addedToMyDay),
+            isStarred: Value(row.isStarred),
+            reminder: Value(row.reminder),
+            dueDate: Value(row.dueDate),
+            repeat: Value(row.repeat),
+            notes: Value(row.notes),
+            position: row.position,
+            createdAt: Value(now),
+            updatedAt: Value(now),
+          ))
+        );
+      });
+
+    },);
+
     
   }
 
@@ -293,6 +322,11 @@ LazyDatabase _openConnection() {
     final dbFolder = await getApplicationDocumentsDirectory();
     final file = File(p.join(dbFolder.path, 'db_v2.sqlite'));
 
-    return NativeDatabase.createInBackground(file);
+    return NativeDatabase.createInBackground(file, setup: (db) {
+      db.execute('PRAGMA journal_mode=WAL;');
+      // To check current mode first:
+      // final result = db.select('PRAGMA journal_mode;');
+      // print("Journal mode: $result");
+    });
   });
 }
