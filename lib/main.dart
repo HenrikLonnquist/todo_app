@@ -1020,11 +1020,11 @@ class _TaskListItemState extends State<TaskListItem> {
 
             await widget.db.updateTask(
               widget.task.id, 
-              addedToMyDay: Value(true)
+              addedToMyDay: Value(!(widget.task.addedToMyDay ?? true))
             );
 
           },
-          child: const Text("Add to My Day")
+          child: Text((widget.task.addedToMyDay ?? false) ? "Remove from My Day" : "Add to My Day")
         ),
 
         // Mark as Important (copy task)
@@ -1035,10 +1035,10 @@ class _TaskListItemState extends State<TaskListItem> {
             
             await widget.db.updateTask(
               widget.task.id,
-              isStarred: Value(true),
+              isStarred: Value( !(widget.task.isStarred ?? true)),
             );
           },
-          child: const Text("Mark as Important")
+          child: Text( (widget.task.isStarred ?? false) ? "Remove importance" : "Mark as Important")
         ),
 
         // Mark as completed
