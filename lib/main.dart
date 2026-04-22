@@ -126,19 +126,23 @@ class _NavigationPanel2State extends State<NavigationPanel2> {
           hoverColor: Colors.grey.shade800,
           onTap: () async {
             
-            await db.todoLists.count().get().then((value) async {
+            final newList = await db.transaction(() async {
               
-              int size = value[0] - 3; // 3 default tabs("My day"..
-              //! if there is one in the list already then the second will have the same pos. Because of "count(1) * 1000" equals 1000
-              int newPosition = (size <= 1 ? size + 1 : size) * 1000; 
-            
-              await db.into(db.todoLists).insert(TodoListsCompanion.insert(
+              final row = await db.getMaxPositionAndCountTaskOrList(getListMaxPos: true);
+
+              final newPosition = row.maxPos + 1000;
+              final size = row.count - 3;
+
+              final newList = await db.into(db.todoLists).insertReturning(TodoListsCompanion.insert(
                 name: Value("Untitled list ${size + 1}"),
                 position: newPosition,
               ));
 
-            },);
+              return newList;
+            });
 
+            if(!mounted) return print("Error: not mounted");
+            context.read<NavController>().setNavListNameAndIndex(newList.name!, newList.id);
             
           },
         ),
@@ -440,29 +444,22 @@ class _NavListTileState extends State<NavListTile> {
           child: const Text("Duplicate List"),
           onPressed: () async {
 
-            //! Could change it to somethiing like an customSelect: "SELECT TOP 1 * FROM todo_lists ORDER BY ID DESC"
-            //! which will choose the last item in the db.
 
-            // create new list
-            await db.into(db.todoLists).insert(TodoListsCompanion.insert(
-              name: Value("${widget.title}(copy)"),
-              position: widget.userPos!, 
-            ));
+            await db.transaction(() async {
 
-            // find the new list id
-            final newList = await (db.select(db.todoLists)
-                ..orderBy([(l) => OrderingTerm.desc(l.id)])
-                ..limit(1))
-                .getSingleOrNull();
+              // create new list
+              final newList = await db.into(db.todoLists).insertReturning(TodoListsCompanion.insert(
+                name: Value("${widget.title}(copy)"),
+                position: widget.userPos!, 
+              ));
 
-            // just in case it comes back null           
-            if (newList == null) return print("error: no list found");
+              // call the function to copy tasks to new list id.
+              await db.copyingTasksToList(
+                fromListID: widget.listID,
+                toListID: newList.id,
+              );
 
-            // call the function to copy tasks to new list id.
-            await db.copyingTasksToList(
-              fromListID: widget.listID,
-              toListID: newList.id,
-            );
+            });
             
           },
         ),
@@ -507,47 +504,51 @@ class _NavListTileState extends State<NavListTile> {
                       ),
                       onPressed: () async {
 
-                        // choose to switch to nearest user list first if available if not then Tasks tab(3) 
-                        final availableLists = await (db.select(db.todoLists)
-                        ..where((list) => list.id.isBiggerThanValue(3))
-                        ..orderBy([(list) => OrderingTerm.asc(list.id)]))
-                        .get();
+                        await db.transaction(() async {
+
+                          // choose to switch to nearest user list first if available if not then Tasks tab(3) 
+                          final availableLists = await (db.select(db.todoLists)
+                          ..where((list) => list.id.isBiggerThanValue(3))
+                          ..orderBy([(list) => OrderingTerm.asc(list.id)]))
+                          .get();
 
 
-                        TodoList? targetTabIndex;
+                          TodoList? targetTabIndex;
 
-                        if (availableLists.isNotEmpty) {
-                          final currentIndex = availableLists.indexWhere((e) => e.id == widget.listID);
-
-
-                          // Picks one neighbour: prefer the one after, fall back to the one before
-                          final neighbour = availableLists.elementAtOrNull(currentIndex + 1) ??
-                          (currentIndex > 0 ? availableLists.elementAtOrNull(currentIndex - 1) : null);
+                          if (availableLists.isNotEmpty) {
+                            final currentIndex = availableLists.indexWhere((e) => e.id == widget.listID);
 
 
-                          if (neighbour != null) {
-                            targetTabIndex = neighbour;
+                            // Picks one neighbour: prefer the one after, fall back to the one before
+                            final neighbour = availableLists.elementAtOrNull(currentIndex + 1) ??
+                            (currentIndex > 0 ? availableLists.elementAtOrNull(currentIndex - 1) : null);
+
+
+                            if (neighbour != null) {
+                              targetTabIndex = neighbour;
+                            }
                           }
-                        }
 
-                        
-                        // If no available tab, fall back to Tasks tab(3)
-                        targetTabIndex ??= TodoList(id: 3, name: "Tasks", position: 0); 
-
-
-                        // Switch to an available tab/list
-                        if (!mounted) return print("not mounted");
-                        context.read<NavController>().setNavListNameAndIndex(targetTabIndex.name!, targetTabIndex.id);
-                        Navigator.of(context).pop();
+                          
+                          // If no available tab, fall back to Tasks tab(3)
+                          targetTabIndex ??= TodoList(id: 3, name: "Tasks", position: 0); 
 
 
-                        // Delete list and related tasks
-                        try {
-                          await (db.delete(db.todoLists)..where((list) => list.id.equals(widget.listID))).go();
-                          await (db.delete(db.tasks)..where((task) => task.listsId.equals(widget.listID))).go();
-                        } catch (e) {
-                          print("Delete failed: $e");
-                        }
+                          // Switch to an available tab/list
+                          if (!mounted) return print("not mounted");
+                          context.read<NavController>().setNavListNameAndIndex(targetTabIndex.name!, targetTabIndex.id);
+                          Navigator.of(context).pop();
+
+
+                          // Delete list and related tasks
+                          try {
+                            await (db.delete(db.todoLists)..where((list) => list.id.equals(widget.listID))).go();
+                            await (db.delete(db.tasks)..where((task) => task.listsId.equals(widget.listID))).go();
+                          } catch (e) {
+                            print("Delete failed: $e");
+                          }
+
+                        });
 
 
                       },
@@ -690,31 +691,24 @@ class _MainPageState extends State<MainPage> {
         ),
         bottomBar: AddTask(
           onSubmitted: (title) async {
-        
-            await db.tasks.count().get().then((value) async {
-              
-              //! Issue?: (test)position value being equal to the last item in db when adding a new one
-              //! if deleting a task and then adding back again. 
-              // task 1 pos 1000 | task 2 pos 2000 | task 3 pos 3000 |
-              // tasks: 3 total > delete task 2 > 2 total > add > 3 total
-              // task 1 pos 1000 | task 3 pos 3000 | task 4 pos 3000
-              //! Will this be a problem? Need to test this. I dont think so and depends on how
-              //! I retrieve them. Is it ordered by ID and then have to sort according to pos. That would be great.
-              final size = value[0];
-              final pos = size > 0 ? size * 1000 : 1000;
-                
+
+            await db.transaction(() async {
+
+              final row = await db.getMaxPositionAndCountTaskOrList(getTaskMaxPos: true);
+
+              final newPosition = row.maxPos + 1000;
+              // final size = row.count - 3;
+          
               await db.insertTask(
                 title: title,
                 listID: navIndex < SpecialLists.tasks ? SpecialLists.tasks : navIndex,
                 addedToMyDay: navIndex == SpecialLists.myDay ? true : false,
                 isStarred: navIndex == SpecialLists.important ? true : false,
-                position: pos,
+                position: newPosition,
               );
-            },
-            onError: (e) {
-              print("Add task error: $e");
-            }
-            );
+
+            });
+
         
           },
         ),
@@ -1051,10 +1045,12 @@ class _TaskListItemState extends State<TaskListItem> {
         MenuItemButton(
           leadingIcon: Icon(Icons.check_circle_outline_outlined),
           onPressed: () async {
+
             await widget.db.updateTask(
               widget.task.id,
               isDone: Value(!widget.task.isDone!)
             );
+
           },
           child: Text("Mark as ${ widget.task.isDone! ?"Not Completed" : "Completed"}")
         ),
@@ -1137,34 +1133,28 @@ class _TaskListItemState extends State<TaskListItem> {
           leadingIcon: Icon(Icons.format_list_bulleted_add),
           onPressed: () async {
 
-
-            //! Kinda a slow with all these await and fetching from DB.
-            await widget.db.todoLists.count().get().then((value) async {
+            final newList = await widget.db.transaction(() async {
               
-              int size = value[0] - 3; // 3 default tabs("My day"..
-              //! if there is one in the list already then the second will have the same pos. Because of "count(1) * 1000" equals 1000
-              int newPosition = (size <= 1 ? size + 1 : size) * 1000; 
-            
-              await widget.db.into(widget.db.todoLists).insert(TodoListsCompanion.insert(
+              final row = await widget.db.getMaxPositionAndCountTaskOrList(getListMaxPos: true);
+
+              final newPosition = row.maxPos + 1000;
+              final size = row.count - 3;
+
+              final newList = await widget.db.into(widget.db.todoLists).insertReturning(TodoListsCompanion.insert(
                 name: Value("Untitled list ${size + 1}"),
                 position: newPosition,
               ));
 
-            },);
+              await widget.db.updateTask(
+                widget.task.id,
+                listID: Value(newList.id),
+              );
+              return newList;
+            });
 
+            await widget.db.watchTasksByListId(newList.id).first;
 
-            // find the new list id
-            final newList = await (widget.db.select(widget.db.todoLists)
-                ..orderBy([(l) => OrderingTerm.desc(l.id)])
-                ..limit(1))
-                .getSingleOrNull();
-
-
-            await widget.db.updateTask(
-              widget.task.id,
-              listID: Value(newList!.id),
-            );
-
+            //! weird flicker when switching to the new list
             if (!mounted) return print("not mounted: create new list from this task");
             context.read<NavController>().setNavListNameAndIndex(newList.name!, newList.id);
 
