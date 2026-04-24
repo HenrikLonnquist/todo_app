@@ -592,7 +592,7 @@ class MainPage extends StatefulWidget {
 
 class _MainPageState extends State<MainPage> {
 
-  bool hideCompleted = false;
+  
   
 
   Stream<Map<String, List<Task>>> getTaskStream(int listID, AppDB db) {
@@ -608,12 +608,10 @@ class _MainPageState extends State<MainPage> {
     
     final db = context.read<AppDB>();
 
-    final (int, String, bool) nav = context.select<NavController, (int, String, bool)>((nav) => (nav.navIndex, nav.navListName, nav.showTaskPanel));
+    final (int, String) nav = context.select<NavController, (int, String)>((nav) => (nav.navIndex, nav.navListName));
     
     final int navIndex = nav.$1;
     final String navListName = nav.$2;
-    final bool taskPanelState = nav.$3;
-
   
     return Expanded(
       child: CustomPanel(
@@ -743,101 +741,162 @@ class _MainPageState extends State<MainPage> {
                 );
               }
 
-              final List<Task> dataTasks = data["tasks"] ?? [];
-              final List<Task> dataCompletedTasks = data["completedTasks"] ?? [];
+              final List<Task> tasks = data["tasks"] ?? [];
+              final List<Task> completedTasks = data["completedTasks"] ?? [];
 
-              return SingleChildScrollView(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    ReorderableListView.builder(
-                      buildDefaultDragHandles: false,
-                      onReorder: (oldIndex, newIndex) {
-                        
-                      },
-                      shrinkWrap: true,
-                      physics: NeverScrollableScrollPhysics(),
-                      itemCount: math.max(0, dataTasks.length * 2 - 1),
-                      itemBuilder: (context, index) {
-                      
-                        final key = GlobalKey();
-
-                        // Separator between the tasks
-                        if (index.isOdd) {
-                            return SizedBox(key: key, height: 8,);
-                        }
-
-                        final itemIndex = index ~/2;
-                        final Task task = dataTasks[itemIndex];
-                        final bool isSelected = context.watch<NavController>().currentTaskID == task.id;
-
-
-                
-                        return TaskListItem(
-                          key: key,
-                          task: task,
-                          isSelected: isSelected,
-                          taskPanelState: taskPanelState,
-                          db: db,
-                        );
-                      },
-
-                    ),
-                    //TODO: Need to remember if to hide or show completed per list. Save to user settings(will have that later)
-                    Padding(
-                      padding: const EdgeInsets.all(4.0),
-                      child: ElevatedButton(
-                        onPressed: () {
-                          setState(() {
-                            hideCompleted = !hideCompleted;
-                          });
-                        },
-                        style: ElevatedButton.styleFrom(
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadiusGeometry.circular(7),
-                          ),
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            //! ISSUE: Remove the gap before the icon
-                            Icon(hideCompleted ? Icons.keyboard_arrow_down_outlined :  Icons.keyboard_arrow_right_outlined),
-                            Text("Completed ${dataCompletedTasks.length}"),
-                          ],
-                        ),
-                      ),
-                    ),
-                    //! BUG: why is it flickering when unchecking tasks? (Notion:BUG)
-                    Visibility(
-                      visible: hideCompleted,
-                      child: ListView.separated(
-                        shrinkWrap: true,
-                        physics: NeverScrollableScrollPhysics(),
-                        itemCount: dataCompletedTasks.length,
-                        itemBuilder: (context, index) {
-                        
-                          final Task task = dataCompletedTasks[index];
-                          final bool isSelected = context.watch<NavController>().currentTaskID == task.id;
-
-                        
-                          return TaskListItem(
-                            task: task,
-                            isSelected: isSelected, 
-                            taskPanelState: taskPanelState,
-                            db: db,
-                          );
-                        },
-                        separatorBuilder: (context, index) {
-                          return SizedBox(height: 8,);
-                        },
-                      ),
-                    ),
-                  ],
-                ),
+              return ReorderableTaskList(
+                listID: navIndex,
+                tasks: tasks,
+                completedTasks: completedTasks,
               );
+
             }
           ),
         ),
+      ),
+    );
+  }
+}
+
+class ReorderableTaskList extends StatefulWidget {
+  const ReorderableTaskList({
+    super.key,
+    required this.listID,
+    required this.tasks,
+    required this.completedTasks,
+  });
+
+  final List<Task> tasks;
+  final List<Task> completedTasks;
+  final int listID;
+
+  @override
+  State<ReorderableTaskList> createState() => _ReorderableTaskListState();
+}
+
+class _ReorderableTaskListState extends State<ReorderableTaskList> {
+
+  bool hideCompleted = false;
+  
+  late List<Task> _tasks;
+  late List<Task> _completedTasks;
+
+  late bool taskPanelState;
+
+  bool _isDragging = false;
+
+  late final AppDB db;
+
+  @override
+  void initState() {
+    super.initState();
+    db = context.read<AppDB>();
+    _tasks = List.of(widget.tasks);
+    _completedTasks = List.of(widget.completedTasks);
+  }
+
+  @override
+  void didUpdateWidget(covariant ReorderableTaskList old) {
+    super.didUpdateWidget(old);
+    if (!_isDragging) {
+      _tasks = List.of(widget.tasks);
+      _completedTasks = List.of(widget.tasks);
+
+    }
+  }
+  
+  @override
+  Widget build(BuildContext context) {
+
+    taskPanelState = context.select<NavController, bool>((state) => state.showTaskPanel);
+
+    return SingleChildScrollView(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          ReorderableListView.builder(
+            buildDefaultDragHandles: false,
+            onReorder: (oldIndex, newIndex) {
+              
+            },
+            shrinkWrap: true,
+            physics: NeverScrollableScrollPhysics(),
+            itemCount: math.max(0, _tasks.length * 2 - 1),
+            itemBuilder: (context, index) {
+            
+              final key = GlobalKey();
+
+              // Separator between the tasks
+              if (index.isOdd) {
+                  return SizedBox(key: key, height: 8,);
+              }
+
+              final itemIndex = index ~/2;
+              final Task task = _tasks[itemIndex];
+              final bool isSelected = context.watch<NavController>().currentTaskID == task.id;
+
+
+      
+              return TaskListItem(
+                key: key,
+                task: task,
+                isSelected: isSelected,
+                taskPanelState: taskPanelState,
+                db: db,
+              );
+            },
+
+          ),
+          //TODO: Need to remember if to hide or show completed per list. Save to user settings(will have that later)
+          Padding(
+            padding: const EdgeInsets.all(4.0),
+            child: ElevatedButton(
+              onPressed: () {
+                setState(() {
+                  hideCompleted = !hideCompleted;
+                });
+              },
+              style: ElevatedButton.styleFrom(
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadiusGeometry.circular(7),
+                ),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  //! ISSUE: Remove the gap before the icon
+                  Icon(hideCompleted ? Icons.keyboard_arrow_down_outlined :  Icons.keyboard_arrow_right_outlined),
+                  Text("Completed ${_completedTasks.length}"),
+                ],
+              ),
+            ),
+          ),
+          //! BUG: why is it flickering when unchecking tasks? (Notion:BUG)
+          Visibility(
+            visible: hideCompleted,
+            child: ListView.separated(
+              shrinkWrap: true,
+              physics: NeverScrollableScrollPhysics(),
+              itemCount: _completedTasks.length,
+              itemBuilder: (context, index) {
+              
+                final Task task = _completedTasks[index];
+                final bool isSelected = context.watch<NavController>().currentTaskID == task.id;
+
+              
+                return TaskListItem(
+                  task: task,
+                  isSelected: isSelected, 
+                  taskPanelState: taskPanelState,
+                  db: db,
+                );
+              },
+              separatorBuilder: (context, index) {
+                return SizedBox(height: 8,);
+              },
+            ),
+          ),
+        ],
       ),
     );
   }
