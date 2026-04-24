@@ -66,7 +66,10 @@ class AppDB extends _$AppDB{
 
   // "Regular"" List
   Stream<List<Task>> watchTasksByListId(int listId) {
-    return (select(tasks)..where((t) => t.listsId.equals(listId) & t.parentId.isNull() )).watch();
+    return (select(tasks)
+      ..where((t) => t.listsId.equals(listId) & t.parentId.isNull() )
+      ..orderBy([(t) => OrderingTerm.asc(t.position)]))
+      .watch();
   }
 
   // MyDay
