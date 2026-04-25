@@ -319,31 +319,15 @@ class TaskInfo extends StatelessWidget {
                       //   subTask!.isEmpty ? Text("Add step", style: subTaskTextStyle) : Text("Next Step", style: subTaskTextStyle,), //! Titlefield - take from above in listview
                     ),
                     SizedBox(height: 10),
-                    ListTile(
-                      title:Text((parentTask.addedToMyDay ?? false) ? "Added in My Day" : "Add to My Day"),
-                      hoverColor: Colors.grey.shade700,
-                      splashColor: Colors.transparent,
-                      tileColor: Colors.grey.shade800.withValues(alpha: 0.2),
-                      trailing: TextButton(
-                        
-                        // hoverColor: Colors.grey.shade700,
-                        // splashColor: Colors.transparent,
-                        // icon: Icon(Icons.close,
-                        // size: 34
-                        // ),
-                        onPressed: () async {
 
-                            db.updateTask(
-                              parentTask.id,
-                              addedToMyDay: Value(!(parentTask.addedToMyDay ?? true)),
-                            );
-                            
-                          },
-                        child: Icon(Icons.close,
-                        size: 34,
-                        )
-                      ),
+                    CustomTileTaskInfo(
+                      title: Text((parentTask.addedToMyDay ?? false) ? "Added in My Day" : "Add to My Day"),
+                      currentTask: parentTask,
+                      tileOnPressedStayEnabled: false,
+                      addedToMyDay: true,
                     ),
+
+                    
                     SizedBox(height: 10),
                     ListTile(
                       title:Text("Remind Me"),
@@ -369,6 +353,97 @@ class TaskInfo extends StatelessWidget {
           ),
         );
       }
+    );
+  }
+}
+
+class CustomTileTaskInfo extends StatelessWidget {
+  const CustomTileTaskInfo({
+    super.key,
+    this.title,
+    required this.currentTask,
+    this.tileOnPressed,
+    this.buttonOnPressed,
+    this.tileOnPressedStayEnabled = true,
+    this.addedToMyDay,
+    this.reminder,
+    this.dueDate,
+    this.repeat,
+    this.notes,
+  });
+  
+  final Text? title;
+  final bool tileOnPressedStayEnabled;
+
+  final Task currentTask;
+  final Function()? tileOnPressed;
+  final Function()? buttonOnPressed;
+
+  final bool? addedToMyDay;
+  final DateTime? reminder;
+  final DateTime? dueDate;
+  final String? repeat;
+  final String? notes;
+  
+
+  @override
+  Widget build(BuildContext context) {
+    final db = context.read<AppDB>();
+    return Row(
+      children: [
+        //TODO: make it more "visible", something that highlights that its in my day
+        Expanded(
+          child: ListTile(
+            title: title,
+            hoverColor: Colors.grey.shade700,
+            splashColor: Colors.transparent,
+            tileColor: Colors.grey.shade800.withValues(alpha: 0.2),
+            onTap: tileOnPressedStayEnabled ? null : () async {
+              
+              db.updateTask(
+                currentTask.id,
+                addedToMyDay: Value(addedToMyDay ?? true),
+                reminder: Value(reminder),
+                dueDate: Value(dueDate),
+                repeat: Value(repeat),
+                notes: Value(notes),
+              );
+
+            } 
+          ) ,
+        ),
+        Visibility(
+          visible: currentTask.addedToMyDay ?? false,
+          child: TextButton(
+            style: TextButton.styleFrom(
+              padding: EdgeInsetsDirectional.symmetric(vertical: 19),
+              backgroundColor: Colors.grey.shade600.withValues(alpha: 0.3),
+              overlayColor: Colors.grey.shade600,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.only(topRight: Radius.circular(4), bottomRight: Radius.circular(4)),
+              ),
+            ),
+            onPressed: () async {
+          
+              await db.updateTask(
+                currentTask.id,
+                addedToMyDay: Value(!addedToMyDay!),
+                reminder: Value(reminder),
+                dueDate: Value(dueDate),
+                repeat: Value(repeat),
+                notes: Value(notes),
+
+              );
+                
+            },
+            //TODO: can I make it thinner?
+            child: Icon(Icons.close_outlined,
+            color: Colors.white,
+            size: 26,
+            )
+          ),
+        ),
+      ],
     );
   }
 }
