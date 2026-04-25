@@ -320,8 +320,29 @@ class TaskInfo extends StatelessWidget {
                     ),
                     SizedBox(height: 10),
                     ListTile(
-                      title:Text("Add to My Day"),
+                      title:Text((parentTask.addedToMyDay ?? false) ? "Added in My Day" : "Add to My Day"),
+                      hoverColor: Colors.grey.shade700,
+                      splashColor: Colors.transparent,
                       tileColor: Colors.grey.shade800.withValues(alpha: 0.2),
+                      trailing: TextButton(
+                        
+                        // hoverColor: Colors.grey.shade700,
+                        // splashColor: Colors.transparent,
+                        // icon: Icon(Icons.close,
+                        // size: 34
+                        // ),
+                        onPressed: () async {
+
+                            db.updateTask(
+                              parentTask.id,
+                              addedToMyDay: Value(!(parentTask.addedToMyDay ?? true)),
+                            );
+                            
+                          },
+                        child: Icon(Icons.close,
+                        size: 34,
+                        )
+                      ),
                     ),
                     SizedBox(height: 10),
                     ListTile(

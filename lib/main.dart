@@ -800,7 +800,7 @@ class _ReorderableTaskListState extends State<ReorderableTaskList> {
     super.didUpdateWidget(old);
     if (!_isDragging) {
       _tasks = List.of(widget.tasks);
-      _completedTasks = List.of(widget.tasks);
+      _completedTasks = List.of(widget.completedTasks);
 
     }
   }
@@ -1058,9 +1058,8 @@ class _TaskListItemState extends State<TaskListItem> {
                     ),
                   ),
                   Icon(
-                    Icons.arrow_forward_ios_sharp,
+                    Icons.star_border_outlined,
                     color: Colors.white,
-                    
                   ),
                 ],
               ),
