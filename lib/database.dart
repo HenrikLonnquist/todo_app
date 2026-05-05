@@ -26,6 +26,9 @@ extension TaskPartition on List<Task> {
 class AppDB extends _$AppDB{
   AppDB() : super(_openConnection());
 
+  // only for testing purposes
+  AppDB.forTesting(QueryExecutor executor) : super(executor);
+
 
   Stream<Map<dynamic, int>> watchTaskCountPerList() {
     return select(tasks).watch().map((allTasks) {
@@ -33,7 +36,7 @@ class AppDB extends _$AppDB{
       final Map<dynamic, int> counts = {};
 
       for (final task in allTasks) {
-        // Skip subtasks and completed tasks
+        // Skips subtasks and completed tasks
         if (task.parentId != null || task.isDone == null || task.isDone!) continue; 
         
 
@@ -57,7 +60,10 @@ class AppDB extends _$AppDB{
 
 
   Stream<List<TodoList>> watchUserLists() {
-    return (select(todoLists)..where((t) => t.id.isBiggerThanValue(3))).watch();
+    return (select(todoLists)
+    ..where((t) => t.id.isBiggerThanValue(3))
+    ..orderBy([(t) => OrderingTerm.asc(t.position)]))
+    .watch();
   }
 
   Stream<List<Task>> watchTasks() {
@@ -87,6 +93,54 @@ class AppDB extends _$AppDB{
     return (select(tasks)..where((t) => t.id.equals(id) | t.parentId.equals(id) )).watch();
   }
 
+  //TODO: need a function for update position??? updateTask does that already.
+  Future<(int, int)> renormalizeAllTaskPosition(int? prevNeighborID, int? nextNeighborID) async {
+
+    // map {listid: [tasks]}
+    final Map<int, List<Task>> mapTasksByListID = await (select(tasks)).get().then((allTasks) {
+      
+      final Map<int, List<Task>> tasksByListID = {};
+
+      for (final task in allTasks) {
+        tasksByListID.putIfAbsent(task.listsId!, () => []).add(task);
+      }
+
+      return tasksByListID;  
+
+    });
+    
+    int prevNewPos = 0;
+    int nextNewPos = 0;
+
+    await transaction(() async {
+      await batch((b) {
+
+        for (final entry in mapTasksByListID.entries) {
+          
+          final listOfTasks = entry.value;
+
+          for (int i = 0; i < listOfTasks.length; i++) {
+
+
+            if (prevNeighborID != null && listOfTasks[i].id == prevNeighborID) prevNewPos = ( i + 1) * 1000;
+            if (nextNeighborID != null &&  listOfTasks[i].id == nextNeighborID) nextNewPos = ( i + 1) * 1000;
+
+            b.update(
+              tasks,
+              TasksCompanion(position: Value(( i + 1) * 1000)),
+              where: (t) => t.id.equals(listOfTasks[i].id)
+            );
+
+          }
+        }
+
+      });
+    });
+
+    return (prevNewPos, nextNewPos);
+
+
+  }
 
   Future<({int count, int maxPos})> getMaxPositionAndCountTaskOrList(
     {
