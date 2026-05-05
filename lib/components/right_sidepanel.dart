@@ -1,6 +1,7 @@
 // ignore_for_file: avoid_print
 
-import 'dart:ui';
+import 'dart:async';
+import 'dart:nativewrappers/_internal/vm/lib/ffi_allocation_patch.dart';
 
 import 'package:drift/drift.dart' hide Column;
 import 'package:flutter/material.dart';
@@ -80,14 +81,20 @@ class TaskInfo extends StatelessWidget {
     super.key,
   });
 
+  final MenuController _reminderMenuController = MenuController();
+  final MenuController _dueDateMenuController = MenuController();
+  final MenuController _repeatMenuController = MenuController();
+
+  final _anchorKey = GlobalKey();
+  
   final bool isChecked = false;
 
-  final TextStyle subTaskTextStyle = TextStyle(
+  final bool inputNewSubTask = false;
+
+    final TextStyle subTaskTextStyle = TextStyle(
     color: Colors.white.withValues(alpha: 0.5), 
     fontSize: 15
   );
-
-  final bool inputNewSubTask = false;
 
   final TitleField taskTitle = TitleField(
     textSize: 20,
@@ -98,6 +105,211 @@ class TaskInfo extends StatelessWidget {
       //TODO: update database
     },
   );
+
+
+   Future _openCalendar({bool showTime = false, DateTime? hasDate}) async {
+
+    final now = DateTime.now();
+    Completer? completer  = Completer<DateTime?>();
+    DateTime? selectedDate = hasDate ?? now;
+    int? hourSelected = now.hour;
+    int? minuteSelected = now.minute;
+
+    final MenuController menuCalendarController = MenuController();
+
+    final renderBox = _anchorKey.currentContext!.findRenderObject() as RenderBox;
+    final size = renderBox.size;
+    final offset = renderBox.localToGlobal(Offset.zero);
+
+    // e.g. position the calendar directly below the anchor widget
+    final calendarOffset = Offset(offset.dx, offset.dy + size.height);
+
+    OverlayEntry? overlayEntry;
+    overlayEntry = OverlayEntry(
+      builder: (context) => Stack(
+        children: [
+          Positioned.fill(
+            child: GestureDetector(
+              behavior: HitTestBehavior.translucent,
+              onTap: () {
+                overlayEntry!.remove();
+                overlayEntry = null;
+                completer.complete(null);
+              },
+            ),
+          ),
+
+          Positioned(
+            top: calendarOffset.dy,
+            left: calendarOffset.dx,
+            child: Material(
+              elevation: 8,
+              color: Colors.white,
+              // color: Colors.grey.shade900,
+              child: SizedBox(
+                width: 250,
+                child: Column(
+                  children: [
+                    CalendarDatePicker(
+                      initialDate: DateTime.now(),
+                      firstDate: DateTime(2020),
+                      lastDate: DateTime(2030),
+                      onDateChanged: (date) {
+
+                        selectedDate = date;
+
+                      },
+                    ),
+                    // TODO: add a time picker here.
+                    MenuAnchor(
+                      controller: menuCalendarController,
+                      builder: (context, controller, child) {
+
+                        return TextButton(
+                          onPressed: () {
+                            controller.isOpen ? controller.close() : controller.open();
+                          },
+                          child: SizedBox(
+                            height: 20,
+                            child: Row(
+                              children: [
+                                Expanded(child: Text("$hourSelected".padLeft(2, "0"), textAlign: TextAlign.center,)), 
+                                VerticalDivider(color: Colors.black, thickness: 1, ), 
+                                Expanded(child: Text("$minuteSelected".padLeft(2, "0"), textAlign: TextAlign.center,)), 
+                              ],
+                            ),
+                          )
+                        );
+                      },
+                      menuChildren: [
+                        SizedBox(
+                          height: 250,
+                          width: 230,
+                          child: Column(
+                            children: [
+                              Expanded(
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                  children: [
+                                    Expanded(
+                                      child: SingleChildScrollView(
+                                        // TODO: try make the scroll start at the current time
+                                        child: Column(
+                                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                                          children: [
+                                            for ( var index = 0; index < 24; index++)
+                                              TextButton(
+                                                style: TextButton.styleFrom(
+                                                  shape: RoundedRectangleBorder(
+                                                    borderRadius: BorderRadius.circular(0),
+                                                  ),
+                                                ),
+                                                onPressed: () {
+                                                  // assign new hour value
+                                                  hourSelected = index;
+                                                  print(hourSelected);
+                                                },
+                                                child: Text("$index"),
+                                              ),
+                                          ]
+                                        ),
+                                      ),
+                                    ),
+                                    Expanded(
+                                      child: SingleChildScrollView(
+                                        child: Column(
+                                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                                          children: [
+                                            for ( var index = 0; index < 24; index++) Text("$index")
+                                                                  
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Expanded(
+                                    child: TextButton(
+                                      style: TextButton.styleFrom(
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius: BorderRadius.circular(0),
+                                        ),
+                                      ),
+                                      onPressed: () {
+
+                                        // print("save: $hourSelected");
+                                        if ( selectedDate != null ) selectedDate!.subtract(Duration(hours: selectedDate!.hour));
+                                        selectedDate!.add(Duration(hours: hourSelected!));
+                                        
+                                        menuCalendarController.close();
+                                      },
+                                      child: Icon(Icons.check),
+                                    ),
+                                  ),
+                                  Expanded(
+                                    child: TextButton(
+                                      style: TextButton.styleFrom(
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius: BorderRadius.circular(0),
+                                        ),
+                                      ),
+                                      onPressed: () {
+                                        
+                                        menuCalendarController.close();
+                                      },
+                                      child: Icon(Icons.close),
+                                    ),
+                                  ),
+                                ], 
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        TextButton(
+                          onPressed: () {
+                            overlayEntry?.remove();
+                            overlayEntry = null;
+                            completer.complete(null);
+                            
+                          },
+                          child: Text("Cancel")
+                        ),
+                        TextButton(
+                          onPressed: () {
+                            overlayEntry?.remove();
+                            overlayEntry = null;
+
+                            completer.complete(selectedDate);
+
+                          },
+                          child: Text("Save")
+                        ),
+                      ]
+                    )
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ],
+      )
+    );
+
+    _reminderMenuController.close();
+    Overlay.of(_anchorKey.currentContext!).insert(overlayEntry!);
+
+    return completer.future;
+
+  }
 
   
   @override
@@ -139,8 +351,7 @@ class TaskInfo extends StatelessWidget {
             ),
           );
         }
-
-
+        
         final task = snapshot.data;
     
         final parentTask = task![0];
@@ -225,7 +436,6 @@ class TaskInfo extends StatelessWidget {
                               isDone: Value(isDone),
                             );
                           }
-                
                           
                         },
                       ),
@@ -320,28 +530,163 @@ class TaskInfo extends StatelessWidget {
                     ),
                     SizedBox(height: 10),
 
+                    // MARK: Add To My Day
                     CustomTileTaskInfo(
                       title: Text((parentTask.addedToMyDay ?? false) ? "Added in My Day" : "Add to My Day"),
                       currentTask: parentTask,
-                      tileOnPressedStayEnabled: false,
-                      addedToMyDay: true,
+                      tileOnPressedStayEnabledAfter: parentTask.addedToMyDay == true ? false : true,
+                      addedToMyDay: parentTask.addedToMyDay,
                     ),
 
-                    
                     SizedBox(height: 10),
-                    ListTile(
-                      title:Text("Remind Me"),
-                      tileColor: Colors.grey.shade800.withValues(alpha: 0.2),
+
+                    // MARK: REMINDER
+                    MenuAnchor(
+                      controller: _reminderMenuController,
+                      key: _anchorKey,
+                      consumeOutsideTap: true, // similar to "Barrier" in showdialog, i think
+                      style: MenuStyle(
+                        backgroundColor: WidgetStateProperty.fromMap({WidgetState.any: Colors.grey.shade800}),
+                      ),
+                      builder: (context, controller, child) {
+
+                        return CustomTileTaskInfo(
+                          title: Text( parentTask.reminder != null ? "${parentTask.reminder}" :  "Remind me"),
+                          currentTask: parentTask,
+                          reminder: parentTask.reminder,
+                          tileOnPressed: () {
+
+                            _reminderMenuController.isOpen ? controller.close() : controller.open();
+
+                            //! How do I get the date selection to here? or do I have update in the menuitem button?
+                            //update after selecting an option
+
+                            // menu anchor
+                              // options:
+                                // Later today - Wed 15:00
+                                // Tomorrow - Thu 09:00
+                                // Next Wed - 09:00
+                                // Next Week - Mon 09:00
+                                // Choose a date and time
+                            // pass the select date to customtiletaskinfo
+
+                          },
+                        );
+                      },
+                      menuChildren: [
+
+                        //TODO: make the text a little smaller, 2-5 smaller
+                        CustomTileTaskInfo(
+                          //TODO: increment time.now with +3
+                          title: Text("Later today at N:00"),
+                          currentTask: parentTask,
+                          tileOnPressed: () {
+
+                            // Adds 3 hours to current itme
+                            final today = DateTime.now();
+                            final laterTodayAtN = today.add(Duration(hours: 3));
+
+                            return laterTodayAtN;
+                            
+                          },
+                        ),
+                        CustomTileTaskInfo(
+                          title: Text("Tomorrow - 9:00 "),
+                          currentTask: parentTask,
+                          tileOnPressed: () {
+
+                            final today = DateTime.now();
+                            final tomorrowAt9 = DateTime.utc(today.year, today.month, (today.day + 1), 9, 00,);
+
+                            return tomorrowAt9;
+                            
+                          },
+                        ),
+
+                        CustomTileTaskInfo(
+                          title: Text("Next Monday - 9am?"),
+                          currentTask: parentTask,
+                          tileOnPressed: () {
+
+                            final today = DateTime.now(); 
+
+                            if (today.weekday == 7 && today.hour == 23 && today.minute > 56) {
+                              print("too late");
+                              return null; 
+                            }
+
+                            // 7 - 1 + 1 = 7 | mon(1) + 7 =  mon
+                            // 7 - 2 + 1 = 6 | tue(2) + 6 = mon
+                            // 7 - 3 + 1 = 5 | wed(3) + 5 = mon
+                            final nextMondayAt9 = today.add(Duration(days: (7 - today.weekday) + 1));
+
+                            return nextMondayAt9;
+                            
+                          },
+                        ),
+
+                        CustomTileTaskInfo(
+                          title: Text("Next Week -- (same weekday)"),
+                          currentTask: parentTask,
+                          tileOnPressed: () {
+
+                            // if today isnt past 9:00 then set task reminder to 9:00
+                            final today = DateTime.now();
+                            final nextSameWeekDay = today.add(Duration(days: 7));
+
+                            return nextSameWeekDay;
+                            
+                          },
+                        ),
+
+                        CustomTileTaskInfo(
+                          title: Text("Choose"),
+                          currentTask: parentTask,
+                          tileOnPressed: () async {
+
+                            DateTime? selectedDate = await _openCalendar();
+
+                            print(selectedDate);
+
+                            return selectedDate;
+                        
+                        
+                            // TODO: close the first menuanchor and then show anthoer one with dates/calendar
+                            // and in a different tab time
+
+                            // Need position details, like in gesturedetector. Used a globalkey on the menuanchor to get 
+                            // the position with currentcontext - renderbox
+                            // To do what? To position the new "popup",
+                            // still dont know how to do this. Like a switch to new one.. but HOW?
+                            // 
+
+
+                            // How to do this?
+                              // children:
+                                // current month + button to go back or forward in the months
+                                // tables of columns and rows with dates
+                                // time - able to select hh and mm separately
+                                // button to cancel and save changes
+                            
+                          },
+                        ),
+                      ],
                     ),
+
+                    // MARK: DUE DATE
                     ListTile(
                       title:Text("Due Date"),
                       tileColor: Colors.grey.shade800.withValues(alpha: 0.2),
                     ),
+
+                    // MARK: REPEAT
                     ListTile(
                       title:Text("Repeat"),
                       tileColor: Colors.grey.shade800.withValues(alpha: 0.2),
                     ),
                     SizedBox(height: 10,),
+
+                    // MARK: NOTES
                     ListTile(
                       title:Text("Notes"),
                       tileColor: Colors.grey.shade800.withValues(alpha: 0.2),
@@ -364,7 +709,11 @@ class CustomTileTaskInfo extends StatelessWidget {
     required this.currentTask,
     this.tileOnPressed,
     this.buttonOnPressed,
-    this.tileOnPressedStayEnabled = true,
+    
+    /// Stays clickable/actionable after having setting the option 
+    /// to something(adding to my day, setting an reminder, etc..)
+    this.tileOnPressedStayEnabledAfter = true, 
+    
     this.addedToMyDay,
     this.reminder,
     this.dueDate,
@@ -373,9 +722,10 @@ class CustomTileTaskInfo extends StatelessWidget {
   });
   
   final Text? title;
-  final bool tileOnPressedStayEnabled;
-
   final Task currentTask;
+
+  final bool tileOnPressedStayEnabledAfter;
+  
   final Function()? tileOnPressed;
   final Function()? buttonOnPressed;
 
@@ -389,6 +739,13 @@ class CustomTileTaskInfo extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final db = context.read<AppDB>();
+
+    final bool enableTrailingButton = addedToMyDay != null ||
+      reminder != null || 
+      dueDate != null ||
+      repeat != null ||
+      notes != null;
+
     return Row(
       children: [
         //TODO: make it more "visible", something that highlights that its in my day
@@ -398,22 +755,42 @@ class CustomTileTaskInfo extends StatelessWidget {
             hoverColor: Colors.grey.shade700,
             splashColor: Colors.transparent,
             tileColor: Colors.grey.shade800.withValues(alpha: 0.2),
-            onTap: tileOnPressedStayEnabled ? null : () async {
+            onTap: tileOnPressedStayEnabledAfter ? () async {
               
+              //! need the value from the dialog that got selected.
+              
+              if (tileOnPressed == null) return;
+
+              dynamic returnValue;
+              DateTime? currentDate;
+              String? noteString;
+
+              returnValue = await tileOnPressed!.call();
+
+              print("helo: $returnValue");
+
+              // DateTime - String
+
+              // print("from customTile - date: $currentDate");
+              // print("from customTile - notes: $noteString");
+
+              // print("$addedToMyDay");
+
               db.updateTask(
                 currentTask.id,
-                addedToMyDay: Value(addedToMyDay ?? true),
-                reminder: Value(reminder),
-                dueDate: Value(dueDate),
-                repeat: Value(repeat),
-                notes: Value(notes),
+                addedToMyDay: addedToMyDay != null ? Value.absent() : Value(true),
+                reminder: reminder != null ? Value.absent() : Value(currentDate),
+                // dueDate: dueDate != null ? Value.absent() : Value(currentDate),
+                // repeat: repeat != null ? Value.absent() : Value(),
+                // notes: notes != null ? Value.absent() : Value(),
               );
 
             } 
-          ) ,
+            : null
+          ),
         ),
         Visibility(
-          visible: currentTask.addedToMyDay ?? false,
+          visible: enableTrailingButton,
           child: TextButton(
             style: TextButton.styleFrom(
               padding: EdgeInsetsDirectional.symmetric(vertical: 19),
@@ -424,14 +801,14 @@ class CustomTileTaskInfo extends StatelessWidget {
               ),
             ),
             onPressed: () async {
-          
+
               await db.updateTask(
                 currentTask.id,
-                addedToMyDay: Value(!addedToMyDay!),
-                reminder: Value(reminder),
-                dueDate: Value(dueDate),
-                repeat: Value(repeat),
-                notes: Value(notes),
+                addedToMyDay: addedToMyDay != null ? Value(null) : const Value.absent(),
+                // reminder: reminder != null ? Value(null) : const Value.absent(),
+                // dueDate: dueDate != null ? Value(null) : const Value.absent(),
+                // repeat: repeat != null ? Value(null) : const Value.absent(),
+                // notes: notes != null ? Value(null) : const Value.absent(),
 
               );
                 
