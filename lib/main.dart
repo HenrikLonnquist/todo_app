@@ -4,6 +4,7 @@ import 'dart:async';
 
 import 'package:drift/drift.dart' hide Column;
 import 'package:dropdown_button2/dropdown_button2.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:todo_app/components/add_task_field.dart';
@@ -843,7 +844,7 @@ class _ReorderableTaskListState extends State<ReorderableTaskList> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           ReorderableListView.builder(
-            // buildDefaultDragHandles: false,
+            buildDefaultDragHandles: false,
             onReorderStart: (oldIndex) => setState(() =>_isDragging = true),
             onReorderEnd: (newIndex) => setState(() => _isDragging = false),
             onReorder: (oldIndex, newIndex) async {
@@ -873,13 +874,6 @@ class _ReorderableTaskListState extends State<ReorderableTaskList> {
 
               });
 
-              //! cna remove this, i think need to test _persistMove first.
-              // print("newPosition: $newPosition");
-              //update new task position
-              // await db.updateTask(
-              //   task!.id,
-              //   position: Value(newPosition),
-              // );
             }, 
             shrinkWrap: true,
             physics: NeverScrollableScrollPhysics(),
@@ -898,14 +892,17 @@ class _ReorderableTaskListState extends State<ReorderableTaskList> {
               final bool isSelected = context.watch<NavController>().currentTaskID == task.id;
 
       
-              return Padding(
+              return ReorderableDragStartListener(
+                index: index,
                 key: ValueKey(task.id),
-                padding: const EdgeInsets.fromLTRB(0, 0, 0, 8.0), // Separator for now.
-                child: TaskListItem(
-                  task: task,
-                  isSelected: isSelected,
-                  taskPanelState: taskPanelState,
-                  db: db,
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(0, 0, 0, 8.0), // Separator for now.
+                  child: TaskListItem(
+                    task: task,
+                    isSelected: isSelected,
+                    taskPanelState: taskPanelState,
+                    db: db,
+                  ),
                 ),
               );
             },
