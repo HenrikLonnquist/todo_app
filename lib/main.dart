@@ -1,5 +1,7 @@
 // import 'dart:ffi';
 
+import 'dart:async';
+
 import 'package:drift/drift.dart' hide Column;
 import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:flutter/material.dart';
@@ -805,6 +807,32 @@ class _ReorderableTaskListState extends State<ReorderableTaskList> {
     }
   }
   
+  Future<void> _persistMove(AppDB db, Task task, int? prev, int? next, int? prevID, int? nextID) async {
+
+    int newPosition;
+
+    if (prev == null) {
+      print("no top neighbor");
+      newPosition = (next! / 2).round();
+    } else if (next == null) {
+      print("no bottom neighbor");
+      newPosition = prev + 1000;
+    } else {
+      newPosition = ((prev + next) / 2).round();
+      if ( (newPosition - prev).abs() <= 10 || (next - newPosition).abs() <= 10 ) {
+        
+        print("renormalize tasks position");
+        final (int prevNewPos, int nextNewPos) = await db.renormalizeAllTaskPosition(prevID, nextID);
+        return _persistMove(db, task, prevNewPos, nextNewPos, null, null);
+      }
+    }
+    print("update task position");
+    return db.updateTask(
+      task.id,
+      position: Value(newPosition),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
 
@@ -815,65 +843,104 @@ class _ReorderableTaskListState extends State<ReorderableTaskList> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           ReorderableListView.builder(
-            buildDefaultDragHandles: false,
-            onReorder: (oldIndex, newIndex) {
+            // buildDefaultDragHandles: false,
+            onReorderStart: (oldIndex) => setState(() =>_isDragging = true),
+            onReorderEnd: (newIndex) => setState(() => _isDragging = false),
+            onReorder: (oldIndex, newIndex) async {
+
+              setState(() {
+
+                if (oldIndex < newIndex) newIndex -= 1;
               
-            },
+                // final newTaskIndex = newIndex ~/2; // the actual task index because of the separator.
+                // final oldTaskIndex = oldIndex ~/2;                
+
+                //! might not need to do this.
+                final Task movedTask = _tasks.removeAt(oldIndex);
+                _tasks.insert(newIndex, movedTask);
+
+
+                // fetch the movedTask's neighbors position 
+                final prev = newIndex > 0 ? _tasks[newIndex - 1].position : null;
+                final next = newIndex < _tasks.length - 1? _tasks[newIndex + 1].position : null;
+                
+                // neighbor id of prev, next
+                final prevID = prev != null ? _tasks[newIndex - 1].id : null;
+                final nextID = next != null ? _tasks[newIndex + 1].id : null;
+
+                _persistMove(db, movedTask, prev, next, prevID, nextID);
+
+
+              });
+
+              //! cna remove this, i think need to test _persistMove first.
+              // print("newPosition: $newPosition");
+              //update new task position
+              // await db.updateTask(
+              //   task!.id,
+              //   position: Value(newPosition),
+              // );
+            }, 
             shrinkWrap: true,
             physics: NeverScrollableScrollPhysics(),
-            itemCount: math.max(0, _tasks.length * 2 - 1),
+            // itemCount: math.max(0, _tasks.length * 2 - 1),
+            itemCount: _tasks.length,
             itemBuilder: (context, index) {
             
-              final key = GlobalKey();
-
               // Separator between the tasks
-              if (index.isOdd) {
-                  return SizedBox(key: key, height: 8,);
-              }
+              // if (index.isOdd) {
+              //     return IgnorePointer(key: ValueKey(index), child: SizedBox(height: 8,));
+              // }
 
-              final itemIndex = index ~/2;
-              final Task task = _tasks[itemIndex];
+              // final itemIndex = index ~/2;
+              // final Task task = _tasks[itemIndex];
+              final Task task = _tasks[index];
               final bool isSelected = context.watch<NavController>().currentTaskID == task.id;
 
-
       
-              return TaskListItem(
-                key: key,
-                task: task,
-                isSelected: isSelected,
-                taskPanelState: taskPanelState,
-                db: db,
+              return Padding(
+                key: ValueKey(task.id),
+                padding: const EdgeInsets.fromLTRB(0, 0, 0, 8.0), // Separator for now.
+                child: TaskListItem(
+                  task: task,
+                  isSelected: isSelected,
+                  taskPanelState: taskPanelState,
+                  db: db,
+                ),
               );
             },
 
           ),
           //TODO: Need to remember if to hide or show completed per list. Save to user settings(will have that later)
-          Padding(
-            padding: const EdgeInsets.all(4.0),
-            child: ElevatedButton(
-              onPressed: () {
-                setState(() {
-                  hideCompleted = !hideCompleted;
-                });
-              },
-              style: ElevatedButton.styleFrom(
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadiusGeometry.circular(7),
+          Visibility(
+            visible: _completedTasks.isEmpty ? false : true,
+            child: Padding(
+              padding: const EdgeInsets.all(4.0),
+              child: ElevatedButton(
+                onPressed: () {
+                  setState(() {
+                    hideCompleted = !hideCompleted;
+                  });
+                },
+                style: ElevatedButton.styleFrom(
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadiusGeometry.circular(7),
+                  ),
                 ),
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  //! ISSUE: Remove the gap before the icon
-                  Icon(hideCompleted ? Icons.keyboard_arrow_down_outlined :  Icons.keyboard_arrow_right_outlined),
-                  Text("Completed ${_completedTasks.length}"),
-                ],
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    //! ISSUE: Remove the gap before the icon
+                    Icon(hideCompleted ? Icons.keyboard_arrow_down_outlined :  Icons.keyboard_arrow_right_outlined),
+                    Text("Completed ${_completedTasks.length}"),
+                  ],
+                ),
               ),
             ),
           ),
           //! BUG: why is it flickering when unchecking tasks? (Notion:BUG)
           Visibility(
-            visible: hideCompleted,
+            visible: _completedTasks.isEmpty ? false : hideCompleted,
             child: ListView.separated(
               shrinkWrap: true,
               physics: NeverScrollableScrollPhysics(),
