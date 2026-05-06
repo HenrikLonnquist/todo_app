@@ -137,6 +137,7 @@ class _TitleFieldState extends State<TitleField> {
           fontSize: widget.textSize,
           fontWeight: widget.fontWeight,
           color: Colors.white,
+          overflow: TextOverflow.ellipsis,
           decoration: widget.completed ? TextDecoration.lineThrough : null,
           // fontFamily: ,                    
         ),
