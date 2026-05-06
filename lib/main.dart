@@ -1081,6 +1081,7 @@ class _TaskListItemState extends State<TaskListItem> {
                           // Subtitles 
                           Row(
                             //TODO: fix the gap between the subtitles.
+                            spacing: 4.0,
                             children: [
                               
                               // Nav List Name
@@ -1093,28 +1094,32 @@ class _TaskListItemState extends State<TaskListItem> {
                               ),
                               
                               //TODO: Need an more inituitive way to implement the divider, maybe I should use an indexbuilder.
+                              //* maybe check whats availble and then draw the layout.
                               //Divider
                               Icon(Icons.circle_rounded, size: 4, color: Colors.white),
 
                               // Subtitle - Due Date 
-                              //TODO: an calendar icon as well
+                              //TODO: an calendar icon as well - for what?
                               if (widget.task.dueDate != null)
-                              Text(
-                                "${widget.task.dueDate}",
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  color: Colors.white,
+                                Text(
+                                  "${widget.task.dueDate}",
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    color: Colors.white,
+                                  ),
                                 ),
-                              ),
                               
                               // Subtitle - Repeat
-                              Icon(Icons.repeat_outlined, size: 16, color: Colors.white,),
+                              if (widget.task.repeat != null)
+                                Icon(Icons.repeat_outlined, size: 16, color: Colors.white,),
                               
                               // Subtitle - Reminder 
-                              Icon(Icons.notifications_none_outlined, size: 16, color: Colors.white),
+                              if (widget.task.reminder != null)
+                                Icon(Icons.notifications_none_outlined, size: 16, color: Colors.white),
 
                               // Subtitle - Notes 
-                              Icon(Icons.note_outlined, size: 16, color: Colors.white),
+                              if (widget.task.notes != null)
+                                Icon(Icons.note_outlined, size: 16, color: Colors.white),
 
                               // Subtitle - Tags 
                             ],
