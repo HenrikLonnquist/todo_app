@@ -628,8 +628,9 @@ class _MainPageState extends State<MainPage> {
                 
                 //TODO: add a onHover effect. Shows that it is selectable
                 // ID from database > 3 == user lists.
-                if (navIndex > 3)
-                  TitleField(
+                Expanded(
+                  child: navIndex > 3
+                  ? TitleField(
                     inputValue: navListName,
                     selectAllOnFocus: true,
                     onChange: (newName) async {
@@ -645,18 +646,17 @@ class _MainPageState extends State<MainPage> {
 
                     },
                   )
-                else 
-                  Text(
+                  :Text(
                     navListName,
                     style: TextStyle(
                       fontSize: 26,
                       color: Colors.white,
+                      overflow: TextOverflow.ellipsis
                     ),
                   ),
+                ),
                 
 
-
-                Spacer(),
                 Icon(Icons.swap_vert),
                 Icon(Icons.lightbulb),
                 //TODO: Very slow, how can I fix it? I guess make my own no need to make it complicated, just a window and a list of items.
