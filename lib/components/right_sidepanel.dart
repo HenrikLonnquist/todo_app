@@ -1,7 +1,6 @@
 // ignore_for_file: avoid_print
 
 import 'dart:async';
-import 'dart:nativewrappers/_internal/vm/lib/ffi_allocation_patch.dart';
 
 import 'package:drift/drift.dart' hide Column;
 import 'package:flutter/material.dart';
@@ -740,7 +739,7 @@ class CustomTileTaskInfo extends StatelessWidget {
   Widget build(BuildContext context) {
     final db = context.read<AppDB>();
 
-    final bool enableTrailingButton = addedToMyDay != null ||
+    final bool enableTrailingButton = (addedToMyDay != null && addedToMyDay == true) ||
       reminder != null || 
       dueDate != null ||
       repeat != null ||
