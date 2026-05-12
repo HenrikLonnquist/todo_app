@@ -75,17 +75,26 @@ class CustomPanel extends StatelessWidget {
 }
 
 //MARK: Task Info
-class TaskInfo extends StatelessWidget {
-  TaskInfo({
+class TaskInfo extends StatefulWidget {
+  const TaskInfo({
     super.key,
   });
 
+  @override
+  State<TaskInfo> createState() => _TaskInfoState();
+}
+
+class _TaskInfoState extends State<TaskInfo> {
   final MenuController _reminderMenuController = MenuController();
+
   final MenuController _dueDateMenuController = MenuController();
+
   final MenuController _repeatMenuController = MenuController();
 
+  final OverlayPortalController _calendarController = OverlayPortalController();
+
   final _anchorKey = GlobalKey();
-  
+
   final bool isChecked = false;
 
   final bool inputNewSubTask = false;
@@ -106,211 +115,6 @@ class TaskInfo extends StatelessWidget {
   );
 
 
-   Future _openCalendar({bool showTime = false, DateTime? hasDate}) async {
-
-    final now = DateTime.now();
-    Completer? completer  = Completer<DateTime?>();
-    DateTime? selectedDate = hasDate ?? now;
-    int? hourSelected = now.hour;
-    int? minuteSelected = now.minute;
-
-    final MenuController menuCalendarController = MenuController();
-
-    final renderBox = _anchorKey.currentContext!.findRenderObject() as RenderBox;
-    final size = renderBox.size;
-    final offset = renderBox.localToGlobal(Offset.zero);
-
-    // e.g. position the calendar directly below the anchor widget
-    final calendarOffset = Offset(offset.dx, offset.dy + size.height);
-
-    OverlayEntry? overlayEntry;
-    overlayEntry = OverlayEntry(
-      builder: (context) => Stack(
-        children: [
-          Positioned.fill(
-            child: GestureDetector(
-              behavior: HitTestBehavior.translucent,
-              onTap: () {
-                overlayEntry!.remove();
-                overlayEntry = null;
-                completer.complete(null);
-              },
-            ),
-          ),
-
-          Positioned(
-            top: calendarOffset.dy,
-            left: calendarOffset.dx,
-            child: Material(
-              elevation: 8,
-              color: Colors.white,
-              // color: Colors.grey.shade900,
-              child: SizedBox(
-                width: 250,
-                child: Column(
-                  children: [
-                    CalendarDatePicker(
-                      initialDate: DateTime.now(),
-                      firstDate: DateTime(2020),
-                      lastDate: DateTime(2030),
-                      onDateChanged: (date) {
-
-                        selectedDate = date;
-
-                      },
-                    ),
-                    // TODO: add a time picker here.
-                    MenuAnchor(
-                      controller: menuCalendarController,
-                      builder: (context, controller, child) {
-
-                        return TextButton(
-                          onPressed: () {
-                            controller.isOpen ? controller.close() : controller.open();
-                          },
-                          child: SizedBox(
-                            height: 20,
-                            child: Row(
-                              children: [
-                                Expanded(child: Text("$hourSelected".padLeft(2, "0"), textAlign: TextAlign.center,)), 
-                                VerticalDivider(color: Colors.black, thickness: 1, ), 
-                                Expanded(child: Text("$minuteSelected".padLeft(2, "0"), textAlign: TextAlign.center,)), 
-                              ],
-                            ),
-                          )
-                        );
-                      },
-                      menuChildren: [
-                        SizedBox(
-                          height: 250,
-                          width: 230,
-                          child: Column(
-                            children: [
-                              Expanded(
-                                child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                                  children: [
-                                    Expanded(
-                                      child: SingleChildScrollView(
-                                        // TODO: try make the scroll start at the current time
-                                        child: Column(
-                                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                                          children: [
-                                            for ( var index = 0; index < 24; index++)
-                                              TextButton(
-                                                style: TextButton.styleFrom(
-                                                  shape: RoundedRectangleBorder(
-                                                    borderRadius: BorderRadius.circular(0),
-                                                  ),
-                                                ),
-                                                onPressed: () {
-                                                  // assign new hour value
-                                                  hourSelected = index;
-                                                  print(hourSelected);
-                                                },
-                                                child: Text("$index"),
-                                              ),
-                                          ]
-                                        ),
-                                      ),
-                                    ),
-                                    Expanded(
-                                      child: SingleChildScrollView(
-                                        child: Column(
-                                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                                          children: [
-                                            for ( var index = 0; index < 24; index++) Text("$index")
-                                                                  
-                                          ],
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Expanded(
-                                    child: TextButton(
-                                      style: TextButton.styleFrom(
-                                        shape: RoundedRectangleBorder(
-                                          borderRadius: BorderRadius.circular(0),
-                                        ),
-                                      ),
-                                      onPressed: () {
-
-                                        // print("save: $hourSelected");
-                                        if ( selectedDate != null ) selectedDate!.subtract(Duration(hours: selectedDate!.hour));
-                                        selectedDate!.add(Duration(hours: hourSelected!));
-                                        
-                                        menuCalendarController.close();
-                                      },
-                                      child: Icon(Icons.check),
-                                    ),
-                                  ),
-                                  Expanded(
-                                    child: TextButton(
-                                      style: TextButton.styleFrom(
-                                        shape: RoundedRectangleBorder(
-                                          borderRadius: BorderRadius.circular(0),
-                                        ),
-                                      ),
-                                      onPressed: () {
-                                        
-                                        menuCalendarController.close();
-                                      },
-                                      child: Icon(Icons.close),
-                                    ),
-                                  ),
-                                ], 
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      children: [
-                        TextButton(
-                          onPressed: () {
-                            overlayEntry?.remove();
-                            overlayEntry = null;
-                            completer.complete(null);
-                            
-                          },
-                          child: Text("Cancel")
-                        ),
-                        TextButton(
-                          onPressed: () {
-                            overlayEntry?.remove();
-                            overlayEntry = null;
-
-                            completer.complete(selectedDate);
-
-                          },
-                          child: Text("Save")
-                        ),
-                      ]
-                    )
-                  ],
-                ),
-              ),
-            ),
-          ),
-        ],
-      )
-    );
-
-    _reminderMenuController.close();
-    Overlay.of(_anchorKey.currentContext!).insert(overlayEntry!);
-
-    return completer.future;
-
-  }
-
-  
   @override
   Widget build(BuildContext context) {
 
@@ -549,27 +353,20 @@ class TaskInfo extends StatelessWidget {
                       ),
                       builder: (context, controller, child) {
 
-                        return CustomTileTaskInfo(
-                          title: Text( parentTask.reminder != null ? "${parentTask.reminder}" :  "Remind me"),
-                          currentTask: parentTask,
-                          reminder: parentTask.reminder,
-                          tileOnPressed: () {
-
-                            _reminderMenuController.isOpen ? controller.close() : controller.open();
-
-                            //! How do I get the date selection to here? or do I have update in the menuitem button?
-                            //update after selecting an option
-
-                            // menu anchor
-                              // options:
-                                // Later today - Wed 15:00
-                                // Tomorrow - Thu 09:00
-                                // Next Wed - 09:00
-                                // Next Week - Mon 09:00
-                                // Choose a date and time
-                            // pass the select date to customtiletaskinfo
-
-                          },
+                        return CustomCalendarPicker(
+                          controller: _calendarController,
+                          anchorKey: _anchorKey,
+                          child: CustomTileTaskInfo(
+                            title: Text( parentTask.reminder != null ? "${parentTask.reminder}" :  "Remind me"),
+                            currentTask: parentTask,
+                            reminder: parentTask.reminder,
+                            tileOnPressed: () {
+                          
+                              // _reminderMenuController.isOpen ? controller.close() : controller.open();
+                              _calendarController.toggle();
+                          
+                            },
+                          ),
                         );
                       },
                       menuChildren: [
@@ -637,29 +434,31 @@ class TaskInfo extends StatelessWidget {
                             
                           },
                         ),
-
+                        
                         CustomTileTaskInfo(
                           title: Text("Choose"),
                           currentTask: parentTask,
                           tileOnPressed: () async {
-
-                            DateTime? selectedDate = await _openCalendar();
-
-                            print(selectedDate);
-
-                            return selectedDate;
+                        
+                            // DateTime? selectedDate = await _openCalendar();
+                            _reminderMenuController.close();
+                            _calendarController.show();
+                        
+                            // print(selectedDate);
+                        
+                            // return selectedDate;
                         
                         
                             // TODO: close the first menuanchor and then show anthoer one with dates/calendar
                             // and in a different tab time
-
+                        
                             // Need position details, like in gesturedetector. Used a globalkey on the menuanchor to get 
                             // the position with currentcontext - renderbox
                             // To do what? To position the new "popup",
                             // still dont know how to do this. Like a switch to new one.. but HOW?
                             // 
-
-
+                        
+                        
                             // How to do this?
                               // children:
                                 // current month + button to go back or forward in the months
@@ -892,6 +691,363 @@ class PanelBottomBar extends StatelessWidget {
               color: Colors.white,
             )
           ),
+        ),
+      ],
+    );
+  }
+}
+
+class CustomCalendarPicker extends StatefulWidget {
+  const CustomCalendarPicker({
+    super.key,
+    this.showTime = false,
+    this.hasDate,
+    required this.controller,
+    required this.anchorKey,
+    required this.child,
+  });
+
+  final bool showTime;
+  final DateTime? hasDate;
+  final Widget child;
+  final OverlayPortalController controller;
+  final GlobalKey anchorKey;
+
+
+
+  @override
+  State<CustomCalendarPicker> createState() => _CustomCalendarPickerState();
+}
+
+class _CustomCalendarPickerState extends State<CustomCalendarPicker> {
+
+  //TODO: need to send back dates that got picked.
+
+  Completer? completer  = Completer<DateTime?>();
+    
+  @override
+  Widget build(BuildContext context) {
+
+    final now = DateTime.now();
+    DateTime? selectedDate = widget.hasDate ?? now;
+
+    //! why is this running twice?
+    print("hello calendar show please");
+
+
+    return OverlayPortal(
+      controller: widget.controller,
+      overlayChildBuilder: (context) {
+
+        final renderBox = widget.anchorKey.currentContext!.findRenderObject() as RenderBox;
+        final size = renderBox.size;
+        final offset = renderBox.localToGlobal(Offset.zero);
+
+        // e.g. position the calendar directly below the anchor widget
+        final calendarOffset = Offset(offset.dx, offset.dy + size.height);
+
+        print("builder?");
+
+        return Stack(
+          children: [
+            Positioned.fill(
+              child: GestureDetector(
+                behavior: HitTestBehavior.translucent,
+                onTap: () {
+                  widget.controller.hide();
+                  //! causes error on tap outisde.
+                  // completer!.complete(null);
+                },
+              ),
+            ),
+            Positioned(
+              top: calendarOffset.dy,
+              left: calendarOffset.dx,
+              child: Material(
+                elevation: 8,
+                color: Colors.white,
+                // color: Colors.grey.shade900,
+                child: SizedBox(
+                  width: 250,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      CalendarDatePicker(
+                        initialDate: DateTime.now(),
+                        firstDate: DateTime(2020),
+                        lastDate: DateTime(2030),
+                        onDateChanged: (date) {
+                          
+                          selectedDate = date;
+                          
+                        },
+                      ),
+                      //! Doesnt layer itself ontop of the calendarpicker, why?
+                      TimePicker(
+                        dateTime: widget.hasDate,
+                      ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [
+                          TextButton(
+                            onPressed: () {
+                        
+                              widget.controller.hide();
+                              completer!.complete(null);
+                              
+                            },
+                            child: Text("Cancel")
+                          ),
+                          TextButton(
+                            onPressed: () {
+                        
+                              widget.controller.hide();
+                              completer!.complete(selectedDate);
+                          
+                            },
+                            child: Text("Save")
+                          ),
+                        ]
+                      )
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ],
+        );
+      },
+      child: widget.child,
+    );
+  }
+}
+
+
+
+class TimePicker extends StatefulWidget {
+  const TimePicker({
+    super.key,
+    this.dateTime,
+  });
+
+  final DateTime? dateTime;
+
+  @override
+  State<TimePicker> createState() => _TimePickerState();
+}
+
+class _TimePickerState extends State<TimePicker> {
+
+  final DateTime now = DateTime.now(); 
+
+  int? hourSelected;
+  int? minuteSelected;
+  
+  //TODO: better naming
+  late int currentHour;
+  late int currentMinute;
+
+  final MenuController menuTimeController = MenuController();
+
+  late FixedExtentScrollController hourScrollController;
+  late FixedExtentScrollController minuteScrollController;
+
+  @override
+  void initState() {
+    super.initState();
+
+    currentHour = widget.dateTime != null ? widget.dateTime!.hour : now.hour;
+    currentMinute = widget.dateTime != null ? widget.dateTime!.minute : now.minute;
+
+    print(currentMinute);
+
+    hourScrollController = FixedExtentScrollController(initialItem: currentHour);
+    minuteScrollController = FixedExtentScrollController(initialItem: currentMinute);
+
+  }
+
+
+  @override
+  void dispose() {
+    
+    hourScrollController.dispose();
+    minuteScrollController.dispose();
+
+    super.dispose();
+  }
+  
+  
+  @override
+  Widget build(BuildContext context) {
+    return MenuAnchor(
+      controller: menuTimeController,
+      alignmentOffset: Offset.fromDirection(1, 20),
+      style: MenuStyle(
+        alignment: Alignment.centerLeft,
+      ),
+      builder: (context, controller, child) {
+        return TextButton(
+          onPressed: () {
+            controller.isOpen ? controller.close() : controller.open();
+          },
+          child: SizedBox(
+            height: 20,
+            child: Row(
+              children: [
+                Expanded(child: Text("$currentHour".padLeft(2, "0"), textAlign: TextAlign.center,)), 
+                VerticalDivider(color: Colors.black, thickness: 1, ), 
+                Expanded(child: Text("$currentMinute".padLeft(2, "0"), textAlign: TextAlign.center,)), 
+              ],
+            ),
+          )
+        );
+      },
+      menuChildren: [
+        SizedBox(
+          height: 240,
+          width: 230,
+          child: Row(
+            children: [
+              Expanded(
+                child: Stack(
+                  children: [
+                    Center(
+                      child: IgnorePointer(
+                        child: Container(
+                          height: 48,
+                          decoration: BoxDecoration(
+                            color: Colors.red.withOpacity(0.4),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                        ),
+                      ),
+                    ),
+                    ListWheelScrollView.useDelegate(
+                      itemExtent: 48,
+                      controller: hourScrollController,
+                      physics: FixedExtentScrollPhysics(),
+                      onSelectedItemChanged: (index) {
+                        setState(() => hourSelected = index % 24);
+                      },
+                      childDelegate: ListWheelChildLoopingListDelegate(
+                      children: [
+                          for ( var index = 0; index < 24; index++)
+                            SizedBox(
+                              width: double.infinity,
+                              child: TextButton(
+                                style: TextButton.styleFrom(
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                ),
+                                onPressed: () {
+                                  setState(() {
+                                    hourScrollController.animateToItem(
+                                      index, 
+                                      duration: Duration(milliseconds: 300),
+                                      curve: Curves.bounceIn,
+                                    );
+                                  });
+                                },
+                                child: Text("$index".padLeft(2, "0")),
+                              ),
+                            ),
+                        ],
+                      ), 
+                    ),
+                  ],
+                ),
+              ),
+    
+              Expanded(
+                child: Stack(
+                  children: [
+                    Center(
+                      child: IgnorePointer(
+                        child: Container(
+                          height: 48,
+                          decoration: BoxDecoration(
+                            color: Colors.red.withOpacity(0.4),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                        ),
+                      ),
+                    ),
+                    ListWheelScrollView.useDelegate(
+                      itemExtent: 48,
+                      controller: minuteScrollController,
+                      physics: FixedExtentScrollPhysics(),
+                      onSelectedItemChanged: (index) {
+                        setState(() => minuteSelected = index % 60);
+                      },
+                      childDelegate: ListWheelChildLoopingListDelegate(
+                      children: [
+                          for ( var index = 0; index < 60; index++)
+                            SizedBox(
+                              width: double.infinity,
+                              child: TextButton(
+                                style: TextButton.styleFrom(
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                ),
+                                onPressed: () {
+                                  setState(() {
+                                    minuteScrollController.animateToItem(
+                                      index, 
+                                      duration: Duration(milliseconds: 300),
+                                      curve: Curves.bounceIn,
+                                    );
+                                  });
+                                },
+                                child: Text("$index".padLeft(2, "0")),
+                              ),
+                            ),
+                        ],
+                      ), 
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+        Divider(height: 0),
+        Row(
+          children: [
+            Expanded(
+              child: TextButton(
+                style: TextButton.styleFrom(
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(0),
+                  ),
+                ),
+                onPressed: () {
+                  // callback function to return the selected minute and hour
+                  menuTimeController.close();
+                  setState(() {
+                    currentHour = hourSelected ?? currentHour;
+                    currentMinute = minuteSelected ?? currentMinute;
+                  });
+                },
+                child: Icon(Icons.check)
+              ),
+            ),
+            Expanded(
+              child: TextButton(
+                style: TextButton.styleFrom(
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(0),
+                  ),
+                ),
+                onPressed: () {
+                  // callback function to return the selected minute and hour
+                  menuTimeController.close();
+                },
+                child: Icon(Icons.close)
+              ),
+            ),
+          ],
         ),
       ],
     );
