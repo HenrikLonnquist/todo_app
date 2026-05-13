@@ -775,20 +775,27 @@ class _CustomCalendarPickerState extends State<CustomCalendarPicker> {
                         lastDate: DateTime(2030),
                         onDateChanged: (date) {
                           
-                          setState(()  => selectedDate = date);
+                          //! explain
+                          setState(()  => selectedDate = DateTime(
+                            date.year,
+                            date.month,
+                            date.day,
+                            selectedDate?.hour ?? widget.hasDate?.hour ?? now.hour,
+                            selectedDate?.minute ?? widget.hasDate?.minute ?? now.minute,
+                          ));
                           
                         },
                       ),
-                      //! Doesnt layer itself ontop of the calendarpicker, why?
                       TimePicker(
                         dateTime: widget.hasDate,
                         onTimeChanged: (time) {
                           
                           setState(() {
+                            //! explain
                             selectedDate = DateTime(
-                              selectedDate?.year ?? now.year,
-                              selectedDate?.month ?? now.month,
-                              selectedDate?.day ?? now.day,
+                              selectedDate?.year ?? widget.hasDate?.year ?? now.year,
+                              selectedDate?.month ?? widget.hasDate?.month ?? now.month,
+                              selectedDate?.day ?? widget.hasDate?.day ?? now.day,
                               time.hour,
                               time.minute,
 
@@ -870,8 +877,6 @@ class _TimePickerState extends State<TimePicker> {
 
     currentHour = widget.dateTime != null ? widget.dateTime!.hour : now.hour;
     currentMinute = widget.dateTime != null ? widget.dateTime!.minute : now.minute;
-
-    print(currentMinute);
 
     hourScrollController = FixedExtentScrollController(initialItem: currentHour);
     minuteScrollController = FixedExtentScrollController(initialItem: currentMinute);
@@ -1038,8 +1043,10 @@ class _TimePickerState extends State<TimePicker> {
                   // callback function to return the selected minute and hour
                   menuTimeController.close();
                   setState(() {
+
                     currentHour = hourSelected ?? currentHour;
                     currentMinute = minuteSelected ?? currentMinute;
+
                     widget.onTimeChanged.call(DateTime(
                       widget.dateTime?.year ?? now.year,
                       widget.dateTime?.month ?? now.month,
@@ -1047,6 +1054,7 @@ class _TimePickerState extends State<TimePicker> {
                       currentHour,
                       currentMinute,
                     ));
+
                   });
                 },
                 child: Icon(Icons.check)
