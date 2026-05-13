@@ -356,14 +356,25 @@ class _TaskInfoState extends State<TaskInfo> {
                         return CustomCalendarPicker(
                           controller: _calendarController,
                           anchorKey: _anchorKey,
+                          onDateTimeChanged: (value) async {
+                            await db.updateTask(
+                              parentTask.id,
+                              reminder: Value(value),
+                            );
+                          },
                           child: CustomTileTaskInfo(
-                            title: Text( parentTask.reminder != null ? "${parentTask.reminder}" :  "Remind me"),
+                            title: Text( parentTask.reminder != null 
+                            // ? "${DateFormat("d, yMd").format(parentTask.reminder!)}" 
+                            ? "Remind me at ${DateFormat("Hm").format(parentTask.reminder!)}"
+                            :  "Remind me"),
+                            subTitle: parentTask.reminder != null
+                            ? Text(DateFormat("EEE, d MMM y").format(parentTask.reminder!))
+                            : null,
                             currentTask: parentTask,
                             reminder: parentTask.reminder,
                             tileOnPressed: () {
                           
-                              // _reminderMenuController.isOpen ? controller.close() : controller.open();
-                              _calendarController.toggle();
+                              _reminderMenuController.isOpen ? controller.close() : controller.open();
                           
                             },
                           ),
@@ -500,10 +511,12 @@ class _TaskInfoState extends State<TaskInfo> {
   }
 }
 
+//MARK: CustomTile - options
 class CustomTileTaskInfo extends StatelessWidget {
   const CustomTileTaskInfo({
     super.key,
     this.title,
+    this.subTitle,
     required this.currentTask,
     this.tileOnPressed,
     this.buttonOnPressed,
@@ -520,6 +533,7 @@ class CustomTileTaskInfo extends StatelessWidget {
   });
   
   final Text? title;
+  final Text? subTitle;
   final Task currentTask;
 
   final bool tileOnPressedStayEnabledAfter;
@@ -550,6 +564,11 @@ class CustomTileTaskInfo extends StatelessWidget {
         Expanded(
           child: ListTile(
             title: title,
+            subtitle: subTitle,
+            subtitleTextStyle: TextStyle(
+              fontSize: 10,
+              color: Colors.white,
+            ),
             hoverColor: Colors.grey.shade700,
             splashColor: Colors.transparent,
             tileColor: Colors.grey.shade800.withValues(alpha: 0.2),
@@ -591,7 +610,9 @@ class CustomTileTaskInfo extends StatelessWidget {
           visible: enableTrailingButton,
           child: TextButton(
             style: TextButton.styleFrom(
-              padding: EdgeInsetsDirectional.symmetric(vertical: 19),
+              padding: EdgeInsetsDirectional.symmetric(vertical: subTitle != null 
+              ? 27
+              : 19),
               backgroundColor: Colors.grey.shade600.withValues(alpha: 0.3),
               overlayColor: Colors.grey.shade600,
               shape: RoundedRectangleBorder(
@@ -697,6 +718,7 @@ class PanelBottomBar extends StatelessWidget {
   }
 }
 
+//MARK: Calendar - date
 class CustomCalendarPicker extends StatefulWidget {
   const CustomCalendarPicker({
     super.key,
@@ -705,6 +727,7 @@ class CustomCalendarPicker extends StatefulWidget {
     required this.controller,
     required this.anchorKey,
     required this.child,
+    required this.onDateTimeChanged,
   });
 
   final bool showTime;
@@ -712,6 +735,7 @@ class CustomCalendarPicker extends StatefulWidget {
   final Widget child;
   final OverlayPortalController controller;
   final GlobalKey anchorKey;
+  final Function(DateTime?) onDateTimeChanged; 
 
 
 
@@ -721,15 +745,18 @@ class CustomCalendarPicker extends StatefulWidget {
 
 class _CustomCalendarPickerState extends State<CustomCalendarPicker> {
 
-  //TODO: need to send back dates that got picked.
+  final now = DateTime.now();
+  late DateTime? selectedDate;
 
-  Completer? completer  = Completer<DateTime?>();
-    
+  @override
+  void initState() {
+    super.initState();
+    selectedDate = widget.hasDate ?? now;
+  }
+ 
   @override
   Widget build(BuildContext context) {
 
-    final now = DateTime.now();
-    DateTime? selectedDate = widget.hasDate ?? now;
 
     //! why is this running twice?
     print("hello calendar show please");
@@ -745,8 +772,6 @@ class _CustomCalendarPickerState extends State<CustomCalendarPicker> {
 
         // e.g. position the calendar directly below the anchor widget
         final calendarOffset = Offset(offset.dx, offset.dy + size.height);
-
-        print("builder?");
 
         return Stack(
           children: [
@@ -778,13 +803,27 @@ class _CustomCalendarPickerState extends State<CustomCalendarPicker> {
                         lastDate: DateTime(2030),
                         onDateChanged: (date) {
                           
-                          selectedDate = date;
+                          setState(()  => selectedDate = date);
                           
                         },
                       ),
                       //! Doesnt layer itself ontop of the calendarpicker, why?
                       TimePicker(
                         dateTime: widget.hasDate,
+                        onTimeChanged: (time) {
+                          
+                          setState(() {
+                            selectedDate = DateTime(
+                              selectedDate?.year ?? now.year,
+                              selectedDate?.month ?? now.month,
+                              selectedDate?.day ?? now.day,
+                              time.hour,
+                              time.minute,
+
+                            );
+                          });
+                        },
+
                       ),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.end,
@@ -793,16 +832,15 @@ class _CustomCalendarPickerState extends State<CustomCalendarPicker> {
                             onPressed: () {
                         
                               widget.controller.hide();
-                              completer!.complete(null);
                               
                             },
                             child: Text("Cancel")
                           ),
                           TextButton(
-                            onPressed: () {
+                            onPressed: () async {
                         
                               widget.controller.hide();
-                              completer!.complete(selectedDate);
+                              widget.onDateTimeChanged.call(selectedDate);
                           
                             },
                             child: Text("Save")
@@ -823,14 +861,16 @@ class _CustomCalendarPickerState extends State<CustomCalendarPicker> {
 }
 
 
-
+// MARK: Timepicker
 class TimePicker extends StatefulWidget {
   const TimePicker({
     super.key,
     this.dateTime,
+    required this.onTimeChanged
   });
 
   final DateTime? dateTime;
+  final void Function(DateTime) onTimeChanged;
 
   @override
   State<TimePicker> createState() => _TimePickerState();
@@ -1028,6 +1068,13 @@ class _TimePickerState extends State<TimePicker> {
                   setState(() {
                     currentHour = hourSelected ?? currentHour;
                     currentMinute = minuteSelected ?? currentMinute;
+                    widget.onTimeChanged.call(DateTime(
+                      widget.dateTime?.year ?? now.year,
+                      widget.dateTime?.month ?? now.month,
+                      widget.dateTime?.day ?? now.day,
+                      currentHour,
+                      currentMinute,
+                    ));
                   });
                 },
                 child: Icon(Icons.check)
@@ -1041,7 +1088,6 @@ class _TimePickerState extends State<TimePicker> {
                   ),
                 ),
                 onPressed: () {
-                  // callback function to return the selected minute and hour
                   menuTimeController.close();
                 },
                 child: Icon(Icons.close)
