@@ -356,6 +356,7 @@ class _TaskInfoState extends State<TaskInfo> {
                         return CustomCalendarPicker(
                           controller: _calendarController,
                           anchorKey: _anchorKey,
+                          hasDate: parentTask.reminder,
                           onDateTimeChanged: (value) async {
                             await db.updateTask(
                               parentTask.id,
@@ -390,10 +391,10 @@ class _TaskInfoState extends State<TaskInfo> {
                           tileOnPressed: () {
 
                             // Adds 3 hours to current itme
-                            final today = DateTime.now();
-                            final laterTodayAtN = today.add(Duration(hours: 3));
+                            final DateTime today = DateTime.now();
+                            final DateTime laterTodayAtN = today.add(Duration(hours: 3));
 
-                            return laterTodayAtN;
+                            //TODO: update db with new value
                             
                           },
                         ),
@@ -451,32 +452,9 @@ class _TaskInfoState extends State<TaskInfo> {
                           currentTask: parentTask,
                           tileOnPressed: () async {
                         
-                            // DateTime? selectedDate = await _openCalendar();
                             _reminderMenuController.close();
                             _calendarController.show();
                         
-                            // print(selectedDate);
-                        
-                            // return selectedDate;
-                        
-                        
-                            // TODO: close the first menuanchor and then show anthoer one with dates/calendar
-                            // and in a different tab time
-                        
-                            // Need position details, like in gesturedetector. Used a globalkey on the menuanchor to get 
-                            // the position with currentcontext - renderbox
-                            // To do what? To position the new "popup",
-                            // still dont know how to do this. Like a switch to new one.. but HOW?
-                            // 
-                        
-                        
-                            // How to do this?
-                              // children:
-                                // current month + button to go back or forward in the months
-                                // tables of columns and rows with dates
-                                // time - able to select hh and mm separately
-                                // button to cancel and save changes
-                            
                           },
                         ),
                       ],
@@ -539,7 +517,7 @@ class CustomTileTaskInfo extends StatelessWidget {
   final bool tileOnPressedStayEnabledAfter;
   
   final Function()? tileOnPressed;
-  final Function()? buttonOnPressed;
+  final Function()? buttonOnPressed; //! what is this for?
 
   final bool? addedToMyDay;
   final DateTime? reminder;
@@ -572,38 +550,32 @@ class CustomTileTaskInfo extends StatelessWidget {
             hoverColor: Colors.grey.shade700,
             splashColor: Colors.transparent,
             tileColor: Colors.grey.shade800.withValues(alpha: 0.2),
-            onTap: tileOnPressedStayEnabledAfter ? () async {
+            // onTap: tileOnPressedStayEnabledAfter ? () async {
               
-              //! need the value from the dialog that got selected.
+            //   //! need the value from the dialog that got selected.
               
-              if (tileOnPressed == null) return;
+            //   if (tileOnPressed == null) return;
 
-              dynamic returnValue;
-              DateTime? currentDate;
-              String? noteString;
+            //   dynamic returnValue;
+            //   DateTime? currentDate;
+            //   String? noteString;
 
-              returnValue = await tileOnPressed!.call();
+            //   returnValue = await tileOnPressed!.call();
 
-              print("helo: $returnValue");
+            //   print("helo: $returnValue");
 
-              // DateTime - String
+            //   db.updateTask(
+            //     currentTask.id,
+            //     addedToMyDay: addedToMyDay != null ? Value.absent() : Value(true),
+            //     reminder: reminder != null ? Value.absent() : Value(currentDate),
+            //     // dueDate: dueDate != null ? Value.absent() : Value(currentDate),
+            //     // repeat: repeat != null ? Value.absent() : Value(),
+            //     // notes: notes != null ? Value.absent() : Value(),
+            //   );
 
-              // print("from customTile - date: $currentDate");
-              // print("from customTile - notes: $noteString");
-
-              // print("$addedToMyDay");
-
-              db.updateTask(
-                currentTask.id,
-                addedToMyDay: addedToMyDay != null ? Value.absent() : Value(true),
-                reminder: reminder != null ? Value.absent() : Value(currentDate),
-                // dueDate: dueDate != null ? Value.absent() : Value(currentDate),
-                // repeat: repeat != null ? Value.absent() : Value(),
-                // notes: notes != null ? Value.absent() : Value(),
-              );
-
-            } 
-            : null
+            // } 
+            // : null
+            onTap: tileOnPressedStayEnabledAfter ? tileOnPressed : null,
           ),
         ),
         Visibility(
@@ -798,7 +770,7 @@ class _CustomCalendarPickerState extends State<CustomCalendarPicker> {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       CalendarDatePicker(
-                        initialDate: DateTime.now(),
+                        initialDate: widget.hasDate ?? DateTime.now(),
                         firstDate: DateTime(2020),
                         lastDate: DateTime(2030),
                         onDateChanged: (date) {
