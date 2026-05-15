@@ -463,9 +463,12 @@ class _TaskInfoState extends State<TaskInfo> {
                         return CustomCalendarPicker(
                           controller: _calendarController,
                           anchorKey: _dueDateAnchorKey,
+<<<<<<< Updated upstream
                           onDateTimeChanged: (value) {
                             
                           },
+=======
+>>>>>>> Stashed changes
                           child: CustomTileTaskInfo(
                             currentTask: parentTask,
                             dueDate: parentTask.dueDate,
