@@ -895,6 +895,7 @@ class _ReorderableTaskListState extends State<ReorderableTaskList> {
               return ReorderableDragStartListener(
                 index: index,
                 key: ValueKey(task.id),
+                //TODO: fix white background/+color when dragging
                 child: Padding(
                   padding: const EdgeInsets.fromLTRB(0, 0, 0, 8.0), // Separator for now.
                   child: TaskListItem(

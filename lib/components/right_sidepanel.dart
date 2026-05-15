@@ -93,7 +93,9 @@ class _TaskInfoState extends State<TaskInfo> {
 
   final OverlayPortalController _calendarController = OverlayPortalController();
 
-  final _anchorKey = GlobalKey();
+  final _reminderAnchorKey = GlobalKey();
+  final _dueDateAnchorKey = GlobalKey();
+  final _repeatAnchorKey = GlobalKey();
 
   final bool isChecked = false;
 
@@ -213,13 +215,6 @@ class _TaskInfoState extends State<TaskInfo> {
                 type: MaterialType.transparency,
                 child: Column(
                   children: [
-                    //TODO:
-                        //// subtasks
-                        // button for adding to 'My Day' list
-                        // reminder
-                        // Due date
-                        // repeat rule
-                        // notes
             
                     //MARK: MAIN TASK NAME
                     ListTile(
@@ -346,7 +341,7 @@ class _TaskInfoState extends State<TaskInfo> {
                     // MARK: REMINDER
                     MenuAnchor(
                       controller: _reminderMenuController,
-                      key: _anchorKey,
+                      key: _reminderAnchorKey,
                       consumeOutsideTap: true, // similar to "Barrier" in showdialog, i think
                       style: MenuStyle(
                         backgroundColor: WidgetStateProperty.fromMap({WidgetState.any: Colors.grey.shade800}),
@@ -355,7 +350,7 @@ class _TaskInfoState extends State<TaskInfo> {
 
                         return CustomCalendarPicker(
                           controller: _calendarController,
-                          anchorKey: _anchorKey,
+                          anchorKey: _reminderAnchorKey,
                           hasDate: parentTask.reminder,
                           onDateTimeChanged: (value) async {
                             await db.updateTask(
@@ -461,10 +456,35 @@ class _TaskInfoState extends State<TaskInfo> {
                     ),
 
                     // MARK: DUE DATE
-                    ListTile(
-                      title:Text("Due Date"),
-                      tileColor: Colors.grey.shade800.withValues(alpha: 0.2),
+                    MenuAnchor(
+                      controller: _dueDateMenuController,
+                      key: _dueDateAnchorKey,
+                      builder: (context, controller, child) {
+                        return CustomCalendarPicker(
+                          controller: _calendarController,
+                          anchorKey: _dueDateAnchorKey,
+                          onDateTimeChanged: (value) {
+                            
+                          },
+                          child: CustomTileTaskInfo(
+                            currentTask: parentTask,
+                            dueDate: parentTask.dueDate,
+                            tileOnPressed: () {
+                              _calendarController.show();
+                            },
+                          ),
+                        );
+                      },
+                      menuChildren: [
+                        CustomTileTaskInfo(
+                          currentTask: parentTask,
+                        ),
+                      ],
                     ),
+                    // ListTile(
+                    //   title:Text("Due Date"),
+                    //   tileColor: Colors.grey.shade800.withValues(alpha: 0.2),
+                    // ),
 
                     // MARK: REPEAT
                     ListTile(
