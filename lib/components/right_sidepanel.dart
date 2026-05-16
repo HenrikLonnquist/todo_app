@@ -91,7 +91,9 @@ class _TaskInfoState extends State<TaskInfo> {
 
   final MenuController _repeatMenuController = MenuController();
 
-  final OverlayPortalController _calendarController = OverlayPortalController();
+  final OverlayPortalController _reminderCalendarController = OverlayPortalController();
+  final OverlayPortalController _dueDateCalendarController = OverlayPortalController();
+  final OverlayPortalController _repeatCalendarController = OverlayPortalController();
 
   final _reminderAnchorKey = GlobalKey();
   final _dueDateAnchorKey = GlobalKey();
@@ -116,6 +118,8 @@ class _TaskInfoState extends State<TaskInfo> {
     },
   );
 
+  
+
 
   @override
   Widget build(BuildContext context) {
@@ -123,6 +127,8 @@ class _TaskInfoState extends State<TaskInfo> {
     final db = context.read<AppDB>();
     final taskID = context.watch<NavController>().currentTaskID;
     final isPanelOpen = context.watch<NavController>().showTaskPanel;
+
+    final now = DateTime.now();
 
 
     return StreamBuilder(
@@ -330,7 +336,7 @@ class _TaskInfoState extends State<TaskInfo> {
 
                     // MARK: Add To My Day
                     CustomTileTaskInfo(
-                      title: Text((parentTask.addedToMyDay ?? false) ? "Added in My Day" : "Add to My Day"),
+                      title: (parentTask.addedToMyDay ?? false) ? "Added in My Day" : "Add to My Day",
                       currentTask: parentTask,
                       tileOnPressedStayEnabledAfter: parentTask.addedToMyDay == true ? false : true,
                       addedToMyDay: parentTask.addedToMyDay,
@@ -349,7 +355,7 @@ class _TaskInfoState extends State<TaskInfo> {
                       builder: (context, controller, child) {
 
                         return CustomCalendarPicker(
-                          controller: _calendarController,
+                          controller: _reminderCalendarController,
                           anchorKey: _reminderAnchorKey,
                           hasDate: parentTask.reminder,
                           onDateTimeChanged: (value) async {
@@ -358,13 +364,13 @@ class _TaskInfoState extends State<TaskInfo> {
                               reminder: Value(value),
                             );
                           },
+                          showTime: true,
                           child: CustomTileTaskInfo(
-                            title: Text( parentTask.reminder != null 
-                            // ? "${DateFormat("d, yMd").format(parentTask.reminder!)}" 
+                            title: parentTask.reminder != null 
                             ? "Remind me at ${DateFormat("Hm").format(parentTask.reminder!)}"
-                            :  "Remind me"),
+                            :  "Remind me",
                             subTitle: parentTask.reminder != null
-                            ? Text(DateFormat("EEE, d MMM y").format(parentTask.reminder!))
+                            ? DateFormat("EEE, d MMM y").format(parentTask.reminder!)
                             : null,
                             currentTask: parentTask,
                             reminder: parentTask.reminder,
@@ -381,7 +387,7 @@ class _TaskInfoState extends State<TaskInfo> {
                         //TODO: make the text a little smaller, 2-5 smaller
                         CustomTileTaskInfo(
                           //TODO: increment time.now with +3
-                          title: Text("Later today at N:00"),
+                          title: "Later today at N:00",
                           currentTask: parentTask,
                           tileOnPressed: () {
 
@@ -394,7 +400,7 @@ class _TaskInfoState extends State<TaskInfo> {
                           },
                         ),
                         CustomTileTaskInfo(
-                          title: Text("Tomorrow - 9:00 "),
+                          title: "Tomorrow - 9:00 ",
                           currentTask: parentTask,
                           tileOnPressed: () {
 
@@ -407,7 +413,7 @@ class _TaskInfoState extends State<TaskInfo> {
                         ),
 
                         CustomTileTaskInfo(
-                          title: Text("Next Monday - 9am?"),
+                          title: "Next Monday - 9am?",
                           currentTask: parentTask,
                           tileOnPressed: () {
 
@@ -429,7 +435,7 @@ class _TaskInfoState extends State<TaskInfo> {
                         ),
 
                         CustomTileTaskInfo(
-                          title: Text("Next Week -- (same weekday)"),
+                          title: "Next Week -- (same weekday)",
                           currentTask: parentTask,
                           tileOnPressed: () {
 
@@ -443,12 +449,12 @@ class _TaskInfoState extends State<TaskInfo> {
                         ),
                         
                         CustomTileTaskInfo(
-                          title: Text("Choose"),
+                          title: "Choose",
                           currentTask: parentTask,
                           tileOnPressed: () async {
                         
                             _reminderMenuController.close();
-                            _calendarController.show();
+                            _reminderCalendarController.show();
                         
                           },
                         ),
@@ -459,21 +465,30 @@ class _TaskInfoState extends State<TaskInfo> {
                     MenuAnchor(
                       controller: _dueDateMenuController,
                       key: _dueDateAnchorKey,
+                      consumeOutsideTap: true,
+                      style: MenuStyle(
+                        backgroundColor: WidgetStateProperty.fromMap({WidgetState.any: Colors.grey.shade800}),
+                      ),
                       builder: (context, controller, child) {
                         return CustomCalendarPicker(
-                          controller: _calendarController,
+                          controller: _dueDateCalendarController,
                           anchorKey: _dueDateAnchorKey,
-<<<<<<< Updated upstream
-                          onDateTimeChanged: (value) {
-                            
+                          hasDate: parentTask.dueDate,
+                          showTime: false,
+                          onDateTimeChanged: (value) async {
+                            await db.updateTask(
+                              parentTask.id,
+                              dueDate: Value(value),
+                            );
                           },
-=======
->>>>>>> Stashed changes
                           child: CustomTileTaskInfo(
                             currentTask: parentTask,
                             dueDate: parentTask.dueDate,
+                            title: parentTask.dueDate != null 
+                            ? "Due ${DateFormat("EEE, d MMM y").format(parentTask.dueDate!)}"
+                            : "Add due date",
                             tileOnPressed: () {
-                              _calendarController.show();
+                              _dueDateMenuController.isOpen ? _dueDateMenuController.close() : _dueDateMenuController.open();
                             },
                           ),
                         );
@@ -481,6 +496,44 @@ class _TaskInfoState extends State<TaskInfo> {
                       menuChildren: [
                         CustomTileTaskInfo(
                           currentTask: parentTask,
+                          title: "Due Today - ${DateFormat("EEE").format(now)}",
+                          tileOnPressed: () async {
+                            _dueDateMenuController.close();
+                            await db.updateTask(
+                              parentTask.id,
+                              dueDate: Value(now),
+                            );
+                          },
+                        ),
+                        CustomTileTaskInfo(
+                          currentTask: parentTask,
+                          title: "Due Tomorrow - ${DateFormat("EEE").format(now.add(Duration(days: 1)))}",
+                          tileOnPressed: () async {
+                            _dueDateMenuController.close();
+                            await db.updateTask(
+                              parentTask.id,
+                              dueDate: Value(now.add(Duration(days: 1))),
+                            );
+                          },
+                        ),
+                        CustomTileTaskInfo(
+                          currentTask: parentTask,
+                          title: "Due Next Week - ${DateFormat("EEE").format(now.add(Duration(days: 7)))}",
+                          tileOnPressed: () async {
+                            _dueDateMenuController.close();
+                            await db.updateTask(
+                              parentTask.id,
+                              dueDate: Value(now.add(Duration(days: 7))),
+                            );
+                          },
+                        ),
+                        //* Updating db happens in the menu anchor builder
+                        CustomTileTaskInfo(
+                          currentTask: parentTask,
+                          title: "Choose",
+                          tileOnPressed: () {
+                            _dueDateCalendarController.show();
+                          },
                         ),
                       ],
                     ),
@@ -533,8 +586,8 @@ class CustomTileTaskInfo extends StatelessWidget {
     this.notes,
   });
   
-  final Text? title;
-  final Text? subTitle;
+  final String? title;
+  final String? subTitle;
   final Task currentTask;
 
   final bool tileOnPressedStayEnabledAfter;
@@ -564,40 +617,17 @@ class CustomTileTaskInfo extends StatelessWidget {
         //TODO: make it more "visible", something that highlights that its in my day
         Expanded(
           child: ListTile(
-            title: title,
-            subtitle: subTitle,
+            title: title != null ? Text(title!) : null,
+            subtitle: subTitle != null ? Text(subTitle!) :  null,
             subtitleTextStyle: TextStyle(
               fontSize: 10,
               color: Colors.white,
             ),
-            hoverColor: Colors.grey.shade700,
+            //TODO: change color to red if its past due
+            textColor: title != null ? const Color.fromARGB(255, 119, 178, 226) : Colors.white,
+            hoverColor: Colors.grey.shade700.withValues(alpha: 0.1),
             splashColor: Colors.transparent,
             tileColor: Colors.grey.shade800.withValues(alpha: 0.2),
-            // onTap: tileOnPressedStayEnabledAfter ? () async {
-              
-            //   //! need the value from the dialog that got selected.
-              
-            //   if (tileOnPressed == null) return;
-
-            //   dynamic returnValue;
-            //   DateTime? currentDate;
-            //   String? noteString;
-
-            //   returnValue = await tileOnPressed!.call();
-
-            //   print("helo: $returnValue");
-
-            //   db.updateTask(
-            //     currentTask.id,
-            //     addedToMyDay: addedToMyDay != null ? Value.absent() : Value(true),
-            //     reminder: reminder != null ? Value.absent() : Value(currentDate),
-            //     // dueDate: dueDate != null ? Value.absent() : Value(currentDate),
-            //     // repeat: repeat != null ? Value.absent() : Value(),
-            //     // notes: notes != null ? Value.absent() : Value(),
-            //   );
-
-            // } 
-            // : null
             onTap: tileOnPressedStayEnabledAfter ? tileOnPressed : null,
           ),
         ),
@@ -619,8 +649,8 @@ class CustomTileTaskInfo extends StatelessWidget {
               await db.updateTask(
                 currentTask.id,
                 addedToMyDay: addedToMyDay != null ? Value(null) : const Value.absent(),
-                // reminder: reminder != null ? Value(null) : const Value.absent(),
-                // dueDate: dueDate != null ? Value(null) : const Value.absent(),
+                reminder: reminder != null ? Value(null) : const Value.absent(),
+                dueDate: dueDate != null ? Value(null) : const Value.absent(),
                 // repeat: repeat != null ? Value(null) : const Value.absent(),
                 // notes: notes != null ? Value(null) : const Value.absent(),
 
@@ -748,7 +778,8 @@ class _CustomCalendarPickerState extends State<CustomCalendarPicker> {
     super.initState();
     selectedDate = widget.hasDate ?? now;
   }
- 
+
+
   @override
   Widget build(BuildContext context) {
 
@@ -767,6 +798,7 @@ class _CustomCalendarPickerState extends State<CustomCalendarPicker> {
 
         // e.g. position the calendar directly below the anchor widget
         final calendarOffset = Offset(offset.dx, offset.dy + size.height);
+
 
         return Stack(
           children: [
@@ -809,24 +841,25 @@ class _CustomCalendarPickerState extends State<CustomCalendarPicker> {
                           
                         },
                       ),
-                      TimePicker(
-                        dateTime: widget.hasDate,
-                        onTimeChanged: (time) {
-                          
-                          setState(() {
-                            //! explain
-                            selectedDate = DateTime(
-                              selectedDate?.year ?? widget.hasDate?.year ?? now.year,
-                              selectedDate?.month ?? widget.hasDate?.month ?? now.month,
-                              selectedDate?.day ?? widget.hasDate?.day ?? now.day,
-                              time.hour,
-                              time.minute,
+                      if (widget.showTime)
+                        TimePicker(
+                          dateTime: widget.hasDate,
+                          onTimeChanged: (time) {
+                            
+                            setState(() {
+                              //! explain
+                              selectedDate = DateTime(
+                                selectedDate?.year ?? widget.hasDate?.year ?? now.year,
+                                selectedDate?.month ?? widget.hasDate?.month ?? now.month,
+                                selectedDate?.day ?? widget.hasDate?.day ?? now.day,
+                                time.hour,
+                                time.minute,
 
-                            );
-                          });
-                        },
+                              );
+                            });
+                          },
 
-                      ),
+                        ),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.end,
                         children: [
