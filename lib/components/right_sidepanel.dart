@@ -316,13 +316,13 @@ class _TaskInfoState extends State<TaskInfo> {
                           color: Colors.white.withValues(alpha: 0.5), 
                           fontSize: 15
                           ),
-                        onChange: (subTitle) async {
+                        onChange: (subTaskTitle) async {
                           
                           // Adding a new sub task to database
                           await db.insertTask(
                             parentID: parentTask.id,
                             listID: parentTask.listsId!,
-                            title: subTitle,
+                            title: subTaskTitle,
                             position: 0,
                           );
                           
@@ -624,6 +624,7 @@ class CustomTileTaskInfo extends StatelessWidget {
               color: Colors.white,
             ),
             //TODO: change color to red if its past due
+            //TODO: make it an option to have the color change to blue. (Currently showing in menuchildren as well, dont want that.)
             textColor: title != null ? const Color.fromARGB(255, 119, 178, 226) : Colors.white,
             hoverColor: Colors.grey.shade700.withValues(alpha: 0.1),
             splashColor: Colors.transparent,
