@@ -6,6 +6,7 @@ import 'package:drift/drift.dart' hide Column;
 import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:todo_app/components/add_task_field.dart';
 import 'package:todo_app/components/right_sidepanel.dart';
@@ -1076,7 +1077,7 @@ class _TaskListItemState extends State<TaskListItem> {
                             ),
                           ),
 
-                          // Subtitles 
+                          // MARK: Subtitles 
                           Row(
                             //TODO: fix the gap between the subtitles.
                             spacing: 4.0,
@@ -1100,10 +1101,11 @@ class _TaskListItemState extends State<TaskListItem> {
                               //TODO: an calendar icon as well - for what?
                               if (widget.task.dueDate != null)
                                 Text(
-                                  "${widget.task.dueDate}",
+                                  DateFormat("EEE, d MMM").format(widget.task.dueDate!),
                                   style: TextStyle(
                                     fontSize: 12,
-                                    color: Colors.white,
+                                    fontWeight: FontWeight.bold,
+                                    color: DateTime.now().difference(widget.task.dueDate!).inDays > 1 ? Colors.red : Colors.white,
                                   ),
                                 ),
                               
