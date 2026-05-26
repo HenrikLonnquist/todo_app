@@ -624,8 +624,8 @@ class CustomTileTaskInfo extends StatelessWidget {
               color: Colors.white,
             ),
             //TODO: change color to red if its past due
-            //TODO: make it an option to have the color change to blue. (Currently showing in menuchildren as well, dont want that.)
-            textColor: title != null ? const Color.fromARGB(255, 119, 178, 226) : Colors.white,
+            //* using "enableTrailingButton" variable to determine if any of the options that is using this is non-null/has value.
+            textColor: enableTrailingButton ? const Color.fromARGB(255, 119, 178, 226) : Colors.white,
             hoverColor: Colors.grey.shade700.withValues(alpha: 0.1),
             splashColor: Colors.transparent,
             tileColor: Colors.grey.shade800.withValues(alpha: 0.2),
@@ -808,7 +808,7 @@ class _CustomCalendarPickerState extends State<CustomCalendarPicker> {
                 behavior: HitTestBehavior.translucent,
                 onTap: () {
                   widget.controller.hide();
-                  //! causes error on tap outisde.
+                  //! causes error on tap outisde. do I even need this?
                   // completer!.complete(null);
                 },
               ),
