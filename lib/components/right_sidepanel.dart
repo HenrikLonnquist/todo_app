@@ -543,10 +543,110 @@ class _TaskInfoState extends State<TaskInfo> {
                     // ),
 
                     // MARK: REPEAT
-                    ListTile(
-                      title:Text("Repeat"),
-                      tileColor: Colors.grey.shade800.withValues(alpha: 0.2),
-                    ),
+                    MenuAnchor(
+                      controller: _repeatMenuController,
+                      key: _repeatAnchorKey,
+                      consumeOutsideTap: true,
+                      style: MenuStyle(
+                        backgroundColor: WidgetStateProperty.fromMap({WidgetState.any: Colors.grey.shade800}),
+                      ),
+                      builder: (context, controller, child) {
+                        //TODO: create an custom class for selecting custom repeat date
+                        return CustomTileTaskInfo(
+                          currentTask: parentTask,
+                          repeat: parentTask.repeat,
+                          title: parentTask.repeat ?? "Repeat",
+                          tileOnPressed: () {
+                            _repeatMenuController.isOpen ? _repeatMenuController.close() : _repeatMenuController.open();
+                          },
+                        );
+                      },
+                      menuChildren: [
+                        CustomTileTaskInfo(
+                          currentTask: parentTask,
+                          title: "Daily",
+                          tileOnPressed: () async {
+
+                            _repeatMenuController.close();
+                            
+                            //! this should update duedate as well, which we will use to add on.
+                            //! Need to create an new task with an new duedate if this is completed.
+                            await db.updateTask(
+                              parentTask.id,
+                              repeat: Value("daily"),
+                              dueDate: Value(DateTime.now()),
+                            );
+                          },
+                        ),
+                        CustomTileTaskInfo(
+                          currentTask: parentTask,
+                          title: "Weekdays",
+                          tileOnPressed: () async {
+
+                            _repeatMenuController.close();
+                            await db.updateTask(
+                              parentTask.id,
+                              repeat: Value("weekdays"),
+                              dueDate: Value(DateTime.now()),
+                            );
+                          },
+                        ),
+                        CustomTileTaskInfo(
+                          currentTask: parentTask,
+                          title: "Weekly",
+                          tileOnPressed: () async {
+
+                            _repeatMenuController.close();
+                            await db.updateTask(
+                              parentTask.id,
+                              repeat: Value("weekly"),
+                              dueDate: Value(DateTime.now()),
+                            );
+                          },
+                        ),
+                        CustomTileTaskInfo(
+                          currentTask: parentTask,
+                          title: "Monthly",
+                          tileOnPressed: () async {
+
+                            _repeatMenuController.close();
+                            await db.updateTask(
+                              parentTask.id,
+                              repeat: Value("monthly"),
+                              dueDate: Value(DateTime.now()),
+                            );
+                          },
+                        ),
+                        CustomTileTaskInfo(
+                          currentTask: parentTask,
+                          title: "Yearly",
+                          tileOnPressed: () async {
+
+                            _repeatMenuController.close();
+                            await db.updateTask(
+                              parentTask.id,
+                              repeat: Value("yearly"),
+                              dueDate: Value(DateTime.now()),
+                            );
+                          },
+                        ),
+                        Divider(height: 0, thickness: 1,),
+                        CustomTileTaskInfo(
+                          currentTask: parentTask,
+                          title: "Custom",
+                          tileOnPressed: () async {
+
+                            _repeatMenuController.close();
+
+                            await db.updateTask(
+                              parentTask.id,
+                              repeat: Value(""), //! this might actually need to be an datetime
+                              dueDate: Value(DateTime.now()),
+                            );
+                          },
+                        ),
+                      ],
+                    ),  
                     SizedBox(height: 10,),
 
                     // MARK: NOTES
@@ -606,6 +706,7 @@ class CustomTileTaskInfo extends StatelessWidget {
   Widget build(BuildContext context) {
     final db = context.read<AppDB>();
 
+    //TODO: rename variable to something more fitting, because its being used not only for trailingbutton.
     final bool enableTrailingButton = (addedToMyDay != null && addedToMyDay == true) ||
       reminder != null || 
       dueDate != null ||
@@ -624,7 +725,7 @@ class CustomTileTaskInfo extends StatelessWidget {
               color: Colors.white,
             ),
             //TODO: change color to red if its past due
-            //* using "enableTrailingButton" variable to determine if any of the options that is using this is non-null/has value.
+            //* using "enableTrailingButton" variable to also determine if any of the options that is using this is non-null/has value.
             textColor: enableTrailingButton ? const Color.fromARGB(255, 119, 178, 226) : Colors.white,
             hoverColor: Colors.grey.shade700.withValues(alpha: 0.1),
             splashColor: Colors.transparent,
@@ -652,7 +753,7 @@ class CustomTileTaskInfo extends StatelessWidget {
                 addedToMyDay: addedToMyDay != null ? Value(null) : const Value.absent(),
                 reminder: reminder != null ? Value(null) : const Value.absent(),
                 dueDate: dueDate != null ? Value(null) : const Value.absent(),
-                // repeat: repeat != null ? Value(null) : const Value.absent(),
+                repeat: repeat != null ? Value(null) : const Value.absent(),
                 // notes: notes != null ? Value(null) : const Value.absent(),
 
               );
