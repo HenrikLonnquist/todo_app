@@ -1005,6 +1005,16 @@ class _TaskListItemState extends State<TaskListItem> {
   List<TodoList> copyToList = [];
   List<TodoList> moveToList = [];
 
+  Container circleDivider = Container(
+    margin: EdgeInsets.symmetric(horizontal: 4),
+    height: 3,
+    width: 3,
+    decoration: BoxDecoration(
+      color: Colors.white,
+      shape: BoxShape.circle,
+    ),
+  );
+
   @override
   Widget build(BuildContext context) {
 
@@ -1091,32 +1101,54 @@ class _TaskListItemState extends State<TaskListItem> {
                                   color: Colors.white,
                                 ),
                               ),
-                              
-                              //TODO: Need an more inituitive way to implement the divider, maybe I should use an indexbuilder.
-                              //* maybe check whats availble and then draw the layout.
-                              //Divider
-                              Icon(Icons.circle_rounded, size: 4, color: Colors.white),
 
                               // Subtitle - Due Date 
                               //TODO: an calendar icon as well - for what?
                               if (widget.task.dueDate != null)
-                                Text(
-                                  DateFormat("EEE, d MMM").format(widget.task.dueDate!),
-                                  style: TextStyle(
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.w500,
-                                    color: DateTime.now().difference(widget.task.dueDate!).inDays > 1 ? Colors.red : Colors.white,
-                                  ),
+                                Row(
+                                  children: [
+                                    circleDivider,
+                                    Icon(
+                                      Icons.calendar_month_outlined,
+                                      size: 16,
+                                     color: DateTime.now().difference(widget.task.dueDate!).inDays > 1 
+                                        ? Colors.red 
+                                        : const Color.fromARGB(255, 119, 178, 226),
+                                    ),
+                                    SizedBox(width: 1),
+                                    Text(
+                                      DateFormat("EEE, d MMM").format(widget.task.dueDate!),
+                                      style: TextStyle(
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.w500,
+                                        color: DateTime.now().difference(widget.task.dueDate!).inDays > 1 
+                                        ? Colors.red 
+                                        : const Color.fromARGB(255, 119, 178, 226),
+                                      ),
+                                    ),
+                                  ]
                                 ),
                               
                               // Subtitle - Repeat
                               if (widget.task.repeat != null)
-                                Icon(Icons.repeat_outlined, size: 16, color: Colors.white,),
+                                Row(
+                                  children: [
+                                    circleDivider,
+                                    Icon(
+                                      Icons.repeat_outlined, 
+                                      size: 16, 
+                                      color: DateTime.now().difference(widget.task.dueDate!).inDays > 1 
+                                      ? Colors.red 
+                                      : const Color.fromARGB(255, 119, 178, 226),
+                                    ),
+                                  ],
+                                ),
                               
                               // Subtitle - Reminder 
                               if (widget.task.reminder != null)
                                 Row(
                                   children: [
+                                    circleDivider,
                                     Icon(
                                       Icons.notifications_none_outlined, 
                                       size: 16, 
@@ -1140,7 +1172,16 @@ class _TaskListItemState extends State<TaskListItem> {
 
                               // Subtitle - Notes 
                               if (widget.task.notes != null)
-                                Icon(Icons.note_outlined, size: 16, color: Colors.white),
+                                Row(
+                                  children: [
+                                    circleDivider,
+                                    Icon(
+                                      Icons.note_outlined, 
+                                      size: 16, 
+                                      color: Colors.white
+                                    ),
+                                  ],
+                                ),
 
                               // Subtitle - Tags 
                             ],
