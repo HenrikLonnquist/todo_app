@@ -1050,7 +1050,23 @@ class _TaskListItemState extends State<TaskListItem> {
                       splashRadius: 0,
                       focusColor: Colors.transparent,
                       onChanged: (value) async {
+
+                        //* Does it matter if the task is gonna completed or undo complete?
+                        //TODO: check if the task should be repeated. Then if panel is open, goto that.
+                        widget.task.repeat; // What value is this?
+
+                        //TODO: need to add different options for repeat in db. Only has daily, weekly and monthly.
+                        //* Maybe ask Claude how I should do this.
                         
+                        // switch cases?
+                          // daily
+                          // weekdays
+                          // weekly
+                          // monthly
+                          // yearly
+                          // custom
+                        
+                        //* do this if .repeat is null
                         await widget.db.updateTask(
                           widget.task.id, 
                           isDone: Value(value!),
@@ -1126,23 +1142,19 @@ class _TaskListItemState extends State<TaskListItem> {
                                         : const Color.fromARGB(255, 119, 178, 226),
                                       ),
                                     ),
+                                    SizedBox(width: 1),
+                                    // Subtitle - Repeat
+                                    if (widget.task.repeat != null)
+                                      Icon(
+                                        Icons.repeat_outlined, 
+                                        size: 16, 
+                                        color: DateTime.now().difference(widget.task.dueDate!).inDays > 1 
+                                        ? Colors.red 
+                                        : const Color.fromARGB(255, 119, 178, 226),
+                                      ),
                                   ]
                                 ),
                               
-                              // Subtitle - Repeat
-                              if (widget.task.repeat != null)
-                                Row(
-                                  children: [
-                                    circleDivider,
-                                    Icon(
-                                      Icons.repeat_outlined, 
-                                      size: 16, 
-                                      color: DateTime.now().difference(widget.task.dueDate!).inDays > 1 
-                                      ? Colors.red 
-                                      : const Color.fromARGB(255, 119, 178, 226),
-                                    ),
-                                  ],
-                                ),
                               
                               // Subtitle - Reminder 
                               if (widget.task.reminder != null)
