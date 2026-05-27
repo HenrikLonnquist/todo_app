@@ -1028,8 +1028,8 @@ class _TaskListItemState extends State<TaskListItem> {
               });
             },
             child: Container(
-              color: widget.isSelected && widget.taskPanelState ? Colors.grey.shade700 : 
-              hovered ? Colors.grey.shade800 : Colors.grey.shade900,
+              color: widget.isSelected && widget.taskPanelState ? Colors.grey.shade700.withAlpha(150) : 
+              hovered ? Colors.grey.shade800.withAlpha(150) : Colors.grey.shade900.withAlpha(200),
               child: Row(
                 children: [
                   Padding(
@@ -1104,7 +1104,7 @@ class _TaskListItemState extends State<TaskListItem> {
                                   DateFormat("EEE, d MMM").format(widget.task.dueDate!),
                                   style: TextStyle(
                                     fontSize: 12,
-                                    fontWeight: FontWeight.bold,
+                                    fontWeight: FontWeight.w500,
                                     color: DateTime.now().difference(widget.task.dueDate!).inDays > 1 ? Colors.red : Colors.white,
                                   ),
                                 ),
@@ -1115,7 +1115,28 @@ class _TaskListItemState extends State<TaskListItem> {
                               
                               // Subtitle - Reminder 
                               if (widget.task.reminder != null)
-                                Icon(Icons.notifications_none_outlined, size: 16, color: Colors.white),
+                                Row(
+                                  children: [
+                                    Icon(
+                                      Icons.notifications_none_outlined, 
+                                      size: 16, 
+                                      color: DateTime.now().difference(widget.task.reminder!).inSeconds > 1 
+                                      ? Colors.red
+                                      : const Color.fromARGB(255, 119, 178, 226) 
+                                    ),
+                                    SizedBox(width: 1),
+                                    Text(
+                                      DateFormat("EEE, d MMM").format(widget.task.reminder!),
+                                      style: TextStyle(
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.w500,
+                                        color: DateTime.now().difference(widget.task.reminder!).inSeconds > 1 
+                                        ? Colors.red
+                                        : const Color.fromARGB(255, 119, 178, 226) ,
+                                      ),
+                                    ),
+                                  ],
+                                ),
 
                               // Subtitle - Notes 
                               if (widget.task.notes != null)
