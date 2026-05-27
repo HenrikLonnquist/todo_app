@@ -1111,15 +1111,20 @@ class _TaskListItemState extends State<TaskListItem> {
                               
                               // Nav List Name
                               Text(
+                                //TODO: Change to list name.
                                 "${widget.task.listsId}",
                                 style: TextStyle(
                                   fontSize: 12,
                                   color: Colors.white,
                                 ),
                               ),
+                              
+                              //TODO: Need an more inituitive way to implement the divider, maybe I should use an indexbuilder.
+                              //* or how I did it with reorderablelistview builder separator < or how they did it.
+                              //* maybe check whats availble and then draw the layout.
+                              
 
                               // Subtitle - Due Date 
-                              //TODO: an calendar icon as well - for what?
                               if (widget.task.dueDate != null)
                                 Row(
                                   children: [

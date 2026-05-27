@@ -329,8 +329,6 @@ class _TaskInfoState extends State<TaskInfo> {
                         },
                         // inputValue: subTask!.isEmpty ? "Add step" : "Next Step"
                       ),
-                      // title: inputNewSubTask ? taskTitle :
-                      //   subTask!.isEmpty ? Text("Add step", style: subTaskTextStyle) : Text("Next Step", style: subTaskTextStyle,), //! Titlefield - take from above in listview
                     ),
                     SizedBox(height: 10),
 
