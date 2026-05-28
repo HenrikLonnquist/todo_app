@@ -1059,7 +1059,7 @@ class _TaskListItemState extends State<TaskListItem> {
                         //TODO: need to add different options for repeat in db. Only has daily, weekly and monthly.
                         //* Maybe ask Claude how I should do this.
                         
-                        
+                        //TODO: Add this to task info panel as well afterwards its finished < doesnt work when completing the task there.
                         if (widget.task.repeat != null && (widget.task.isDone != null && widget.task.isDone == false) ) {
                           switch (widget.task.repeat) {
                             case "daily":
@@ -1167,7 +1167,7 @@ class _TaskListItemState extends State<TaskListItem> {
                                     Icon(
                                       Icons.calendar_month_outlined,
                                       size: 16,
-                                     color: DateTime.now().difference(widget.task.dueDate!).inDays > 1 
+                                     color: DateTime.now().difference(widget.task.dueDate!).inDays >= 1 
                                         ? Colors.red 
                                         : const Color.fromARGB(255, 119, 178, 226),
                                     ),
@@ -1177,7 +1177,7 @@ class _TaskListItemState extends State<TaskListItem> {
                                       style: TextStyle(
                                         fontSize: 12,
                                         fontWeight: FontWeight.w500,
-                                        color: DateTime.now().difference(widget.task.dueDate!).inDays > 1 
+                                        color: DateTime.now().difference(widget.task.dueDate!).inDays >= 1 
                                         ? Colors.red 
                                         : const Color.fromARGB(255, 119, 178, 226),
                                       ),
@@ -1188,7 +1188,7 @@ class _TaskListItemState extends State<TaskListItem> {
                                       Icon(
                                         Icons.repeat_outlined, 
                                         size: 16, 
-                                        color: DateTime.now().difference(widget.task.dueDate!).inDays > 1 
+                                        color: DateTime.now().difference(widget.task.dueDate!).inDays >= 1 
                                         ? Colors.red 
                                         : const Color.fromARGB(255, 119, 178, 226),
                                       ),
