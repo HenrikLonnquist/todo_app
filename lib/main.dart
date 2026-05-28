@@ -1051,26 +1051,61 @@ class _TaskListItemState extends State<TaskListItem> {
                       focusColor: Colors.transparent,
                       onChanged: (value) async {
 
-                        //* Does it matter if the task is gonna completed or undo complete?
+                        final db = widget.db;
+
+                        //* Does it matter if the task is gonna be completed or undo completed task?
                         //TODO: check if the task should be repeated. Then if panel is open, goto that.
-                        widget.task.repeat; // What value is this?
 
                         //TODO: need to add different options for repeat in db. Only has daily, weekly and monthly.
                         //* Maybe ask Claude how I should do this.
                         
-                        // switch cases?
-                          // daily
-                          // weekdays
-                          // weekly
-                          // monthly
-                          // yearly
-                          // custom
                         
-                        //* do this if .repeat is null
-                        await widget.db.updateTask(
-                          widget.task.id, 
-                          isDone: Value(value!),
-                        );
+                        if (widget.task.repeat != null && (widget.task.isDone != null && widget.task.isDone == false) ) {
+                          switch (widget.task.repeat) {
+                            case "daily":
+                              
+                              //TODO: add an addtional paramter for the copytasktolist function, one for duedate.
+                              await db.transaction(() async {
+
+                                // copy repeated task
+                                await db.copyTaskToList(
+                                  taskID: widget.task.id,
+                                  repeatDueDate: widget.task.dueDate!.add(Duration(days: 1)),
+                                );
+
+                                // complete/check old task
+                                await db.updateTask(
+                                  widget.task.id,
+                                  isDone: Value(true),
+                                );
+                              });
+                              break;
+                            case "weekdays":
+                              //do something
+                              break;
+                            case "weekly":
+                              //do something
+                              break;
+                            case "monthly":
+                              //do something
+                              break;
+                            case "yearly":
+                              //do something
+                              break;
+                            case "custom":
+                              //do something
+                              break;
+                          }
+                        } else {
+                          
+                          //* do this if task repeat is null
+                          await db.updateTask(
+                            widget.task.id, 
+                            isDone: Value(value!),
+                          );
+
+                        }
+                        
                         
                       }
                     ),
