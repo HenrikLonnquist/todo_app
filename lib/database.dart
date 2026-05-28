@@ -261,6 +261,7 @@ class AppDB extends _$AppDB{
   Future<void> copyTaskToList({
     required int taskID,
     int? toListID,
+    DateTime? repeatDueDate, // In case of task being repeated
   }) async {
 
     DateTime now = DateTime.now();
@@ -277,7 +278,7 @@ class AppDB extends _$AppDB{
             addedToMyDay: Value(duplicatedTask.addedToMyDay),
             isStarred: Value(duplicatedTask.isStarred),
             reminder: Value(duplicatedTask.reminder),
-            dueDate: Value(duplicatedTask.dueDate),
+            dueDate: Value(repeatDueDate ?? duplicatedTask.dueDate),
             repeat: Value(duplicatedTask.repeat),
             notes: Value(duplicatedTask.notes),
             position: Value(duplicatedTask.position),
