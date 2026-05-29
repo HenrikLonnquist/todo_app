@@ -85,15 +85,17 @@ class TaskInfo extends StatefulWidget {
 }
 
 class _TaskInfoState extends State<TaskInfo> {
+
+  final List<String> customRepeatList = ["daily", "weekdays", "weekly", "monthly", "yearly", "custom: datetime"];
+
   final MenuController _reminderMenuController = MenuController();
-
   final MenuController _dueDateMenuController = MenuController();
-
   final MenuController _repeatMenuController = MenuController();
 
   final OverlayPortalController _reminderCalendarController = OverlayPortalController();
   final OverlayPortalController _dueDateCalendarController = OverlayPortalController();
-  final OverlayPortalController _repeatCalendarController = OverlayPortalController();
+  final OverlayPortalController _repeatCustomController = OverlayPortalController();
+
 
   final _reminderAnchorKey = GlobalKey();
   final _dueDateAnchorKey = GlobalKey();
@@ -103,7 +105,7 @@ class _TaskInfoState extends State<TaskInfo> {
 
   final bool inputNewSubTask = false;
 
-    final TextStyle subTaskTextStyle = TextStyle(
+  final TextStyle subTaskTextStyle = TextStyle(
     color: Colors.white.withValues(alpha: 0.5), 
     fontSize: 15
   );
@@ -168,6 +170,7 @@ class _TaskInfoState extends State<TaskInfo> {
         final parentTask = task![0];
         
         final subTasks = snapshot.data!.where((t) => t.parentId == parentTask.id).toList();
+        
     
         return Visibility(
           visible: isPanelOpen,
@@ -550,13 +553,88 @@ class _TaskInfoState extends State<TaskInfo> {
                       ),
                       builder: (context, controller, child) {
                         //TODO: create an custom class for selecting custom repeat date
-                        return CustomTileTaskInfo(
-                          currentTask: parentTask,
-                          repeat: parentTask.repeat,
-                          title: parentTask.repeat ?? "Repeat",
-                          tileOnPressed: () {
-                            _repeatMenuController.isOpen ? _repeatMenuController.close() : _repeatMenuController.open();
-                          },
+                        return OverlayPortal(
+                          controller: _repeatCustomController,
+                          overlayChildBuilder: (context) {
+
+                            final box = _repeatAnchorKey.currentContext!.findRenderObject() as RenderBox;
+                            final size = box.size;
+                            final offset = box.localToGlobal(Offset.zero);
+
+                            final repeatCustomOffset = Offset(offset.dx, offset.dy + size.height);
+
+                            return Stack(
+                              children: [
+                                Positioned.fill(
+                                  child: GestureDetector(
+                                    behavior: HitTestBehavior.translucent,
+                                    onTap: () {
+                                      _repeatCustomController.hide();
+                                    },
+                                  ),
+                                ),
+                                Positioned(
+                                  top: repeatCustomOffset.dy,
+                                  left: repeatCustomOffset.dx,
+                                  child: Container(
+                                    color: Colors.grey.shade800,
+                                    child: Column(
+                                      children: [
+                                        Text("Repeat every.."),
+                                        Row(
+                                          children: [
+                                            // TextField
+                                            // TextField(),
+
+                                            // Dropdownmenu
+                                            DropdownButton(
+                                              value: parentTask.repeat,
+                                              onChanged: (value) {},
+                                              items: customRepeatList.map<DropdownMenuItem>((String value) {
+                                                return DropdownMenuItem();
+                                              }).toList(),
+                                            ),
+                                          ],
+                                        ),
+                                        Row(
+                                          children:[
+                                            // Cancel
+                                            TextButton(
+                                              onPressed: () {
+                                                _repeatCustomController.hide();
+                                              },
+                                              style: ButtonStyle(),
+                                              child: Text("Cancel")
+                                            ),
+
+                                            // Save
+                                            TextButton(
+                                              onPressed: () {
+                                                _repeatCustomController.hide();
+                                                // convert selected to string
+                                                // update db task repeat 
+                                              },
+                                              style: ButtonStyle(),
+                                              child: Text("Save")
+                                            ),
+                                          ]
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            );
+
+                          }, 
+                          child: CustomTileTaskInfo(
+                            currentTask: parentTask,
+                            repeat: parentTask.repeat,
+                            title: parentTask.repeat ?? "Repeat",
+                            tileOnPressed: () {
+                              _repeatMenuController.isOpen ? _repeatMenuController.close() : _repeatMenuController.open();
+                            },
+                          ),
                         );
                       },
                       menuChildren: [
@@ -629,19 +707,22 @@ class _TaskInfoState extends State<TaskInfo> {
                           },
                         ),
                         Divider(height: 0, thickness: 1,),
+                        
                         CustomTileTaskInfo(
                           currentTask: parentTask,
                           title: "Custom",
                           tileOnPressed: () async {
-
+                        
                             _repeatMenuController.close();
-
-                            await db.updateTask(
-                              parentTask.id,
-                              repeat: Value(""), //! this might actually need to be an datetime
-                              dueDate: Value(DateTime.now()),
-                            );
-                          },
+                            _repeatCustomController.show();
+                            // open custom selection of repeat date
+                        
+                            // await db.updateTask(
+                            //   parentTask.id,
+                            //   repeat: Value(""), //! this might actually need to be an datetime
+                            //   dueDate: Value(DateTime.now()),
+                            // );
+                          }
                         ),
                       ],
                     ),  
@@ -659,6 +740,39 @@ class _TaskInfoState extends State<TaskInfo> {
           ),
         );
       }
+    );
+  }
+}
+
+//MARK: CustomOverlayRepeatDate
+class CustomOverlayRepeatDate extends StatefulWidget {
+  const CustomOverlayRepeatDate({
+    super.key,
+    required this.child,
+  });
+
+  final Widget? child;
+
+  @override
+  State<CustomOverlayRepeatDate> createState() => _CustomOverlayRepeatDateState();
+}
+
+class _CustomOverlayRepeatDateState extends State<CustomOverlayRepeatDate> {
+
+  final OverlayPortalController _controller = OverlayPortalController();
+
+  @override
+  Widget build(BuildContext context) {
+    return OverlayPortal(
+      controller: _controller,
+      overlayChildBuilder: (context) {
+        return Container(
+          width: 50,
+          height: 50,
+          color: Colors.red,
+        );
+      },
+      child: widget.child,
     );
   }
 }
